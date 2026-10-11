@@ -6,7 +6,7 @@ import PhotoTile from "@/components/item/PhotoTile.astro";
 import arrow from "@/assets/icons/ui-arrow.svg";
 import capTalent from "@/assets/icons/cap-talent.svg";
 import { capabilityHref } from "@/data/site.ts";
-import { capabilities, home, settings } from "@/sanity/content.ts";
+import { capabilities, home } from "@/sanity/content.ts";
 
 interface Props {
   /** Set to `false` to omit the component. */
@@ -15,10 +15,9 @@ interface Props {
 
 const { render = true } = Astro.props;
 
-const [CAPABILITIES, { sections }, { cta: CTA }] = await Promise.all([
+const [CAPABILITIES, { sections }] = await Promise.all([
   capabilities(),
   home(),
-  settings(),
 ]);
 const intro = sections.capabilities;
 ---
@@ -92,23 +91,6 @@ const intro = sections.capabilities;
             </span>
           </Fragment>
         </PhotoTile>
-
-        <PhotoTile
-          tone="brand"
-          class="bento_tile is-cta"
-          data-reveal
-          style="--reveal-order: 2"
-        >
-          <h3 class="photo-tile_title is-large">Unlock your data.</h3>
-          <p class="photo-tile_text bento_cta_text">
-            Tell us your platforms and goals. We'll engineer the data and AI
-            behind them, end to end.
-          </p>
-          <Button element="link" href={CTA.primary.href} emphasis="secondary">
-            {CTA.primary.label}
-            <Icon src={arrow} variant="small" class="button_icon" />
-          </Button>
-        </PhotoTile>
       </div>
     </div>
   )
@@ -140,16 +122,14 @@ const intro = sections.capabilities;
           "data data"
           "sap ai"
           "flow code"
-          "talent talent"
-          "cta cta";
+          "talent talent";
       }
       @media (width >= 64rem) {
         grid-template-columns: repeat(4, minmax(0, 1fr));
         grid-template-areas:
           "data data sap sap"
           "data data ai flow"
-          "code code cta cta"
-          "talent talent cta cta";
+          "code code talent talent";
       }
       /* Areas only exist from 48rem; on phones the tiles simply stack. */
       @media (width >= 48rem) {
@@ -170,9 +150,6 @@ const intro = sections.capabilities;
         }
         & > .is-cap-talent {
           grid-area: talent;
-        }
-        & > .is-cta {
-          grid-area: cta;
         }
       }
     }
@@ -196,11 +173,6 @@ const intro = sections.capabilities;
           }
         }
       }
-    }
-
-    .bento_cta_text {
-      margin-bottom: var(--space-2);
-      font-size: var(--text-main);
     }
   }
 </style>
