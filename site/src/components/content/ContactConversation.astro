@@ -58,12 +58,10 @@ const intro = isHome
    lands in its field on the contact. */
 const areas = [
   ...CAPABILITIES.map((cap) => ({ value: cap.id, label: cap.title })),
-  isHome
-    ? { value: "capability-center", label: "A full capability center" }
-    : {
-        value: "multi-capability",
-        label: "A multi-capability transformation program",
-      },
+  { value: "cap-talent", label: "Specialist Talent" },
+  ...(isHome
+    ? [{ value: "capability-center", label: "A full capability center" }]
+    : []),
 ];
 
 const roles = [

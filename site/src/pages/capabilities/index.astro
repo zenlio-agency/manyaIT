@@ -7,6 +7,7 @@ import TeamPanel from "@/components/content/TeamPanel.astro";
 import FaqList from "@/components/content/FaqList.astro";
 import CtaFinal from "@/components/content/CtaFinal.astro";
 import { capabilityHref } from "@/data/site.ts";
+import capTalent from "@/assets/icons/cap-talent.svg";
 import { capabilities, page, settings } from "@/sanity/content.ts";
 
 const [CAPABILITIES, { hero, faqIntro, faq, seo }, { cta: CTA }] =
@@ -30,20 +31,34 @@ const [CAPABILITIES, { hero, faqIntro, faq, seo }, { cta: CTA }] =
     />
   </Section>
 
-  {/* The five capabilities, each with its focus areas */}
+  {/* The capabilities, each with its focus areas */}
   <Section theme="tint">
     <FeatureGrid
       variant="rows"
       eyebrow="What we deliver"
       heading="Integrated capabilities for data-driven, AI-ready enterprises"
       intro="Start with one capability or combine them into a single program. Data fuels AI, enterprise platforms anchor data, and digital products put it in front of customers. One partner carries the work across every layer."
-      items={CAPABILITIES.map((cap) => ({
-        title: cap.title,
-        text: cap.line,
-        list: [...cap.focus],
-        href: capabilityHref(cap),
-        icon: cap.icon,
-      }))}
+      items={[
+        ...CAPABILITIES.map((cap) => ({
+          title: cap.title,
+          text: cap.line,
+          list: [...cap.focus],
+          href: capabilityHref(cap),
+          icon: cap.icon,
+        })),
+        {
+          title: "Specialist Talent",
+          text: "The right specialists, engaged the way your business needs them, across the U.S. and India.",
+          list: [
+            "Specialist technology talent",
+            "Flexible engagement models",
+            "Cross-border U.S. & India reach",
+            "Permanent, contract & team options",
+          ],
+          href: "/capabilities/specialist-talent",
+          icon: capTalent,
+        },
+      ]}
       linkLabel="Explore"
     />
   </Section>

@@ -10,11 +10,42 @@ import { settings } from "@/sanity/content.ts";
 interface Props {
   /** Set to `false` to omit the component. */
   render?: boolean;
+  eyebrow?: string;
+  heading?: string;
+  text?: string;
+  doors?: {
+    primary?: { label?: string; title?: string; text?: string; href?: string };
+    secondary?: { label?: string; title?: string; text?: string; href?: string };
+  };
 }
 
-const { render = true } = Astro.props;
+const {
+  render = true,
+  eyebrow = "Next step",
+  heading = "Build what’s next.",
+  text = "Whether you're modernizing a core platform, operationalizing AI or rebuilding your data foundation, start here.",
+  doors,
+} = Astro.props;
 
 const { cta: CTA } = await settings();
+
+const doorPrimary = {
+  label: doors?.primary?.label ?? "For enterprises",
+  title: doors?.primary?.title ?? CTA.primary.label,
+  text:
+    doors?.primary?.text ??
+    "Tell us about your objectives. Our team will respond within 1 business day.",
+  href: doors?.primary?.href ?? CTA.primary.href,
+};
+
+const doorSecondary = {
+  label: doors?.secondary?.label ?? "For experienced professionals",
+  title: doors?.secondary?.title ?? CTA.secondary.label,
+  text:
+    doors?.secondary?.text ??
+    "Engineer production platforms alongside people who own the outcome.",
+  href: doors?.secondary?.href ?? CTA.secondary.href,
+};
 ---
 
 {
@@ -31,9 +62,9 @@ const { cta: CTA } = await settings();
         />
       </svg>
       <div class="cta-final_copy">
-        <Eyebrow data-reveal>Next step</Eyebrow>
+        <Eyebrow data-reveal>{eyebrow}</Eyebrow>
         <Heading variant="display" data-reveal style="--reveal-order: 1">
-          Build what’s next.
+          {heading}
         </Heading>
         <Paragraph
           variant="large"
@@ -41,24 +72,21 @@ const { cta: CTA } = await settings();
           data-reveal
           style="--reveal-order: 2"
         >
-          Whether you're modernizing a core platform, operationalizing AI or
-          rebuilding your data foundation, start here.
+          {text}
         </Paragraph>
       </div>
       <div class="cta-final_doors">
         <a
           class="cta-final_door is-primary"
-          href={CTA.primary.href}
+          href={doorPrimary.href}
           data-reveal
           style="--reveal-order: 2"
         >
-          <span class="cta-final_door_label">For enterprises</span>
-          <span class="cta-final_door_title">{CTA.primary.label}</span>
+          <span class="cta-final_door_label">{doorPrimary.label}</span>
+          <span class="cta-final_door_title">{doorPrimary.title}</span>
           <span
             class="cta-final_door_text"
-            set:html={tbc(
-              "Tell us about your objectives. Our team will respond within 1 business day.",
-            )}
+            set:html={tbc(doorPrimary.text)}
           />
           <span class="cta-final_door_go">
             <Icon src={arrow} />
@@ -66,17 +94,13 @@ const { cta: CTA } = await settings();
         </a>
         <a
           class="cta-final_door"
-          href={CTA.secondary.href}
+          href={doorSecondary.href}
           data-reveal
           style="--reveal-order: 3"
         >
-          <span class="cta-final_door_label">
-            For experienced professionals
-          </span>
-          <span class="cta-final_door_title">{CTA.secondary.label}</span>
-          <span class="cta-final_door_text">
-            Engineer production platforms alongside people who own the outcome.
-          </span>
+          <span class="cta-final_door_label">{doorSecondary.label}</span>
+          <span class="cta-final_door_title">{doorSecondary.title}</span>
+          <span class="cta-final_door_text">{doorSecondary.text}</span>
           <span class="cta-final_door_go">
             <Icon src={arrow} />
           </span>

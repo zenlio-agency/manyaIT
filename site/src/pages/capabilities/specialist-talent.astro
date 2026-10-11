@@ -1,0 +1,269 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import HeroDetail from "@/components/content/HeroDetail.astro";
+import ProblemRows from "@/components/content/ProblemRows.astro";
+import FeatureGrid from "@/components/content/FeatureGrid.astro";
+import ChipGroups from "@/components/content/ChipGroups.astro";
+import ProcessSteps from "@/components/content/ProcessSteps.astro";
+import FaqList from "@/components/content/FaqList.astro";
+import RelatedTiles from "@/components/content/RelatedTiles.astro";
+import CtaFinal from "@/components/content/CtaFinal.astro";
+import capTalent from "@/assets/icons/cap-talent.svg";
+import { capabilityHref } from "@/data/site.ts";
+import { capabilities, settings } from "@/sanity/content.ts";
+
+const [allCapabilities, { cta: CTA }] = await Promise.all([
+  capabilities(),
+  settings(),
+]);
+
+const contact = `${CTA.primary.href}?topic=cap-talent`;
+
+const problems = [
+  {
+    challenge: "We know the skills we need, but not where to find them.",
+    answer:
+      "Established networks and focused outreach that bring relevant, qualified professionals to the table quickly.",
+  },
+  {
+    challenge: "Our timelines keep moving and our needs keep changing.",
+    answer:
+      "Engagement models that flex with your priorities, from a single specialist to a growing team.",
+  },
+  {
+    challenge: "Every region has different rules and expectations.",
+    answer:
+      "Local market experience in the U.S. and India, with engagements structured around regional requirements.",
+  },
+  {
+    challenge: "We need a partner who understands our delivery expectations.",
+    answer:
+      "A structured, transparent process, from first conversation through onboarding and beyond.",
+  },
+];
+
+const offerings = [
+  {
+    title: "Onsite delivery",
+    text: "Specialists working alongside your teams at your location, backed by nearly eight years of U.S. experience across software, cloud, data and AI.",
+  },
+  {
+    title: "Offshore delivery",
+    text: "Scalable capacity through our Hyderabad, India presence, from individual specialists to broader team requirements.",
+  },
+  {
+    title: "Nearshore delivery",
+    text: "Time-zone-aligned collaboration through Latin America, for teams that need real-time working overlap.",
+  },
+  {
+    title: "Global reach",
+    text: "Open to requirements in the Middle East, including Dubai, and other markets, aligned with local regulations.",
+  },
+  {
+    title: "Flexible engagement models",
+    text: "Permanent, contract-to-permanent and contract options, structured to suit your business and the market.",
+  },
+  {
+    title: "Partner onboarding and coordination",
+    text: "Smooth onboarding, clear communication and coordinated next steps, so engagements start well and stay on track.",
+  },
+];
+
+const stackGroups = [
+  {
+    title: "Technology domains",
+    items: [
+      "Software engineering",
+      "Cloud and infrastructure",
+      "Data engineering and analytics",
+      "AI and automation",
+      "Enterprise applications",
+    ],
+  },
+  {
+    title: "Engagement options",
+    items: [
+      "Permanent",
+      "Contract-to-permanent",
+      "Contract",
+      "Project-aligned teams",
+    ],
+  },
+];
+
+const steps = [
+  {
+    title: "Discover",
+    text: "We learn your requirements, priorities and timelines, and agree what success looks like.",
+    note: "Clear needs, shared expectations",
+  },
+  {
+    title: "Source",
+    text: "We engage the right networks and channels to reach relevant specialists.",
+    note: "Relevant reach, faster",
+  },
+  {
+    title: "Qualify",
+    text: "We review fit, availability and expectations so only well-aligned profiles move forward.",
+    note: "Quality before quantity",
+  },
+  {
+    title: "Coordinate",
+    text: "We manage shortlists, interviews and next steps, and support onboarding.",
+    note: "A smooth path to day one",
+  },
+];
+
+const faqItems = [
+  {
+    question: "Which engagement models do you offer?",
+    answer:
+      "We support permanent, contract-to-permanent and contract arrangements. The right structure depends on your goals and the market, and we'll help you choose.",
+  },
+  {
+    question: "Which regions do you cover?",
+    answer:
+      "Our core operations are in the United States, with an expanding presence in India. We're also open to discussing requirements in other markets, subject to local regulations.",
+  },
+  {
+    question: "What kinds of roles do you support?",
+    answer:
+      "Primarily technology roles across software, cloud, data and AI. Other requirements can be considered as needed.",
+  },
+  {
+    question: "How quickly can we get started?",
+    answer:
+      "Once we understand your requirements, we begin right away. Timelines depend on the role, skills and market, and we'll set clear expectations upfront.",
+  },
+  {
+    question: "Can you support us if our needs grow or change?",
+    answer:
+      "Yes. Engagements can scale up, down or shift as your priorities evolve.",
+  },
+  {
+    question: "What does vendor onboarding involve?",
+    answer:
+      "We work with your procurement and delivery teams to complete onboarding requirements, so engagements can begin without delay.",
+  },
+];
+
+const otherCapabilities = allCapabilities.map((cap) => ({
+  title: cap.title,
+  text: cap.line,
+  href: capabilityHref(cap),
+  photo: cap.photo?.src,
+  icon: cap.icon,
+}));
+---
+
+<Layout
+  title="Specialist Talent | ManyaIT"
+  description="Flexible capability connecting enterprises with specialist technology professionals across the United States and India, through engagement models built around your goals and timelines."
+>
+  {/* Hero */}
+  <Section paddingTop="small">
+    <HeroDetail
+      crumbs={[
+        { label: "Home", href: "/" },
+        { label: "Capabilities", href: "/capabilities" },
+        { label: "Specialist Talent" },
+      ]}
+      eyebrow="Specialist Talent"
+      title="The right people. Ready when your roadmap is."
+      lede="We connect enterprises with specialist technology professionals through flexible engagement models, backed by established U.S. operations and a growing presence in India."
+      points={[
+        "Specialist technology talent",
+        "Flexible engagement models",
+        "Aligned to your timelines",
+      ]}
+      primary={{ label: "Discuss your requirements", href: contact }}
+      secondary={{ label: "All capabilities", href: "/capabilities" }}
+      photo="/images/specialist-talent-hero.jpg"
+      photoAlt="Clear alignment from first conversation to day one"
+      icon={capTalent}
+    />
+  </Section>
+
+  {/* The challenge */}
+  <Section theme="tint">
+    <ProblemRows
+      eyebrow="The challenge"
+      heading="Where capacity plans hit a wall"
+      rows={problems}
+    />
+  </Section>
+
+  {/* What we deliver */}
+  <Section>
+    <FeatureGrid
+      eyebrow="What we deliver"
+      heading="Flexible capacity, built around your priorities"
+      intro="Specialist professionals and engagement options that fit your goals, timelines and operating model."
+      items={offerings}
+      numbered
+    />
+  </Section>
+
+  {/* Technology expertise */}
+  <Section theme="tint">
+    <ChipGroups
+      eyebrow="Technology expertise"
+      heading="Skills and domains we support"
+      intro="Experience across the disciplines modern enterprises rely on, so the right expertise is available when and where you need it."
+      groups={stackGroups}
+    />
+  </Section>
+
+  {/* How it works */}
+  <Section theme="dark">
+    <ProcessSteps
+      eyebrow="How it works"
+      heading="From first conversation to lasting results"
+      intro="Engagements are shaped around your priorities, timelines and operating model, and can grow as your needs change."
+      steps={steps}
+    />
+  </Section>
+
+  {/* FAQ */}
+  <Section>
+    <FaqList
+      heading="Specialist Talent, answered"
+      link={{ label: "Ask us directly", href: contact }}
+      items={faqItems}
+    />
+  </Section>
+
+  {/* Other capabilities */}
+  <Section theme="tint">
+    <RelatedTiles
+      eyebrow="Keep exploring"
+      heading="Other capabilities"
+      link={{ label: "All capabilities", href: "/capabilities" }}
+      items={otherCapabilities}
+    />
+  </Section>
+
+  {/* Closing CTA */}
+  <Section theme="dark" paddingTop="large">
+    <CtaFinal
+      eyebrow="Make IT happen!"
+      heading="Let's define the right next step."
+      text="Tell us your priority roles, delivery expectations and preferred engagement model. We'll respond within 1 business day."
+      doors={{
+        primary: {
+          label: "For enterprises",
+          title: "Start a Conversation",
+          text: "Tell us your priority roles, delivery expectations and preferred engagement model. We'll respond within 1 business day.",
+          href: "/contact",
+        },
+        secondary: {
+          label: "For engineers and specialists",
+          title: "Explore Opportunities",
+          text: "Engineer production platforms alongside people who own the outcome.",
+          href: "/careers",
+        },
+      }}
+    />
+  </Section>
+</Layout>

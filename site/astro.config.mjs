@@ -21,6 +21,7 @@ export default defineConfig({
     "/terms-of-use": "/legal/terms",
     "/cookie-policy": "/legal/cookies",
     "/accessibility": "/legal/accessibility",
+    "/capabilities/talent-solutions": "/capabilities/specialist-talent",
   },
 
   /* Allow ngrok and Cloudflare (cloudflared) tunnels for local review */

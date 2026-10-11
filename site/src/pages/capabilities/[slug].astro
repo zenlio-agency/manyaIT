@@ -9,6 +9,7 @@ import ProcessSteps from "@/components/content/ProcessSteps.astro";
 import FaqList from "@/components/content/FaqList.astro";
 import RelatedTiles from "@/components/content/RelatedTiles.astro";
 import CtaFinal from "@/components/content/CtaFinal.astro";
+import capTalent from "@/assets/icons/cap-talent.svg";
 import { capabilityHref } from "@/data/site.ts";
 import { capabilities, settings, type Capability } from "@/sanity/content.ts";
 
@@ -106,13 +107,22 @@ const contact = `${CTA.primary.href}?topic=${cap.id}`;
       eyebrow="Keep exploring"
       heading="Other capabilities"
       link={{ label: "All capabilities", href: "/capabilities" }}
-      items={others.map((other) => ({
-        title: other.title,
-        text: other.line,
-        href: capabilityHref(other),
-        photo: other.photo?.src,
-        icon: other.icon,
-      }))}
+      items={[
+        ...others.map((other) => ({
+          title: other.title,
+          text: other.line,
+          href: capabilityHref(other),
+          photo: other.photo?.src,
+          icon: other.icon,
+        })),
+        {
+          title: "Specialist Talent",
+          text: "The right specialists, engaged the way your business needs them, across the U.S. and India.",
+          href: "/capabilities/specialist-talent",
+          photo: "/images/specialist-talent-hero.jpg",
+          icon: capTalent,
+        },
+      ]}
     />
   </Section>
 

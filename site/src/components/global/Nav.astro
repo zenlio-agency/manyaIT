@@ -61,7 +61,10 @@ const MENUS: Record<string, Menu> = {
       },
       {
         eyebrow: "Platforms & Engineering",
-        links: capLinks(["cap-sap", "cap-code"]),
+        links: [
+          ...capLinks(["cap-sap", "cap-code"]),
+          { label: "Specialist Talent", href: "/capabilities/specialist-talent" },
+        ],
       },
     ],
     footerLinks: [{ label: "All capabilities", href: "/capabilities" }],

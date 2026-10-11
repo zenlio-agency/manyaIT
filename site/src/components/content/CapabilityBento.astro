@@ -4,6 +4,7 @@ import Button from "@/components/Button.astro";
 import Icon from "@/components/media/Icon.astro";
 import PhotoTile from "@/components/item/PhotoTile.astro";
 import arrow from "@/assets/icons/ui-arrow.svg";
+import capTalent from "@/assets/icons/cap-talent.svg";
 import { capabilityHref } from "@/data/site.ts";
 import { capabilities, home, settings } from "@/sanity/content.ts";
 
@@ -68,6 +69,31 @@ const intro = sections.capabilities;
         ))}
 
         <PhotoTile
+          href="/capabilities/specialist-talent"
+          photo="/images/specialist-talent-hero.jpg"
+          class="bento_tile is-cap-talent"
+          id="cap-talent"
+          data-reveal
+          style="--reveal-order: 2"
+        >
+          <span class="photo-tile_icon" slot="top">
+            <Icon src={capTalent} variant="small" />
+          </span>
+          <h3 class="photo-tile_title">
+            Specialist Talent
+          </h3>
+          <Fragment slot="reveal">
+            <p class="photo-tile_text">
+              The right specialists, engaged the way your business needs them, across the U.S. and India.
+            </p>
+            <span class="photo-tile_more">
+              Explore
+              <Icon src={arrow} variant="small" />
+            </span>
+          </Fragment>
+        </PhotoTile>
+
+        <PhotoTile
           tone="brand"
           class="bento_tile is-cta"
           data-reveal
@@ -114,6 +140,7 @@ const intro = sections.capabilities;
           "data data"
           "sap ai"
           "flow code"
+          "talent talent"
           "cta cta";
       }
       @media (width >= 64rem) {
@@ -121,7 +148,8 @@ const intro = sections.capabilities;
         grid-template-areas:
           "data data sap sap"
           "data data ai flow"
-          "code code cta cta";
+          "code code cta cta"
+          "talent talent cta cta";
       }
       /* Areas only exist from 48rem; on phones the tiles simply stack. */
       @media (width >= 48rem) {
@@ -139,6 +167,9 @@ const intro = sections.capabilities;
         }
         & > .is-cap-code {
           grid-area: code;
+        }
+        & > .is-cap-talent {
+          grid-area: talent;
         }
         & > .is-cta {
           grid-area: cta;

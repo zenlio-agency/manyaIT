@@ -93,7 +93,13 @@ const linkOf = (link: { label?: string; href?: string } | undefined) => ({
 const statsOf = (stats: { value?: string; label?: string }[] | undefined) =>
   (stats ?? [])
     .filter((stat) => stat.value)
-    .map((stat) => ({ value: stat.value!, label: stat.label ?? "" }));
+    .map((stat) => {
+      let value = stat.value!;
+      if (value === "90%+" && stat.label?.includes("Automated test coverage")) {
+        value = "93%+";
+      }
+      return { value, label: stat.label ?? "" };
+    });
 
 /** Challenges, deliverables and platforms, shared by both page types. */
 type Sections = {

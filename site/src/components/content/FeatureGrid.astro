@@ -143,6 +143,7 @@ const {
       flex-direction: column;
       align-items: flex-start;
       gap: var(--space-3);
+      min-width: 0;
     }
 
     /* The title link stretches over its card or row. */
@@ -185,6 +186,8 @@ const {
       font-weight: 700;
       letter-spacing: var(--letter-spacing-wide);
       color: var(--accent);
+      line-height: 1.4;
+      overflow-wrap: break-word;
     }
 
     .feature-grid_icon {
@@ -244,10 +247,18 @@ const {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
         @media (width >= 64rem) {
-          grid-template-columns: repeat(var(--_columns), minmax(0, 1fr));
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          grid-template-columns: repeat(var(--_columns, 3), minmax(0, 1fr));
         }
       }
+      .feature-grid_title {
+        font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.625rem);
+        overflow-wrap: anywhere;
+        min-height: 2.5em;
+      }
       .feature-grid_item {
+        min-width: 0;
+        height: 100%;
         padding: var(--space-6);
         border: var(--border-width) solid var(--border);
         border-radius: var(--radius-main);
