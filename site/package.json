@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "astro dev",
     "check": "astro check",
-    "build": "astro build && node scripts/check-dist.mjs",
+    "build": "astro build --force && node scripts/check-dist.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "format": "prettier --write .",
