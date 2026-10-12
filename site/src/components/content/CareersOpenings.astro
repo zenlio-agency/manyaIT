@@ -2,16 +2,13 @@
 import Eyebrow from "@/components/typography/Eyebrow.astro";
 import Heading from "@/components/typography/Heading.astro";
 import Paragraph from "@/components/typography/Paragraph.astro";
-import Button from "@/components/Button.astro";
-import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
 import Icon from "@/components/media/Icon.astro";
-import arrow from "@/assets/icons/ui-arrow.svg";
 import arrowUp from "@/assets/icons/ui-arrow-up-right.svg";
 import PhotoTile from "@/components/item/PhotoTile.astro";
 import { tbc } from "@/data/site.ts";
 import { LEGAL, mailLink } from "@/data/legal.ts";
 import { CAREERS_POINT_PHOTOS } from "@/data/photos.ts";
-import { TALENT_NETWORK, applyHref } from "@/data/careers.ts";
+import { applyHref } from "@/data/careers.ts";
 import { capabilities, page, roles } from "@/sanity/content.ts";
 
 interface Props {
@@ -73,19 +70,6 @@ const teams = [...CAPABILITIES.map((cap) => cap.title), "Client Partnership"];
               )}
             />
           </Paragraph>
-          <ButtonWrapper data-reveal style="--reveal-order: 4">
-            <Button element="link" href="#roles">
-              Explore Opportunities
-              <Icon src={arrow} variant="small" class="button_icon" />
-            </Button>
-            <Button
-              element="link"
-              href={applyHref(TALENT_NETWORK.slug)}
-              emphasis="secondary"
-            >
-              Register Your Interest
-            </Button>
-          </ButtonWrapper>
         </div>
         <ul class="careers_points">
           {points.map((point, index) => (
@@ -256,9 +240,6 @@ const teams = [...CAPABILITIES.map((cap) => cap.title), "Client Partnership"];
       display: flex;
       flex-direction: column;
       gap: var(--space-4);
-      & .button-wrapper {
-        margin-top: var(--space-3);
-      }
     }
 
     .careers_points {
@@ -350,6 +331,25 @@ const teams = [...CAPABILITIES.map((cap) => cap.title), "Client Partnership"];
       display: flex;
       flex-direction: column;
       border-top: var(--border-width) solid var(--divider);
+      max-height: 28rem;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-right: var(--space-2);
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      &::-webkit-scrollbar-thumb {
+        background-color: var(--border);
+        border-radius: var(--radius-round);
+      }
+      &::-webkit-scrollbar-thumb:hover {
+        background-color: var(--accent);
+      }
     }
 
     .careers_role {
