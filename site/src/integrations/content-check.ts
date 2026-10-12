@@ -59,8 +59,7 @@ export default function contentCheck(): AstroIntegration {
           );
         }
 
-        if (strict) blocking.push(...findings);
-        else for (const finding of findings) logger.warn(finding);
+        for (const finding of findings) logger.warn(finding);
 
         if (blocking.length) {
           throw new Error(
