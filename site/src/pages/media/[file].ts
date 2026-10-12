@@ -1,8 +1,8 @@
 import type { APIRoute } from "astro";
-import { ecosystem, logoRows } from "@/sanity/content.ts";
+import { ecosystem, logoRows, settings } from "@/sanity/content.ts";
 
 /*
- * SVG logos from Sanity, copied into the build and served from this site,
+ * SVG logos and custom favicons from Sanity, copied into the build and served from this site,
  * so visitors never load anything from Sanity. Photos go through Astro's
  * image pipeline instead (src/sanity/image.ts).
  */
@@ -15,6 +15,10 @@ export async function getStaticPaths() {
   }
   for (const company of await ecosystem()) {
     if (company.svg) files.set(company.svg.file, company.svg.text);
+  }
+  const setts = await settings();
+  if (setts.faviconSvg) {
+    files.set(setts.faviconSvg.file, setts.faviconSvg.text);
   }
   return [...files].map(([file, text]) => ({
     params: { file },

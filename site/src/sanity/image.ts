@@ -80,8 +80,8 @@ type PhotoOptions = {
   width?: number;
   /** Crop to this width ÷ height around the hotspot. */
   aspectRatio?: number;
-  /** `jpg` for social images, which not every platform reads as WebP. */
-  format?: "webp" | "jpg";
+  /** `jpg` for social images, `png` for icons and favicons. */
+  format?: "webp" | "jpg" | "png";
 };
 
 /**

@@ -27,7 +27,12 @@ const SEO = /* groq */ `"seo": seo{ ..., "image": image${IMAGE} }`;
 const BODY = /* groq */ `{ ..., _type == "imageWithAlt" => ${IMAGE} }`;
 
 export const siteSettingsQuery = defineQuery(`
-  *[_type == "siteSettings" && _id == "siteSettings"]{ ..., ${SEO} }
+  *[_type == "siteSettings" && _id == "siteSettings"]{
+    ...,
+    "favicon": favicon${IMAGE},
+    "appleTouchIcon": appleTouchIcon${IMAGE},
+    ${SEO}
+  }
 `);
 
 export const homePageQuery = defineQuery(`

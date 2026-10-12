@@ -153,6 +153,33 @@ export const settings = once(async () => {
     aspectRatio: 1200 / 630,
     format: "jpg",
   });
+
+  let faviconSvg: SvgFile | undefined;
+  let faviconRaster: Photo | undefined;
+  const favDoc = (doc as { favicon?: SanityImage | null }).favicon;
+  if (favDoc?.asset) {
+    if (favDoc.asset.extension === "svg") {
+      faviconSvg = await svgFile(favDoc.asset);
+    } else {
+      faviconRaster = await sanityPhoto(favDoc, {
+        width: 64,
+        aspectRatio: 1,
+        format: "png",
+      });
+    }
+  }
+
+  let appleTouchIcon: Photo | undefined;
+  const appleDoc = (doc as { appleTouchIcon?: SanityImage | null })
+    .appleTouchIcon;
+  if (appleDoc?.asset) {
+    appleTouchIcon = await sanityPhoto(appleDoc, {
+      width: 180,
+      aspectRatio: 1,
+      format: "png",
+    });
+  }
+
   return {
     contact: {
       email: doc.email ?? "",
@@ -179,6 +206,10 @@ export const settings = once(async () => {
     description: doc.seo?.description,
     /** For pages that set no social image of their own. */
     socialImage: socialImage?.src,
+    faviconSvg,
+    faviconSvgUrl: faviconSvg?.path,
+    faviconRasterUrl: faviconRaster?.src,
+    appleTouchIconUrl: appleTouchIcon?.src,
   };
 });
 

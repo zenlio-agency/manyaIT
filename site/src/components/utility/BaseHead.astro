@@ -60,7 +60,19 @@ const socialImage = new URL(image, Astro.site);
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={socialImage} />
 
-<link rel="icon" href="/favicon.ico" sizes="32x32" />
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+{defaults.faviconRasterUrl ? (
+  <link rel="icon" href={defaults.faviconRasterUrl} sizes="32x32" />
+) : (
+  <link rel="icon" href="/favicon.ico" sizes="32x32" />
+)}
+{defaults.faviconSvgUrl ? (
+  <link rel="icon" type="image/svg+xml" href={defaults.faviconSvgUrl} />
+) : (
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+)}
+{defaults.appleTouchIconUrl ? (
+  <link rel="apple-touch-icon" href={defaults.appleTouchIconUrl} />
+) : (
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+)}
 <meta name="generator" content={Astro.generator} />

@@ -10,7 +10,7 @@ export const siteSettings = defineType({
   icon: CogIcon,
   groups: [
     { name: "contact", title: "Contact", default: true },
-    { name: "brand", title: "Buttons and footer" },
+    { name: "brand", title: "Brand & favicon" },
     { name: "careers", title: "Careers" },
     { name: "seo", title: "Search defaults" },
   ],
@@ -75,6 +75,28 @@ export const siteSettings = defineType({
           preview: { select: { title: "platform", subtitle: "url" } },
         }),
       ],
+    }),
+    defineField({
+      name: "favicon",
+      title: "Favicon (Browser tab icon)",
+      type: "image",
+      group: "brand",
+      description:
+        "The icon displayed in browser tabs. SVG or 32×32 / 512×512 PNG recommended. If empty, the default ManyaIT logo icon is used.",
+      options: {
+        accept: "image/svg+xml,image/png,image/x-icon,image/vnd.microsoft.icon,image/webp",
+      },
+    }),
+    defineField({
+      name: "appleTouchIcon",
+      title: "Apple touch icon",
+      type: "image",
+      group: "brand",
+      description:
+        "The icon displayed on Apple devices and home screen bookmarks. 180×180 PNG recommended. If empty, the default ManyaIT icon is used.",
+      options: {
+        accept: "image/png,image/webp,image/jpeg",
+      },
     }),
     defineField({
       name: "ctaPrimaryLabel",
