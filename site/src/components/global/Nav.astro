@@ -355,12 +355,81 @@ const MENUS: Record<string, Menu> = {
       root.classList.toggle("nav-locked", open && !desktop.matches);
     };
 
+    let closeTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    const cancelClose = () => {
+      if (closeTimeout) {
+        clearTimeout(closeTimeout);
+        closeTimeout = null;
+      }
+    };
+
+    const scheduleClose = (delay = 200) => {
+      cancelClose();
+      closeTimeout = setTimeout(() => {
+        showMenu(null);
+      }, delay);
+    };
+
+    const navCard = nav.querySelector<HTMLElement>(".nav_card");
+    const navMega = nav.querySelector<HTMLElement>(".nav_mega");
+
     for (const trigger of triggers) {
+      trigger.addEventListener("mouseenter", () => {
+        if (!desktop.matches) return;
+        cancelClose();
+        const key = trigger.dataset.menuTrigger ?? null;
+        if (key) showMenu(key);
+      });
+
+      trigger.addEventListener("focus", () => {
+        if (!desktop.matches) return;
+        cancelClose();
+        const key = trigger.dataset.menuTrigger ?? null;
+        if (key) showMenu(key);
+      });
+
       trigger.addEventListener("click", () => {
         const key = trigger.dataset.menuTrigger ?? null;
         showMenu(current === key ? null : key);
       });
     }
+
+    navMega?.addEventListener("mouseenter", () => {
+      if (!desktop.matches) return;
+      cancelClose();
+    });
+
+    navCard?.addEventListener("mouseleave", () => {
+      if (!desktop.matches) return;
+      if (current) {
+        scheduleClose(200);
+      }
+    });
+
+    nav
+      .querySelectorAll<HTMLElement>(
+        ".nav_main a.nav_link, .nav_logo, .nav_actions",
+      )
+      .forEach((el) => {
+        el.addEventListener("mouseenter", () => {
+          if (!desktop.matches) return;
+          if (current) {
+            scheduleClose(150);
+          }
+        });
+      });
+
+    navCard?.addEventListener("focusout", (event) => {
+      if (!desktop.matches) return;
+      if (
+        current &&
+        event.relatedTarget instanceof Node &&
+        !navCard.contains(event.relatedTarget)
+      ) {
+        scheduleClose(100);
+      }
+    });
 
     toggle.addEventListener("click", () =>
       setMobile(toggle.getAttribute("aria-expanded") !== "true"),
