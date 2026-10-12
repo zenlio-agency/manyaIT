@@ -5,7 +5,7 @@ export default defineCliConfig({
   api: { projectId: PROJECT_ID, dataset: DATASET },
   /* `npm run deploy` publishes the Studio to https://manyait.sanity.studio */
   studioHost: "manyait",
-  deployment: { autoUpdates: true },
+  deployment: { autoUpdates: true, appId: "n7z0jy09as4098clo9o50w78" },
   /* `npm run typegen` writes TypeScript types for the website's queries
      (site/src/sanity/queries.ts) from these schemas. */
   typegen: {
