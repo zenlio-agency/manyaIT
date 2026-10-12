@@ -135,19 +135,37 @@ const UNSAFE_SVG: [RegExp, string][] = [
  */
 function resolveDoctype(svg: string, id: string): string {
   const doctype = svg.match(/<!DOCTYPE[^[>]*(?:\[([\s\S]*?)\])?\s*>/i);
-  if (!doctype) return svg;
-  let text = svg.replace(doctype[0], "");
-  for (const [, name, value] of (doctype[1] ?? "").matchAll(
-    /<!ENTITY\s+([\w.-]+)\s+"([^"]*)"\s*>/g,
-  )) {
-    if (/[&<%]/.test(value)) {
-      throw new Error(`SVG ${id}: entity "${name}" isn't plain text.`);
+  let text = doctype ? svg.replace(doctype[0], "") : svg;
+  if (doctype) {
+    for (const [, name, value] of (doctype[1] ?? "").matchAll(
+      /<!ENTITY\s+([\w.-]+)\s+"([^"]*)"\s*>/g,
+    )) {
+      if (/[&<%]/.test(value)) {
+        throw new Error(`SVG ${id}: entity "${name}" isn't plain text.`);
+      }
+      text = text.replaceAll(`&${name};`, value);
     }
-    text = text.replaceAll(`&${name};`, value);
+    if (/<!ENTITY/i.test(text)) {
+      throw new Error(`SVG ${id}: it declares entities the site can't check.`);
+    }
   }
-  if (/<!ENTITY/i.test(text)) {
-    throw new Error(`SVG ${id}: it declares entities the site can't check.`);
+
+  /* Strip stray doctype closure remnants before the root element (e.g. "]>" or "]&gt;"). */
+  const svgIndex = text.indexOf("<svg");
+  if (svgIndex > 0) {
+    const before = text.slice(0, svgIndex);
+    if (!before.includes("<?xml") || /[\]>]/.test(before)) {
+      text = text.slice(svgIndex);
+    }
   }
+
+  /* Fill in standard Illustrator entities that were partially stripped or entity-escaped. */
+  text = text
+    .replaceAll("&amp;ns_svg;", "http://www.w3.org/2000/svg")
+    .replaceAll("&ns_svg;", "http://www.w3.org/2000/svg")
+    .replaceAll("&amp;ns_xlink;", "http://www.w3.org/1999/xlink")
+    .replaceAll("&ns_xlink;", "http://www.w3.org/1999/xlink");
+
   return text;
 }
 
