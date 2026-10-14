@@ -487,6 +487,8 @@ export const articles = once(async () => {
       return {
         id: doc.slug!,
         title: doc.title ?? "",
+        /** Search title, when it should be shorter than the headline. */
+        seoTitle: doc.seo?.title ?? undefined,
         summary: doc.summary ?? "",
         description: doc.seo?.description ?? doc.summary ?? "",
         category: doc.category?.title ?? "",
@@ -497,6 +499,8 @@ export const articles = once(async () => {
         photo,
         /* A placeholder until the date is set, so it's caught before launch. */
         published: doc.publishedAt ?? "[Publish date]",
+        /** When the article was last edited in the Studio. */
+        updated: doc._updatedAt,
         author: doc.author ?? "The ManyaIT team",
         takeaways: doc.takeaways ?? [],
         topic: doc.contactTopic ?? "",

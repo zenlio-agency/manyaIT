@@ -8,3 +8,9 @@ const excluded = new Set(NOINDEX_ROUTES.map(normalize));
 export function isNoindexRoute(pathname: string): boolean {
   return excluded.has(normalize(pathname));
 }
+
+/** The canonical form of a path: no trailing slash, except the home page. */
+export function canonicalPath(pathname: string): string {
+  const path = normalize(pathname);
+  return path === "/" ? "/" : path;
+}

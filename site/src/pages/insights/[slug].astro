@@ -4,7 +4,7 @@ import Section from "@/components/wrapper/Section.astro";
 import ArticleHeader from "@/components/content/ArticleHeader.astro";
 import ArticleBody from "@/components/content/ArticleBody.astro";
 import RelatedTiles from "@/components/content/RelatedTiles.astro";
-import { SITE_NAME } from "@/consts.ts";
+import { blogPosting } from "@/utils/schema.ts";
 import { insightHref } from "@/utils/insights.ts";
 import { articles, type Article } from "@/sanity/content.ts";
 
@@ -26,31 +26,25 @@ type Props = {
 
 const { article, others } = Astro.props;
 
-/* Article structured data for search engines. The publish date is left out
-   until it is a real date. */
-const published = /^\d{4}-\d{2}-\d{2}$/.test(article.published)
-  ? article.published
-  : undefined;
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  headline: article.title,
+/* Article structured data. Dates are left out until they are real. */
+const posting = blogPosting({
+  title: article.title,
   description: article.description,
-  image: new URL(article.photo.src, Astro.site).href,
-  ...(published && { datePublished: published }),
-  author: { "@type": "Organization", name: SITE_NAME },
-  publisher: { "@type": "Organization", name: SITE_NAME },
-  mainEntityOfPage: new URL(Astro.url.pathname, Astro.site).href,
-};
+  pathname: Astro.url.pathname,
+  image: article.photo.src,
+  published: article.published,
+  updated: article.updated,
+  author: article.author,
+});
 ---
 
-<Layout title={article.title} description={article.description} type="article">
-  <script
-    is:inline
-    slot="head"
-    type="application/ld+json"
-    set:html={JSON.stringify(jsonLd)}
-  />
+<Layout
+  title={article.seoTitle || article.title}
+  description={article.description}
+  type="article"
+  breadcrumb={article.title}
+  schema={[posting]}
+>
 
   {/* Header and photo */}
   <Section paddingTop="small" paddingBottom="none">

@@ -11,8 +11,12 @@ import contentCheck from "./src/integrations/content-check.ts";
 
 export default defineConfig({
   site: SITE_URL,
+  /* Pages live at addresses without a trailing slash, as every link writes
+     them. vercel.json redirects the slashed form. */
+  trailingSlash: "never",
 
-  /* Legal page redirects, and the former Locations page */
+  /* Legal page redirects, and the former Locations and capability pages.
+     Keep in step with vercel.json (and public/_redirects). */
   redirects: {
     "/locations": "/about#locations",
     "/privacy": "/legal/privacy",
@@ -22,6 +26,7 @@ export default defineConfig({
     "/cookie-policy": "/legal/cookies",
     "/accessibility": "/legal/accessibility",
     "/capabilities/talent-solutions": "/capabilities/specialist-talent",
+    "/capabilities/workforce-solutions": "/capabilities/specialist-talent",
   },
 
   /* Allow ngrok and Cloudflare (cloudflared) tunnels for local review */
