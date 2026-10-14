@@ -46,6 +46,8 @@ const intro = sections.capabilities;
             href={capabilityHref(cap)}
             photo={cap.photo?.src}
             photoPosition={cap.photo?.position}
+            photoWidth={cap.photo?.width}
+            photoHeight={cap.photo?.height}
             class={`bento_tile is-${cap.id}`}
             id={cap.id}
             data-reveal
@@ -70,6 +72,8 @@ const intro = sections.capabilities;
         <PhotoTile
           href="/capabilities/specialist-talent"
           photo="/images/specialist-talent-hero.webp"
+          photoWidth={1024}
+          photoHeight={576}
           class="bento_tile is-cap-talent"
           id="cap-talent"
           data-reveal

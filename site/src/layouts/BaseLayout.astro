@@ -42,7 +42,7 @@ const indexable = !(seo.noindex ?? isNoindexRoute(Astro.url.pathname));
 const crumbName = breadcrumb ?? seo.title;
 const structured = indexable
   ? [
-      ...siteGraph(sameAs, site.description),
+      ...siteGraph(sameAs, site.description, site.contact),
       crumbName ? breadcrumbs(Astro.url.pathname, crumbName) : undefined,
       ...schema,
     ]
