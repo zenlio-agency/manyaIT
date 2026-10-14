@@ -36,7 +36,7 @@ const contact = `${CTA.primary.href}?topic=${cap.id}`;
   breadcrumb={cap.title}
   schema={[
     service({
-      name: cap.title,
+      name: page.seoTitle || cap.title,
       description: page.description,
       pathname: Astro.url.pathname,
     }),
