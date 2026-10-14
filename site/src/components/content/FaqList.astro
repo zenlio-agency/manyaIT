@@ -8,6 +8,8 @@ import AccordionItem from "@/components/interactive/AccordionItem.astro";
 import arrow from "@/assets/icons/ui-arrow.svg";
 import { tbc } from "@/data/site.ts";
 import { settings } from "@/sanity/content.ts";
+import JsonLd from "@/components/utility/JsonLd.astro";
+import { faqPage } from "@/utils/schema.ts";
 
 interface Props {
   /** Set to `false` to omit the component. */
@@ -37,6 +39,8 @@ const {
 {
   render && items.length > 0 && (
     <div class="faq-list_wrap">
+      {/* The questions and answers shown below, for search engines. */}
+      <JsonLd nodes={[faqPage(items)]} />
       <SectionHeader
         class="faq-list_head"
         layout="stack"

@@ -12,6 +12,7 @@ import CtaFinal from "@/components/content/CtaFinal.astro";
 import capTalent from "@/assets/icons/cap-talent.svg";
 import { capabilityHref } from "@/data/site.ts";
 import { capabilities, settings } from "@/sanity/content.ts";
+import { service } from "@/utils/schema.ts";
 
 const [allCapabilities, { cta: CTA }] = await Promise.all([
   capabilities(),
@@ -155,11 +156,22 @@ const otherCapabilities = allCapabilities.map((cap) => ({
   photo: cap.photo?.src,
   icon: cap.icon,
 }));
+
+const DESCRIPTION =
+  "Flexible capability connecting enterprises with specialist technology professionals across the United States and India, through engagement models built around your goals and timelines.";
 ---
 
 <Layout
   title="Specialist Talent | ManyaIT"
-  description="Flexible capability connecting enterprises with specialist technology professionals across the United States and India, through engagement models built around your goals and timelines."
+  description={DESCRIPTION}
+  breadcrumb="Specialist Talent"
+  schema={[
+    service({
+      name: "Specialist Talent",
+      description: DESCRIPTION,
+      pathname: Astro.url.pathname,
+    }),
+  ]}
 >
   {/* Hero */}
   <Section paddingTop="small">

@@ -497,6 +497,8 @@ export const articles = once(async () => {
         photo,
         /* A placeholder until the date is set, so it's caught before launch. */
         published: doc.publishedAt ?? "[Publish date]",
+        /** When the article was last edited in the Studio. */
+        updated: doc._updatedAt,
         author: doc.author ?? "The ManyaIT team",
         takeaways: doc.takeaways ?? [],
         topic: doc.contactTopic ?? "",

@@ -11,6 +11,7 @@ import RelatedTiles from "@/components/content/RelatedTiles.astro";
 import CtaFinal from "@/components/content/CtaFinal.astro";
 import capTalent from "@/assets/icons/cap-talent.svg";
 import { capabilityHref } from "@/data/site.ts";
+import { service } from "@/utils/schema.ts";
 import { capabilities, settings, type Capability } from "@/sanity/content.ts";
 
 export async function getStaticPaths() {
@@ -29,7 +30,18 @@ const { cta: CTA } = await settings();
 const contact = `${CTA.primary.href}?topic=${cap.id}`;
 ---
 
-<Layout title={page.seoTitle || cap.title} description={page.description}>
+<Layout
+  title={page.seoTitle || cap.title}
+  description={page.description}
+  breadcrumb={cap.title}
+  schema={[
+    service({
+      name: cap.title,
+      description: page.description,
+      pathname: Astro.url.pathname,
+    }),
+  ]}
+>
   {/* Hero */}
   <Section paddingTop="small">
     <HeroDetail
