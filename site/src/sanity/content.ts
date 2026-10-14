@@ -487,6 +487,8 @@ export const articles = once(async () => {
       return {
         id: doc.slug!,
         title: doc.title ?? "",
+        /** Search title, when it should be shorter than the headline. */
+        seoTitle: doc.seo?.title ?? undefined,
         summary: doc.summary ?? "",
         description: doc.seo?.description ?? doc.summary ?? "",
         category: doc.category?.title ?? "",

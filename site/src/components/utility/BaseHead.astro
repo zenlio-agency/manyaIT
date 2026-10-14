@@ -26,14 +26,19 @@ const isNoindex = noindex ?? isNoindexRoute(Astro.url.pathname);
 const isNotFound = /^\/404(\.html)?\/?$/.test(Astro.url.pathname);
 
 const isHome = Astro.url.pathname.replace(/\/+$/, "") === "";
-/* A title that already names the company is used as written. */
-const pageTitle = !title
+/* Search results cut titles at about 60 characters. */
+const TITLE_LIMIT = 60;
+const branded = !title
   ? SITE_NAME
-  : title.includes(SITE_NAME)
+  : isHome
+    ? `${SITE_NAME} | ${title}`
+    : `${title} | ${SITE_NAME}`;
+/* A title that already names the company is used as written, and so is one
+   too long to take the company name as well. */
+const pageTitle =
+  title && (title.includes(SITE_NAME) || branded.length > TITLE_LIMIT)
     ? title
-    : isHome
-      ? `${SITE_NAME} | ${title}`
-      : `${title} | ${SITE_NAME}`;
+    : branded;
 /* Addresses have no trailing slash (see `trailingSlash` in astro.config). */
 const canonical = new URL(canonicalPath(Astro.url.pathname), Astro.site);
 /* Pages without their own image use the site default, which is always

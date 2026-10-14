@@ -39,7 +39,7 @@ const posting = blogPosting({
 ---
 
 <Layout
-  title={article.title}
+  title={article.seoTitle || article.title}
   description={article.description}
   type="article"
   breadcrumb={article.title}
