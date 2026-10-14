@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/privacy", "destination": "/legal/privacy", "statusCode": 301 },
+    { "source": "/privacy-policy", "destination": "/legal/privacy", "statusCode": 301 },
+    { "source": "/terms", "destination": "/legal/terms", "statusCode": 301 },
+    { "source": "/terms-of-use", "destination": "/legal/terms", "statusCode": 301 },
+    { "source": "/cookie-policy", "destination": "/legal/cookies", "statusCode": 301 },
+    { "source": "/accessibility", "destination": "/legal/accessibility", "statusCode": 301 },
+    { "source": "/locations", "destination": "/about#locations", "statusCode": 301 },
+    { "source": "/capabilities/talent-solutions", "destination": "/capabilities/specialist-talent", "statusCode": 301 },
+    { "source": "/capabilities/workforce-solutions", "destination": "/capabilities/specialist-talent", "statusCode": 301 }
+  ]
+}

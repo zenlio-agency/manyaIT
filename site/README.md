@@ -113,8 +113,9 @@ The legal pack lives under `/legal`: a hub, six policies and a privacy
 request form. The footer links to each one, and the addresses people guess
 (`/privacy`, `/privacy-policy`, `/terms`, `/terms-of-use`, `/cookie-policy`,
 `/accessibility`) redirect to them. The redirects are in `astro.config.mjs`,
-which writes a forwarding page at each address, and in `public/_redirects`,
-which Cloudflare serves as permanent (301) redirects. Keep the two lists the
+which writes a forwarding page at each address, in `vercel.json`, which Vercel
+(the live host) serves as permanent (301) redirects, and in
+`public/_redirects`, the same rules for Cloudflare. Keep the three lists the
 same.
 
 | Page                      | File                                              |
@@ -325,8 +326,11 @@ The open items:
   manyait.com; LinkedIn, X, Facebook and YouTube have no address yet, so
   their icons show without a link. The footer, the menu and the contact
   section all read the same list.
-- **Domain.** `SITE_URL` in `src/consts.ts` is `https://manyait.com`.
-  Sitemap and canonical URLs use it.
+- **Domain.** `SITE_URL` in `src/consts.ts` is `https://www.manyait.com`,
+  the address Vercel serves (the bare domain redirects to it). Sitemap,
+  canonical and social URLs use it. Addresses have no trailing slash:
+  `trailingSlash: "never"` in `astro.config.mjs`, and `vercel.json` redirects
+  `/about/` to `/about`.
 
 ## Copy rules
 
