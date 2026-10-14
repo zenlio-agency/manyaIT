@@ -23,6 +23,15 @@ const { theme = "inherit", overlap = false, ...seo } = Astro.props;
 <!doctype html>
 <html lang="en" class:list={[theme !== "inherit" && `theme-${theme}`]}>
   <head>
+    <!-- Google tag (gtag.js) -->
+    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-0HDNRPQCGF"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-0HDNRPQCGF');
+    </script>
     <BaseHead {...seo} />
     <script is:inline>
       (() => {
