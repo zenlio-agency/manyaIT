@@ -26,7 +26,9 @@ const AREA = 14.5;
 const heightOf = (ratio?: number) => {
   if (!ratio) return undefined;
   const rem = Math.min(Math.max(Math.sqrt(AREA / ratio), 1.1), 2.75);
-  return `--_logo-height: ${rem.toFixed(2)}rem`;
+  /* The ratio reserves the logo's width before it loads, so the row
+     doesn't shift. */
+  return `--_logo-height: ${rem.toFixed(2)}rem; aspect-ratio: ${ratio.toFixed(4)}`;
 };
 ---
 
