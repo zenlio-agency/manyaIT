@@ -23,6 +23,13 @@ const fill = (logos: (typeof rows)[number]["logos"]) =>
    the same area, so each height comes from the file's own aspect ratio. A
    logo whose shape isn't known keeps the default height. */
 const AREA = 14.5;
+/* Intrinsic size for the width and height attributes, matching the CSS
+   height below, so browsers know each logo's box before it loads. */
+const sizeOf = (ratio?: number) => {
+  if (!ratio) return {};
+  const height = Math.round(16 * Math.min(Math.max(Math.sqrt(AREA / ratio), 1.1), 2.75));
+  return { width: Math.round(height * ratio), height };
+};
 const heightOf = (ratio?: number) => {
   if (!ratio) return undefined;
   const rem = Math.min(Math.max(Math.sqrt(AREA / ratio), 1.1), 2.75);
@@ -80,6 +87,7 @@ const heightOf = (ratio?: number) => {
                           class="client-logos_img"
                           src={logo.src}
                           alt={logo.name}
+                          {...sizeOf(logo.ratio)}
                           style={heightOf(logo.ratio)}
                           loading="lazy"
                           decoding="async"

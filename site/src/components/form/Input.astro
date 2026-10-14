@@ -43,6 +43,7 @@ const {
   placeholder,
   required = false,
   labelHidden = false,
+  autocomplete,
   class: className,
   ...rest
 } = Astro.props;
@@ -114,7 +115,7 @@ const text = label ?? kind.label;
         name={name ?? slug(text)}
         placeholder={placeholder ?? text}
         inputmode={kind.mode}
-        autocomplete={kind.fill}
+        autocomplete={autocomplete ?? kind.fill}
         required={required || undefined}
         value={value}
         {...rest}

@@ -62,6 +62,8 @@ const filters = [{ title: "All", slug: "all" }, ...topics];
               href={insightHref(article)}
               photo={article.photo.src}
               photoPosition={article.photo.position}
+              photoWidth={article.photo.width}
+              photoHeight={article.photo.height}
               class="insights_tile"
             >
               {/* Small tiles keep just the category so the line never wraps. */}

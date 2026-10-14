@@ -15,9 +15,21 @@ export const absolute = (path: string) =>
 export const ORGANIZATION_ID = `${SITE_URL}/#organization`;
 export const WEBSITE_ID = `${SITE_URL}/#website`;
 
+/** A published contact value, or nothing while it is empty or still a
+    `[placeholder]`. */
+const confirmed = (value?: string) =>
+  value && !/\[|\]/.test(value) ? value.trim() : undefined;
+
 /** The company and the site, on every page. `sameAs` takes only profiles
-    with a real address (Site settings → Social). */
-export function siteGraph(sameAs: string[], description?: string): Node[] {
+    with a real address (Site settings → Social); the contact point uses the
+    company email and phone shown beside the contact form. */
+export function siteGraph(
+  sameAs: string[],
+  description?: string,
+  contact: { email?: string; phone?: string } = {},
+): Node[] {
+  const email = confirmed(contact.email);
+  const telephone = confirmed(contact.phone);
   return [
     {
       "@type": "Organization",
@@ -32,6 +44,15 @@ export function siteGraph(sameAs: string[], description?: string): Node[] {
       },
       ...(description && { description }),
       ...(sameAs.length > 0 && { sameAs }),
+      ...((email || telephone) && {
+        contactPoint: {
+          "@type": "ContactPoint",
+          contactType: "sales",
+          url: absolute("/contact"),
+          ...(email && { email }),
+          ...(telephone && { telephone }),
+        },
+      }),
     },
     {
       "@type": "WebSite",
@@ -39,6 +60,7 @@ export function siteGraph(sameAs: string[], description?: string): Node[] {
       name: SITE_NAME,
       url: absolute("/"),
       inLanguage: "en-US",
+      ...(description && { description }),
       publisher: { "@id": ORGANIZATION_ID },
     },
   ];
