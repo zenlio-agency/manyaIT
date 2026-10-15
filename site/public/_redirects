@@ -9,3 +9,7 @@
 /locations /about#locations 301
 /capabilities/talent-solutions /capabilities/specialist-talent 301
 /capabilities/workforce-solutions /capabilities/specialist-talent 301
+# Pages from the previous ManyaIT site that search engines still list
+/about-us /about 301
+/services /capabilities 301
+/what-we-do /capabilities 301

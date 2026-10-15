@@ -15,14 +15,15 @@ npm install
 npm run dev        # http://localhost:4321
 ```
 
-| Script            | What it does                                                 |
-| ----------------- | ------------------------------------------------------------ |
-| `npm run dev`     | Dev server with hot reload                                   |
-| `npm run build`   | Static build to `dist/`, then checks nothing links to Sanity |
-| `npm run preview` | Serves the built site                                        |
-| `npm run check`   | Type-checks every `.astro` file                              |
-| `npm run format`  | Formats with Prettier                                        |
-| `npm run map`     | Regenerates the dot map in `src/data/world-dots.json`        |
+| Script             | What it does                                                   |
+| ------------------ | -------------------------------------------------------------- |
+| `npm run dev`      | Dev server with hot reload                                     |
+| `npm run build`    | Static build to `dist/`, then checks nothing links to Sanity   |
+| `npm run preview`  | Serves the built site                                          |
+| `npm run check`    | Type-checks every `.astro` file                                |
+| `npm run format`   | Formats with Prettier                                          |
+| `npm run map`      | Regenerates the dot map in `src/data/world-dots.json`          |
+| `npm run indexnow` | Asks Bing to recrawl the live sitemap's pages (after a deploy) |
 
 `dist/` is plain static files and can go on any host. `wrangler.jsonc` is
 already set up for Cloudflare: `npm run build && npx wrangler deploy` publishes
@@ -258,6 +259,14 @@ capability pages and `BlogPosting` on articles. `FaqList` marks up the
 questions it shows as `FAQPage`, skipping any that still hold a placeholder.
 Office addresses and `JobPosting` are left out until the legal entities are
 confirmed and the openings are real roles.
+
+The sitemap (`/sitemap-index.xml`, copied to `/sitemap.xml`) gives each page
+a `<lastmod>`: the last edit to the Sanity documents it shows, or the
+`updated` date of a legal page (`utils/sitemap.ts`). Pages whose text lives
+only in code have none, so a redeploy never marks every page as changed.
+`public/<key>.txt` is the IndexNow key that `npm run indexnow` uses. The
+Search Console and Bing steps for the relaunch are in
+`docs/seo/search-console-relaunch.md`.
 
 ## Before launch
 

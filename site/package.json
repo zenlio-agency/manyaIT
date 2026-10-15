@@ -14,7 +14,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "format": "prettier --write .",
-    "map": "node scripts/world-dots.mjs"
+    "map": "node scripts/world-dots.mjs",
+    "indexnow": "node scripts/indexnow.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
