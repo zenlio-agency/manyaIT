@@ -1,0 +1,26 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import LegalHub from "@/components/content/LegalHub.astro";
+import LegalStrip from "@/components/content/LegalStrip.astro";
+
+const documents = (await getCollection("legal")).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+---
+
+<Layout
+  title="Legal"
+  description="ManyaIT's privacy, cookie, accessibility and applicant notices, the terms for using this site, and how to make a privacy request."
+>
+  {/* Every policy, with its last-updated date */}
+  <Section paddingTop="small">
+    <LegalHub documents={documents} />
+  </Section>
+
+  {/* Privacy requests */}
+  <Section theme="tint" paddingTop="small" paddingBottom="small">
+    <LegalStrip />
+  </Section>
+</Layout>

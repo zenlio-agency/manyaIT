@@ -1,29 +1,55 @@
 ---
 import { Font } from "astro:assets";
-import { SITE_NAME, SITE_DESCRIPTION } from "@/consts.ts";
-import { isNoindexRoute } from "@/utils/seo.ts";
+import { SITE_LOCALE, SITE_NAME } from "@/consts.ts";
+import { settings } from "@/sanity/content.ts";
+import { canonicalPath, isNoindexRoute } from "@/utils/seo.ts";
 import type { SeoProps } from "@/types.ts";
 
 type Props = SeoProps;
 
+/* Pages that set no description or social image use the defaults in
+   Sanity's Site settings. */
+const defaults = await settings();
+
 const {
   title,
-  description = SITE_DESCRIPTION,
-  image = "/og-image.jpg",
+  description = defaults.description,
+  image,
+  imageAlt,
   type = "website",
   noindex,
 } = Astro.props;
 
 const isNoindex = noindex ?? isNoindexRoute(Astro.url.pathname);
+/* The 404 page answers for addresses that don't exist, so it names no
+   canonical of its own. */
+const isNotFound = /^\/404(\.html)?\/?$/.test(Astro.url.pathname);
 
 const isHome = Astro.url.pathname.replace(/\/+$/, "") === "";
-const pageTitle = !title
+/* Search results cut titles at about 60 characters. */
+const TITLE_LIMIT = 60;
+const branded = !title
   ? SITE_NAME
   : isHome
     ? `${SITE_NAME} | ${title}`
     : `${title} | ${SITE_NAME}`;
-const canonical = new URL(Astro.url.pathname, Astro.site);
-const socialImage = new URL(image, Astro.site);
+/* A title that already names the company is used as written, and so is one
+   too long to take the company name as well. */
+const pageTitle =
+  title && (title.includes(SITE_NAME) || branded.length > TITLE_LIMIT)
+    ? title
+    : branded;
+/* Addresses have no trailing slash (see `trailingSlash` in astro.config). */
+const canonical = new URL(canonicalPath(Astro.url.pathname), Astro.site);
+/* Pages without their own image use the site default, which is always
+   1200 × 630. */
+const ownImage = Boolean(image);
+const socialImage = new URL(
+  image ?? defaults.socialImage ?? "/og-image.jpg",
+  Astro.site,
+);
+const socialImageAlt =
+  imageAlt ?? (ownImage ? pageTitle : `${SITE_NAME}, Technology & Talent Partners`);
 ---
 
 <meta charset="utf-8" />
@@ -37,20 +63,40 @@ const socialImage = new URL(image, Astro.site);
 <meta name="theme-color" content="#FAFAFA" />
 <title>{pageTitle}</title>
 <meta name="description" content={description} />
-<link rel="canonical" href={canonical} />
-{isNoindex && <meta name="robots" content="noindex, nofollow" />}
+{!isNotFound && <link rel="canonical" href={canonical} />}
+<link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
+{isNoindex && <meta name="robots" content="noindex, follow" />}
 
 <meta property="og:type" content={type} />
 <meta property="og:site_name" content={SITE_NAME} />
+<meta property="og:locale" content={SITE_LOCALE.replace("-", "_")} />
 <meta property="og:title" content={pageTitle} />
 <meta property="og:description" content={description} />
-<meta property="og:url" content={canonical} />
+{!isNotFound && <meta property="og:url" content={canonical} />}
 <meta property="og:image" content={socialImage} />
+{!ownImage && <meta property="og:image:width" content="1200" />}
+{!ownImage && <meta property="og:image:height" content="630" />}
+<meta property="og:image:alt" content={socialImageAlt} />
 
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={pageTitle} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={socialImage} />
+<meta name="twitter:image:alt" content={socialImageAlt} />
 
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+{defaults.faviconRasterUrl ? (
+  <link rel="icon" href={defaults.faviconRasterUrl} sizes="32x32" />
+) : (
+  <link rel="icon" href="/favicon.ico" sizes="32x32" />
+)}
+{defaults.faviconSvgUrl ? (
+  <link rel="icon" type="image/svg+xml" href={defaults.faviconSvgUrl} />
+) : (
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+)}
+{defaults.appleTouchIconUrl ? (
+  <link rel="apple-touch-icon" href={defaults.appleTouchIconUrl} />
+) : (
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+)}
 <meta name="generator" content={Astro.generator} />

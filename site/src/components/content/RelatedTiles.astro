@@ -1,0 +1,111 @@
+---
+import SectionHeader from "@/components/content/SectionHeader.astro";
+import type { SvgComponent } from "astro/types";
+import Button from "@/components/Button.astro";
+import Icon from "@/components/media/Icon.astro";
+import PhotoTile from "@/components/item/PhotoTile.astro";
+import arrow from "@/assets/icons/ui-arrow.svg";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Pill label above the heading. */
+  eyebrow?: string;
+  /** Section heading. */
+  heading?: string;
+  /** Button beside the heading. */
+  link?: { label: string; href: string };
+  /** Linked photo tiles, up to four to a row. */
+  items?: {
+    title: string;
+    text: string;
+    href: string;
+    photo?: string;
+    icon?: SvgComponent;
+  }[];
+}
+
+const { render = true, eyebrow, heading, link, items = [] } = Astro.props;
+---
+
+{
+  render && heading && items.length > 0 && (
+    <div class="related-tiles_wrap">
+      <SectionHeader eyebrow={eyebrow} heading={heading}>
+        {link && (
+          <Button
+            slot="action"
+            element="link"
+            href={link.href}
+            emphasis="secondary"
+          >
+            {link.label}
+          </Button>
+        )}
+      </SectionHeader>
+      <ul
+        class="related-tiles_list"
+        style={`--_count: ${Math.min(items.length, 4)}`}
+      >
+        {items.map((item, index) => (
+          <li data-reveal style={`--reveal-order: ${index}`}>
+            <PhotoTile
+              href={item.href}
+              photo={item.photo}
+              class="related-tiles_tile"
+            >
+              {item.icon && (
+                <span class="photo-tile_icon" slot="top">
+                  <Icon src={item.icon} variant="small" />
+                </span>
+              )}
+              <h3 class="photo-tile_title is-small">{item.title}</h3>
+              <Fragment slot="reveal">
+                <p class="photo-tile_text">{item.text}</p>
+                <span class="photo-tile_more">
+                  Learn more
+                  <Icon src={arrow} variant="small" />
+                </span>
+              </Fragment>
+            </PhotoTile>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+<style is:global>
+  @layer components {
+    /* Spacing here comes from gaps, so type margins step aside. */
+    :where(.related-tiles_wrap) :where(.heading, .text) {
+      margin-block: 0;
+    }
+
+    .related-tiles_wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-7);
+    }
+
+    .related-tiles_list {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--site-gutter);
+      @media (width >= 30rem) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      @media (width >= 64rem) {
+        grid-template-columns: repeat(var(--_count), minmax(0, 1fr));
+      }
+    }
+
+    .related-tiles_tile {
+      aspect-ratio: 4 / 3;
+      @media (width >= 64rem) {
+        aspect-ratio: 4 / 5;
+      }
+    }
+  }
+</style>

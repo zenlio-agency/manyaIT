@@ -8,55 +8,134 @@ import Form from "@/components/form/Form.astro";
 import Input from "@/components/form/Input.astro";
 import Select from "@/components/form/Select.astro";
 import Textarea from "@/components/form/Textarea.astro";
+import Fieldset from "@/components/form/Fieldset.astro";
+import Choice from "@/components/form/Choice.astro";
+import SocialLinks from "@/components/global/SocialLinks.astro";
 import arrow from "@/assets/icons/ui-arrow.svg";
-import { CAPABILITIES, INDUSTRIES, tbc } from "@/data/site.ts";
+import { CONTACT_TRACKER, tbc } from "@/data/site.ts";
+import { LEGAL } from "@/data/legal.ts";
+import * as content from "@/sanity/content.ts";
 
 interface Props {
   /** Set to `false` to omit the component. */
   render?: boolean;
+  /** Heading level for the section heading. Use `h2` below a page's own h1. */
+  headingTag?: "h1" | "h2";
+  /**
+   * `home` keeps the homepage's original wording; `page` is the Contact
+   * page's wording from the October 2026 content brief.
+   */
+  variant?: "page" | "home";
 }
 
-const { render = true } = Astro.props;
+const { render = true, headingTag = "h1", variant = "page" } = Astro.props;
+const cardTag = headingTag === "h1" ? "h2" : "h3";
+const isHome = variant === "home";
 
-const topics = [
+const [CAPABILITIES, INDUSTRIES, HUBS, settingsDoc, homeDoc, contactPage] =
+  await Promise.all([
+    content.capabilities(),
+    content.industries(),
+    content.hubs(),
+    content.settings(),
+    content.home(),
+    content.page("page-contact"),
+  ]);
+const { cta: CTA, contact: COMPANY_CONTACT } = settingsDoc;
+
+/* The homepage keeps its own wording for this section. */
+const intro = isHome
+  ? homeDoc.sections.contact
+  : {
+      eyebrow: contactPage.hero.eyebrow,
+      heading: contactPage.hero.title,
+      intro: contactPage.hero.lede,
+    };
+
+/* Every answer submits its label, so HighLevel shows readable text. `value`
+   is the id a link's ?topic= uses to preselect one. Field names match the
+   HighLevel contact field keys, such as contact.job_title, so each answer
+   lands in its field on the contact. */
+const areas = [
   ...CAPABILITIES.map((cap) => ({ value: cap.id, label: cap.title })),
-  ...INDUSTRIES.map((industry) => ({
-    value: industry.id,
-    label: `${industry.title} programs`,
-  })),
-  { value: "careers", label: "Careers and the Talent Network" },
+  { value: "cap-talent", label: "Specialist Talent" },
+  ...(isHome
+    ? [{ value: "capability-center", label: "A full capability center" }]
+    : []),
+];
+
+const roles = [
+  {
+    value: "enterprise",
+    label: isHome
+      ? "An enterprise planning a team"
+      : "An enterprise leader planning a technology initiative",
+  },
+  { value: "client", label: "An existing ManyaIT client" },
+  { value: "partner", label: "A technology or alliance partner" },
+  {
+    value: "careers",
+    label: isHome
+      ? "An engineer or specialist exploring careers"
+      : "An experienced professional exploring careers",
+  },
+  { value: "media", label: "Media or an analyst" },
   { value: "other", label: "Something else" },
 ];
 
-const next = [
-  [
-    "Our team reads your note",
-    "Every message goes to a person in Dallas, not a queue.",
-  ],
-  [
-    "We set up a 30-minute call",
-    "We listen first: your goals, your systems and your timelines.",
-  ],
-  [
-    "We map the first step together",
-    "You leave with a recommended starting point, whether or not we work together.",
-  ],
+const industries = [
+  ...INDUSTRIES.map((industry) => ({
+    value: industry.id,
+    label: industry.title,
+  })),
+  { value: "other", label: "Another industry" },
+];
+
+/* What happens after a brief arrives, one word a step. */
+const next = ["Discovery", "Alignment", "Roadmap"];
+
+/* Ways to reach the company without the form, shown beside it. */
+const direct = [
+  {
+    label: "Email",
+    value: COMPANY_CONTACT.email,
+    href: `mailto:${COMPANY_CONTACT.email}`,
+  },
+  ...(isHome
+    ? [
+        {
+          label: "Careers",
+          value: COMPANY_CONTACT.careersEmail,
+          href: `mailto:${COMPANY_CONTACT.careersEmail}`,
+        },
+      ]
+    : []),
+  {
+    label: "Call",
+    value: COMPANY_CONTACT.phone,
+    href: `tel:${COMPANY_CONTACT.phone.replace(/[^+\d]/g, "")}`,
+  },
 ];
 ---
 
 {
   render && (
-    <div class="contact_wrap">
+    <div
+      class="contact_wrap"
+      data-contact
+      data-tracker-src={CONTACT_TRACKER.src}
+      data-tracker-id={CONTACT_TRACKER.trackingId}
+    >
       <div class="contact_intro">
-        <Eyebrow data-reveal>Start a conversation</Eyebrow>
+        <Eyebrow data-reveal>{intro.eyebrow}</Eyebrow>
         <Heading
-          tag="h1"
-          variant="h1"
+          tag={headingTag}
+          variant={headingTag}
           maxWidth={16}
           data-reveal
           style="--reveal-order: 1"
         >
-          Tell us what you want to build.
+          {intro.heading}
         </Heading>
         <Paragraph
           variant="large"
@@ -64,31 +143,29 @@ const next = [
           data-reveal
           style="--reveal-order: 2"
         >
-          <Fragment
-            set:html={tbc(
-              "Whether you're expanding a capability, modernizing a platform or building something new, our team will respond within [1] business day.",
-            )}
-          />
+          <Fragment set:html={tbc(intro.intro)} />
         </Paragraph>
         <ol class="contact_next" data-reveal style="--reveal-order: 3">
-          {next.map(([title, text], index) => (
+          {next.map((step, index) => (
             <li>
               <span class="contact_next_index">0{index + 1}</span>
-              <span class="contact_next_text">
-                <strong>{title}</strong>
-                <span>{text}</span>
-              </span>
+              <span class="contact_next_text">{step}</span>
             </li>
           ))}
         </ol>
       </div>
 
       <div class="contact_card" data-reveal style="--reveal-order: 2">
+        <Heading tag={cardTag} variant="h4" class="contact_card_title">
+          How can we help you?
+        </Heading>
         <Form
           name="start-a-conversation"
-          successMessage="Thanks. This preview form isn't connected to an inbox yet, so nothing was sent. Once ManyaIT's inbox is connected, this is where your note will go."
+          action="/api/contact"
+          errorMessage={`Your message didn't send. Please try again, or email ${COMPANY_CONTACT.email}.`}
+          successMessage="Thank you. Your message is with our team, and we'll reply within 1 business day."
         >
-          <div class="contact_row">
+          <div class="contact_grid">
             <Input
               label="Full name"
               name="name"
@@ -97,60 +174,304 @@ const next = [
               required
             />
             <Input
-              label="Work email"
+              label="Business email"
               variant="email"
               name="email"
               placeholder="name@company.com"
               required
             />
+            <Input
+              label="Company name"
+              name="company_name"
+              autocomplete="organization"
+              placeholder="Company"
+              required
+            />
+            <Input
+              label="Job title"
+              name="job_title"
+              autocomplete="organization-title"
+              placeholder="Your role"
+              required
+            />
+            <Select
+              label="Which best describes you?"
+              name="enquirer_type"
+              options={roles.map((role) => role.label)}
+              placeholder="Choose one"
+              data-role
+              data-careers={
+                roles.find((role) => role.value === "careers")?.label
+              }
+            />
+            <Select
+              label="Industry"
+              name="industry"
+              options={industries.map((industry) => industry.label)}
+              placeholder="Choose an industry"
+              data-industry
+              data-topics={JSON.stringify(
+                Object.fromEntries(
+                  industries.map((industry) => [
+                    industry.value,
+                    industry.label,
+                  ]),
+                ),
+              )}
+            />
+            <Fieldset
+              legend="What would you like to build?"
+              legendStyle="label"
+              class="contact_areas"
+              data-areas
+            >
+              <p class="contact_hint text-style-small">
+                Choose as many as needed.
+              </p>
+              {areas.map((area) => (
+                <Choice
+                  label={area.label}
+                  name="areas_of_interest"
+                  value={area.label}
+                  data-topic={area.value}
+                />
+              ))}
+            </Fieldset>
+            <Textarea
+              label="Tell us more about your goals"
+              name="message"
+              placeholder={
+                isHome
+                  ? "The team you need, the systems involved and any timelines"
+                  : "Your objectives, the systems involved and any timelines"
+              }
+              minLines={9}
+              required
+            />
           </div>
-          <Input
-            label="Company"
-            name="company"
-            autocomplete="organization"
-            placeholder="Company name"
-          />
-          <Select
-            label="What would you like to build?"
-            name="topic"
-            options={topics}
-            placeholder="Choose an area"
-            data-topic
-          />
-          <Textarea
-            label="Tell us a little more"
-            name="message"
-            placeholder="Your goals, the systems involved and any timelines"
-            minLines={4}
-          />
+          {/* The request and marketing are separate choices, and the
+              marketing box is never ticked for you. */}
+          <div class="contact_consent">
+            <Choice
+              label="I agree to ManyaIT contacting me about this request."
+              name="contact_consent"
+              value="Yes"
+              required
+            />
+            <Choice
+              label="Also send me occasional ManyaIT news and insights by email."
+              name="marketing_opt_in"
+              value="Yes"
+            />
+          </div>
           <div class="contact_submit">
             <Button type="submit">
-              Start a Conversation
+              {CTA.primary.label}
               <Icon src={arrow} variant="small" class="button_icon" />
             </Button>
-            <p class="contact_privacy text-style-small">
-              We use your details only to reply to this note.
+            <p class="contact_notice text-style-small" data-notice="general">
+              We use your details to reply to your message. See our{" "}
+              <a href="/legal/privacy">Privacy Notice</a>.
+            </p>
+            <p
+              class="contact_notice text-style-small"
+              data-notice="careers"
+              hidden
+            >
+              <Fragment
+                set:html={tbc(
+                  `We'll keep your details for ${LEGAL.talentRetention} to match you with roles. See our <a href="/legal/applicant-privacy">Applicant Privacy Notice</a>.`,
+                )}
+              />
             </p>
           </div>
         </Form>
+      </div>
+
+      <div class="contact_direct" data-reveal style="--reveal-order: 4">
+        <p class="contact_direct_title">Prefer to reach us directly?</p>
+        <div class="contact_direct_grid">
+          <dl class="contact_direct_list">
+            {direct.map((item) => (
+              <div>
+                <dt>{item.label}</dt>
+                <dd>
+                  <a href={item.href}>{item.value}</a>
+                </dd>
+              </div>
+            ))}
+          </dl>
+          <dl class="contact_direct_list">
+            {HUBS.map((hub) => (
+              <div>
+                <dt>{isHome ? `${hub.country} · ${hub.role}` : hub.role}</dt>
+                <dd>
+                  {hub.entity}
+                  <br />
+                  {/* On the Contact page the main number is already listed
+                      under "Call". */}
+                  {(isHome || hub.phone !== COMPANY_CONTACT.phone) && (
+                    <Fragment>
+                      <a href={`tel:${hub.phone.replace(/[^+\d]/g, "")}`}>
+                        {hub.phone}
+                      </a>
+                      {" · "}
+                    </Fragment>
+                  )}
+                  <a href={`mailto:${hub.email}`}>{hub.email}</a>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+        <div class="contact_direct_social">
+          <span class="contact_direct_label">Follow ManyaIT</span>
+          <SocialLinks />
+        </div>
       </div>
     </div>
   )
 }
 
 <script>
-  /* Arriving from a capability, industry or careers link preselects the
-     matching topic. */
-  const topic = new URLSearchParams(location.search).get("topic");
-  const select = document.querySelector<HTMLSelectElement>(
-    ".contact_wrap select",
-  );
-  if (
-    topic &&
-    select &&
-    [...select.options].some((option) => option.value === topic)
-  ) {
-    select.value = topic;
+  /* HighLevel's External Tracking script, loaded once a page. On load it
+     finds the form and, from then on, sends each submission to HighLevel. */
+  let ready = false;
+  let tracker: Promise<void> | undefined;
+  const loadTracker = (src: string, id: string) =>
+    (tracker ??= new Promise<void>((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.dataset.trackingId = id;
+      script.addEventListener("load", () => {
+        ready = true;
+        resolve();
+      });
+      script.addEventListener("error", () => {
+        /* Blocked or offline: the next attempt loads it afresh. */
+        script.remove();
+        tracker = undefined;
+        reject(new Error("The HighLevel script didn't load."));
+      });
+      document.body.append(script);
+    }));
+
+  for (const contact of document.querySelectorAll<HTMLElement>(
+    "[data-contact]",
+  )) {
+    const fields = contact.querySelector<HTMLFormElement>("form");
+    const wrap = fields?.closest<HTMLElement>(".form_wrap");
+    const send = fields?.querySelector<HTMLButtonElement>(
+      'button:not([type]), button[type="submit"]',
+    );
+    const { trackerSrc, trackerId } = contact.dataset;
+    if (fields && wrap && send && trackerSrc && trackerId) {
+      const load = () => loadTracker(trackerSrc, trackerId);
+
+      /* Only people who start on the form load the script, so other visitors
+         aren't tracked. */
+      for (const type of ["focusin", "pointerdown", "change"]) {
+        fields.addEventListener(type, () => load().catch(() => {}), {
+          once: true,
+        });
+      }
+
+      /* HighLevel also sends on a click of a button marked type="submit",
+         even when the form is incomplete. Such a click stops here, and the
+         browser points at what's missing. */
+      fields.addEventListener(
+        "click",
+        (event) => {
+          const target = event.target as Element;
+          const button = target.closest('button:not([type]), [type="submit"]');
+          if (!button || fields.checkValidity()) return;
+          event.preventDefault();
+          event.stopPropagation();
+          fields.reportValidity();
+        },
+        { capture: true },
+      );
+
+      /* A submit that comes before the script is ready waits for it, up to
+         10 seconds, then goes through. If it can't load, the error message
+         shows and nothing reads as sent. */
+      wrap.addEventListener(
+        "submit",
+        (event) => {
+          if (ready) return;
+          event.preventDefault();
+          event.stopPropagation();
+          if (wrap.dataset.state === "sending") return;
+          wrap.dataset.state = "sending";
+          send.disabled = true;
+          const timeout = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("Timed out.")), 10_000),
+          );
+          Promise.race([load(), timeout])
+            .then(() => {
+              /* Hand back to the form, which checks the fields again. */
+              wrap.dataset.state = "idle";
+              send.disabled = false;
+              fields.requestSubmit();
+            })
+            .catch(() => {
+              wrap.dataset.state = "failed";
+              send.disabled = false;
+            });
+        },
+        { capture: true },
+      );
+    }
+
+    /* At least one area must be ticked; the first box carries the message so
+       the browser blocks the submit and points at the group. */
+    const boxes = [
+      ...contact.querySelectorAll<HTMLInputElement>("[data-areas] input"),
+    ];
+    const sync = () =>
+      boxes[0]?.setCustomValidity(
+        boxes.some((box) => box.checked) ? "" : "Choose at least one area.",
+      );
+    boxes.forEach((box) => box.addEventListener("change", sync));
+    sync();
+
+    /* People exploring careers see the applicant notice instead of the
+       general one. */
+    const role = contact.querySelector<HTMLSelectElement>("select[data-role]");
+    const notices = [...contact.querySelectorAll<HTMLElement>("[data-notice]")];
+    const syncNotice = () => {
+      const kind =
+        role?.value && role.value === role.dataset.careers
+          ? "careers"
+          : "general";
+      for (const notice of notices) {
+        notice.hidden = notice.dataset.notice !== kind;
+      }
+    };
+    role?.addEventListener("change", syncNotice);
+    syncNotice();
+    contact
+      .querySelector("form")
+      ?.addEventListener("reset", () => requestAnimationFrame(syncNotice));
+
+    /* Arriving from a capability, industry or careers link preselects the
+       matching answer. */
+    const topic = new URLSearchParams(location.search).get("topic");
+    if (!topic) continue;
+    const area = boxes.find((box) => box.dataset.topic === topic);
+    const industry = contact.querySelector<HTMLSelectElement>(
+      "select[data-industry]",
+    );
+    const industryLabel = JSON.parse(industry?.dataset.topics ?? "{}")[topic];
+    if (area) {
+      area.checked = true;
+      sync();
+    } else if (industry && industryLabel) {
+      industry.value = industryLabel;
+    } else if (role?.dataset.careers && topic === "careers") {
+      role.value = role.dataset.careers;
+      syncNotice();
+    }
   }
 </script>
 
@@ -160,37 +481,40 @@ const next = [
       margin-block: 0;
     }
 
+    /* The intro and the direct details share the left column, beside the
+       form. On narrow screens the details come before the form, so email and
+       phone are in reach without scrolling past it. */
     .contact_wrap {
       width: 100%;
       display: grid;
       grid-template-columns: minmax(0, 1fr);
-      gap: var(--space-8) var(--section-space-small);
+      grid-template-areas: "intro" "direct" "form";
+      gap: var(--space-6) var(--section-space-small);
       @media (width >= 64rem) {
         grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+        grid-template-rows: auto 1fr;
+        grid-template-areas: "intro form" "direct form";
         align-items: start;
       }
     }
 
     .contact_intro {
+      grid-area: intro;
       display: flex;
       flex-direction: column;
       gap: var(--space-5);
-      @media (width >= 64rem) {
-        position: sticky;
-        top: calc(var(--nav-height) + var(--space-6));
-      }
     }
 
+    /* The three steps read as one line: numbered, one word each. */
     .contact_next {
       display: flex;
-      flex-direction: column;
-      margin-top: var(--space-4);
-      border-top: var(--border-width) solid var(--border);
+      flex-wrap: wrap;
+      gap: var(--space-3) var(--space-5);
+      margin-top: var(--space-2);
       & li {
         display: flex;
-        gap: var(--space-4);
-        padding-block: var(--space-4);
-        border-bottom: var(--border-width) solid var(--border);
+        align-items: center;
+        gap: var(--space-2);
       }
     }
 
@@ -210,48 +534,178 @@ const next = [
     }
 
     .contact_next_text {
+      font-family: var(--heading-family);
+      font-size: var(--text-small);
+      font-weight: var(--heading-bold);
+      color: var(--text);
+    }
+
+    /* Email, phone, addresses and social profiles, for anyone who'd rather
+       not use the form. */
+    .contact_direct {
+      grid-area: direct;
       display: flex;
       flex-direction: column;
-      gap: 0.15rem;
-      font-size: var(--text-small);
-      color: var(--text-body);
-      & strong {
-        font-family: var(--heading-family);
-        font-weight: var(--heading-bold);
-        color: var(--text);
+      gap: var(--space-5);
+      padding: var(--space-5) var(--space-6);
+      border: var(--border-width) solid var(--border);
+      border-radius: var(--radius-main);
+      background-color: var(--background-2);
+      & p {
+        margin-block: 0;
       }
     }
 
+    .contact_direct_title {
+      font-family: var(--display-family);
+      font-size: var(--h6);
+      font-weight: var(--heading-bold);
+      color: var(--text);
+    }
+
+    .contact_direct_grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    /* Email, careers and phone sit in a row; the addresses run full width
+       below them. */
+    .contact_direct_list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+      gap: var(--space-4) var(--space-5);
+      & + & {
+        padding-top: var(--space-4);
+        border-top: var(--border-width) solid var(--divider);
+        grid-template-columns: minmax(0, 1fr);
+      }
+      & div {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+      }
+      & dt {
+        font-family: var(--heading-family);
+        font-size: 0.72rem;
+        font-weight: var(--heading-bold);
+        letter-spacing: var(--letter-spacing-wide);
+        text-transform: uppercase;
+        color: var(--text-2);
+      }
+      & dd {
+        font-size: var(--text-small);
+        line-height: 1.55;
+        color: var(--text-body);
+      }
+      & a {
+        color: var(--link-text);
+        text-decoration: none;
+        @media (hover: hover) {
+          &:hover {
+            text-decoration: underline;
+            text-underline-offset: 0.2em;
+          }
+        }
+      }
+    }
+
+    .contact_direct_social {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+      padding-top: var(--space-4);
+      border-top: var(--border-width) solid var(--divider);
+    }
+
+    .contact_direct_label {
+      font-family: var(--heading-family);
+      font-size: 0.72rem;
+      font-weight: var(--heading-bold);
+      letter-spacing: var(--letter-spacing-wide);
+      text-transform: uppercase;
+      color: var(--text-2);
+    }
+
     .contact_card {
-      padding: var(--space-7) var(--space-6);
+      grid-area: form;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-5);
+      padding: var(--space-6);
       border-radius: var(--radius-main);
       background-color: var(--background-2);
       border: var(--border-width) solid var(--border);
       box-shadow: var(--shadow-raised);
+      @media (width >= 48rem) {
+        padding: var(--space-7) var(--space-6);
+      }
       & .form_fields {
         row-gap: var(--space-5);
       }
     }
 
-    .contact_row {
+    .contact_card_title {
+      margin-block: 0;
+    }
+
+    /* Fields pair up two to a row, the areas sitting beside the message. */
+    .contact_grid {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
       gap: var(--space-5);
+      align-items: start;
       @media (width >= 48rem) {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
-    .contact_submit {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: var(--space-3) var(--space-5);
-      padding-top: var(--space-2);
+    .contact_areas .form-fieldset_fields {
+      gap: var(--space-2);
     }
 
-    .contact_privacy {
+    /* On the white card, boxes match the text fields and tick in Manya
+       Blue. */
+    .contact_card .form-choice_mark {
+      --_mark: var(--background);
+      --_mark-hover: var(--accent-soft);
+      --_mark-chosen: var(--accent);
+      --_ink: var(--white);
+      border-color: var(--border);
+    }
+
+    .contact_hint {
       color: var(--text-2);
+    }
+
+    .contact_consent {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      padding-top: var(--space-4);
+      border-top: var(--border-width) solid var(--divider);
+    }
+
+    .contact_notice {
+      margin-block: 0;
+      color: var(--text-2);
+      &[hidden] {
+        display: none;
+      }
+      & a {
+        color: var(--link-text);
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+      }
+    }
+
+    .contact_submit {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-3);
     }
   }
 </style>

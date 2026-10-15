@@ -1,0 +1,89 @@
+---
+import Button from "@/components/Button.astro";
+import { LEGAL, PRIVACY_REQUESTS_HREF, mailLink } from "@/data/legal.ts";
+import { tbc } from "@/data/site.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+}
+
+const { render = true } = Astro.props;
+---
+
+{
+  render && (
+    <div class="legal-strip_wrap">
+      <div class="legal-strip_text">
+        <p class="legal-strip_title">Questions or a request about your data?</p>
+        <p class="legal-strip_line">
+          Ask for a copy, a correction or a deletion, or opt out of marketing.
+          We acknowledge every request within{" "}
+          <Fragment set:html={tbc(LEGAL.acknowledge)} />.
+        </p>
+      </div>
+      <div class="legal-strip_actions">
+        <Button element="link" href={PRIVACY_REQUESTS_HREF}>
+          Make a privacy request
+        </Button>
+        <p
+          class="legal-strip_email"
+          set:html={tbc(`or email ${mailLink(LEGAL.privacyEmail)}`)}
+        />
+      </div>
+    </div>
+  )
+}
+
+<style is:global>
+  @layer components {
+    .legal-strip_wrap {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-5) var(--section-space-small);
+      align-items: center;
+      @media (width >= 48rem) {
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+      & p {
+        margin-block: 0;
+      }
+    }
+
+    .legal-strip_text {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .legal-strip_title {
+      font-family: var(--display-family);
+      font-size: var(--h5);
+      font-weight: var(--heading-bold);
+      color: var(--text);
+    }
+
+    .legal-strip_line {
+      max-width: 44rem;
+      color: var(--text-body);
+    }
+
+    .legal-strip_actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-3) var(--space-4);
+    }
+
+    .legal-strip_email {
+      font-size: var(--text-small);
+      color: var(--text-2);
+      & a {
+        color: var(--link-text);
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+      }
+    }
+  }
+</style>

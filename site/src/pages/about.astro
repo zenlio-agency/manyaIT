@@ -1,0 +1,260 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import HeroDetail from "@/components/content/HeroDetail.astro";
+import StorySplit from "@/components/content/StorySplit.astro";
+import FeatureGrid from "@/components/content/FeatureGrid.astro";
+import Commitments from "@/components/content/Commitments.astro";
+import ProcessSteps from "@/components/content/ProcessSteps.astro";
+import GlobalPresence from "@/components/content/GlobalPresence.astro";
+import FaqList from "@/components/content/FaqList.astro";
+import CtaFinal from "@/components/content/CtaFinal.astro";
+import { TEAM_STEPS } from "@/data/site.ts";
+import { ABOUT_PHOTOS } from "@/data/photos.ts";
+import { page, settings } from "@/sanity/content.ts";
+
+const [{ hero, faqIntro, faq, seo }, { cta: CTA }] = await Promise.all([
+  page("page-about"),
+  settings(),
+]);
+---
+
+<Layout title={seo.title} description={seo.description}>
+  {/* Hero */}
+  <Section paddingTop="small">
+    <HeroDetail
+      crumbs={[{ label: "Home", href: "/" }, { label: "About" }]}
+      eyebrow={hero.eyebrow}
+      title={hero.title}
+      lede={hero.lede}
+      points={hero.points}
+      primary={CTA.primary}
+      secondary={{ label: "Explore Capabilities", href: "/capabilities" }}
+      photo={hero.photo?.src}
+      photoAlt={hero.photo?.alt}
+      photoPosition={hero.photo?.position}
+    />
+  </Section>
+
+  {/* Story */}
+  <Section theme="tint" id="story">
+    <StorySplit
+      eyebrow="Our story"
+      heading="From IT solutions to end-to-end engineering partner."
+      paragraphs={[
+        "ManyaIT began as a technology solutions firm serving enterprise programs in mobility, cloud and big data.",
+        "That work taught us that transformation succeeds only when strategy, engineering and the right people move as one. Architecture alone does not ship. Talent alone does not scale. Lasting outcomes come from combining both, with clear ownership from the first workshop to the final release.",
+        "Today, enterprises rely on us across the full technology lifecycle: data foundations, enterprise platforms, applied AI, intelligent automation and digital products. Some programs are defined initiatives delivered against agreed outcomes; others are long-running product and platform roadmaps we build and operate. Each is measured by the business outcomes it creates and the capability it leaves inside the enterprise.",
+      ]}
+      photo={ABOUT_PHOTOS.story}
+      reverse
+    />
+  </Section>
+
+  {/* What we engineer: one card per discipline */}
+  <Section id="engineer">
+    <FeatureGrid
+      eyebrow="What we engineer"
+      heading="Depth across every layer of the enterprise stack."
+      intro="Programs fail at the seams between architecture, data, development and operations. Our teams work across all of them, so decisions made in one layer hold up in the next."
+      columns={4}
+      numbered
+      items={[
+        {
+          title: "Technology",
+          text: "Enterprise platforms run to production standards.",
+          list: [
+            "SAP S/4HANA and BTP",
+            "Cloud platforms on AWS, Azure and Google Cloud",
+            "Automation and AI platforms",
+            "Managed operations, SRE and FinOps",
+          ],
+        },
+        {
+          title: "Data",
+          text: "Trusted, governed data that analytics and AI can act on.",
+          list: [
+            "Data strategy and AI-readiness",
+            "Lakehouse and cloud data platforms",
+            "Data products, contracts and master data",
+            "Governance, lineage and data observability",
+          ],
+        },
+        {
+          title: "Development",
+          text: "Cloud-native software engineered to ship and to last.",
+          list: [
+            "Product and experience design",
+            "Microservices and API engineering",
+            "CI/CD, DevSecOps and quality engineering",
+            "AI-augmented software engineering",
+          ],
+        },
+        {
+          title: "Architecture",
+          text: "Target-state designs that make every later decision easier.",
+          list: [
+            "Enterprise and solution architecture",
+            "Cloud, integration and event-driven design",
+            "Zero-trust security and resilience engineering",
+            "Architecture governance and technical-debt reduction",
+          ],
+        },
+      ]}
+    />
+  </Section>
+
+  {/* Our commitments: to clients and to professionals */}
+  <Section theme="tint" id="commitments">
+    <Commitments
+      eyebrow="Our commitments"
+      heading="What clients and professionals can hold us to."
+      intro="Commitments only matter when they are specific. These are the standards we hold ourselves to on every program and for every person who joins us."
+      columns={[
+        {
+          title: "To clients",
+          items: [
+            {
+              title: "Regulated-grade rigor",
+              text: "We build to the standard banking and other regulated industries demand: segregation of duties, audit-ready evidence and data protection from the first sprint.",
+            },
+            {
+              title: "End-to-end product ownership",
+              text: "One team accountable from discovery and design through engineering, release, operations and continuous improvement.",
+            },
+            {
+              title: "Business continuity",
+              text: "Business-critical platforms run under defined service levels, with structured handovers and round-the-clock coverage.",
+            },
+            {
+              title: "Transparent governance",
+              text: "Outcome scorecards, early risk visibility and honest recommendations, even when the news is hard.",
+            },
+            {
+              title: "Knowledge that stays",
+              text: "Documented architecture, runbooks and decisions that remain with your organization, whoever runs the platform next.",
+            },
+          ],
+        },
+        {
+          title: "To professionals",
+          items: [
+            {
+              title: "Work that matters",
+              text: "Production platforms in banking, telecommunications, healthcare, energy and retail, not throwaway prototypes.",
+            },
+            {
+              title: "Real ownership",
+              text: "Take work from architecture to production and see the business results it creates.",
+            },
+            {
+              title: "Structured growth",
+              text: "A personal growth plan, certifications to pursue and a path from engineer to lead and architect.",
+            },
+            {
+              title: "Integrity",
+              text: "A transparent selection process with no fee at any stage.",
+            },
+            {
+              title: "One standard",
+              text: "The same tools, quality bar and respect on every team and in every hub.",
+            },
+          ],
+        },
+      ]}
+    />
+  </Section>
+
+  {/* How we deliver, with the governance that runs through it */}
+  <Section theme="dark" id="model">
+    <ProcessSteps
+      eyebrow="How we deliver"
+      heading="From vision to value, end to end."
+      intro="One accountable lifecycle, from the first conversation to a platform that runs and keeps improving, with the flexibility to start at any stage."
+      steps={TEAM_STEPS}
+      strip={{
+        title: "Delivery governance",
+        items: [
+          "Architecture review at every major decision",
+          "Quality and security gates in every release",
+          "Executive steering against agreed outcomes",
+          "Risk and dependency tracking from week one",
+        ],
+      }}
+    />
+  </Section>
+
+  {/* Principles */}
+  <Section id="values">
+    <FeatureGrid
+      eyebrow="What we believe"
+      heading="The principles behind every program"
+      intro="They shape who joins ManyaIT, how we partner with every enterprise and what we expect of ourselves."
+      numbered
+      items={[
+        {
+          title: "Outcomes over output",
+          text: "We measure success by business impact, not by hours logged or tickets closed.",
+        },
+        {
+          title: "Engineering excellence",
+          text: "Clean architecture, tested code and documented decisions, built to perform at enterprise scale.",
+        },
+        {
+          title: "Transparency by default",
+          text: "Clear reporting, early visibility of risk and honest recommendations.",
+        },
+        {
+          title: "Continuity and ownership",
+          text: "Teams that stay learn your systems, your domain and your controls, so knowledge compounds instead of walking out the door.",
+        },
+        {
+          title: "Security by design",
+          text: "Governance, privacy and compliance built into every sprint, not added at audit time.",
+        },
+        {
+          title: "One delivery standard",
+          text: "One plan, one quality bar and one definition of done, so delivery moves forward around the clock.",
+        },
+      ]}
+    />
+  </Section>
+
+  {/* Global delivery */}
+  <Section theme="tint" id="locations">
+    <GlobalPresence />
+  </Section>
+
+  {/* Mission and vision */}
+  <Section id="why">
+    <FeatureGrid
+      eyebrow="Mission and vision"
+      heading="Strategy to production. People to platforms."
+      columns={2}
+      items={[
+        {
+          title: "Our mission",
+          text: "To help enterprises build technology that delivers measurable value: engineered with precision, delivered end to end and carried by people who own the outcome.",
+        },
+        {
+          title: "Our vision",
+          text: "To be the most trusted engineering partner for enterprises modernizing with data and AI, known for platforms that perform in production and teams that raise the bar every quarter.",
+        },
+      ]}
+    />
+  </Section>
+
+  {/* FAQ */}
+  <Section theme="tint">
+    <FaqList
+      heading={faqIntro.heading || undefined}
+      intro={faqIntro.intro || undefined}
+      items={faq}
+    />
+  </Section>
+
+  {/* Final CTA */}
+  <Section theme="dark" paddingTop="large">
+    <CtaFinal />
+  </Section>
+</Layout>

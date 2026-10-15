@@ -1,0 +1,11 @@
+---
+import RichText from "@/components/typography/RichText.astro";
+import { finishLegalHtml } from "@/utils/legal.ts";
+
+/* The slot is a rendered legal Markdown file; see `finishLegalHtml`. */
+const html = finishLegalHtml(await Astro.slots.render("default"));
+---
+
+<RichText class="legal_body">
+  <Fragment set:html={html} />
+</RichText>

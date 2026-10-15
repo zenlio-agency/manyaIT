@@ -1,0 +1,145 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import HeroDetail from "@/components/content/HeroDetail.astro";
+import ProblemRows from "@/components/content/ProblemRows.astro";
+import FeatureGrid from "@/components/content/FeatureGrid.astro";
+import ChipGroups from "@/components/content/ChipGroups.astro";
+import ProcessSteps from "@/components/content/ProcessSteps.astro";
+import FaqList from "@/components/content/FaqList.astro";
+import RelatedTiles from "@/components/content/RelatedTiles.astro";
+import CtaFinal from "@/components/content/CtaFinal.astro";
+import capTalent from "@/assets/icons/cap-talent.svg";
+import { capabilityHref } from "@/data/site.ts";
+import { service } from "@/utils/schema.ts";
+import { capabilities, settings, type Capability } from "@/sanity/content.ts";
+
+export async function getStaticPaths() {
+  const all = await capabilities();
+  return all.map((cap) => ({
+    params: { slug: cap.slug },
+    props: { cap, others: all.filter((other) => other.id !== cap.id) },
+  }));
+}
+
+type Props = { cap: Capability; others: Capability[] };
+
+const { cap, others } = Astro.props;
+const { page } = cap;
+const { cta: CTA } = await settings();
+const contact = `${CTA.primary.href}?topic=${cap.id}`;
+---
+
+<Layout
+  title={page.seoTitle || cap.title}
+  description={page.description}
+  breadcrumb={cap.title}
+  schema={[
+    service({
+      name: page.seoTitle || cap.title,
+      description: page.description,
+      pathname: Astro.url.pathname,
+    }),
+  ]}
+>
+  {/* Hero */}
+  <Section paddingTop="small">
+    <HeroDetail
+      crumbs={[
+        { label: "Home", href: "/" },
+        { label: "Capabilities", href: "/capabilities" },
+        { label: cap.title },
+      ]}
+      eyebrow={cap.title}
+      title={page.title}
+      lede={page.lede}
+      points={page.points}
+      primary={{ label: "Discuss your initiative", href: contact }}
+      secondary={{ label: "All capabilities", href: "/capabilities" }}
+      photo={cap.photo?.src}
+      photoAlt={cap.photo?.alt}
+      photoPosition={cap.photo?.position}
+      icon={cap.icon}
+    />
+  </Section>
+
+  {/* Challenges */}
+  <Section theme="tint">
+    <ProblemRows
+      eyebrow="The challenge"
+      heading={page.problems.heading}
+      rows={page.problems.rows}
+    />
+  </Section>
+
+  {/* What we deliver */}
+  <Section>
+    <FeatureGrid
+      eyebrow="What we deliver"
+      heading={page.offerings.heading}
+      intro={page.offerings.intro}
+      items={page.offerings.items}
+      numbered
+    />
+  </Section>
+
+  {/* Platforms and tools */}
+  <Section theme="tint">
+    <ChipGroups
+      eyebrow="Technology expertise"
+      heading="Platforms and tools we work with"
+      intro={page.stack.intro}
+      groups={page.stack.groups}
+      note={{ label: "Team behind the work", text: page.team }}
+    />
+  </Section>
+
+  {/* How it works */}
+  <Section theme="dark">
+    <ProcessSteps
+      eyebrow="How it works"
+      heading={page.howItWorks.heading}
+      intro={page.howItWorks.intro}
+      steps={page.howItWorks.steps}
+    />
+  </Section>
+
+  {/* FAQ */}
+  <Section>
+    <FaqList
+      heading={`${cap.title}, answered`}
+      items={page.faq}
+      link={{ label: "Ask us directly", href: contact }}
+    />
+  </Section>
+
+  {/* Other capabilities */}
+  <Section theme="tint">
+    <RelatedTiles
+      eyebrow="Keep exploring"
+      heading="Other capabilities"
+      link={{ label: "All capabilities", href: "/capabilities" }}
+      items={[
+        ...others.map((other) => ({
+          title: other.title,
+          text: other.line,
+          href: capabilityHref(other),
+          photo: other.photo?.src,
+          icon: other.icon,
+        })),
+        {
+          title: "Specialist Talent",
+          text: "The right specialists, engaged the way your business needs them, across the U.S. and India.",
+          href: "/capabilities/specialist-talent",
+          photo: "/images/specialist-talent-hero.webp",
+          icon: capTalent,
+        },
+      ]}
+    />
+  </Section>
+
+  {/* Final CTA */}
+  <Section theme="dark" paddingTop="large">
+    <CtaFinal />
+  </Section>
+</Layout>

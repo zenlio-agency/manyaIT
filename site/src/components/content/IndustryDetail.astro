@@ -3,11 +3,12 @@ import Eyebrow from "@/components/typography/Eyebrow.astro";
 import Heading from "@/components/typography/Heading.astro";
 import Paragraph from "@/components/typography/Paragraph.astro";
 import Button from "@/components/Button.astro";
+import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
 import Icon from "@/components/media/Icon.astro";
 import arrow from "@/assets/icons/ui-arrow.svg";
 import PhotoTile from "@/components/item/PhotoTile.astro";
-import { INDUSTRIES, CTA, tbc } from "@/data/site.ts";
-import { INDUSTRY_PHOTOS } from "@/data/photos.ts";
+import { industryHref } from "@/data/site.ts";
+import { industries, page, settings } from "@/sanity/content.ts";
 
 interface Props {
   /** Set to `false` to omit the component. */
@@ -15,13 +16,19 @@ interface Props {
 }
 
 const { render = true } = Astro.props;
+
+const [INDUSTRIES, { hero }, { cta: CTA }] = await Promise.all([
+  industries(),
+  page("page-industries"),
+  settings(),
+]);
 ---
 
 {
   render && (
     <div class="industry-detail_wrap">
       <div class="industry-detail_head">
-        <Eyebrow data-reveal>Industries</Eyebrow>
+        <Eyebrow data-reveal>{hero.eyebrow}</Eyebrow>
         <Heading
           tag="h1"
           variant="h1"
@@ -29,7 +36,7 @@ const { render = true } = Astro.props;
           data-reveal
           style="--reveal-order: 1"
         >
-          Talent that already knows your industry.
+          {hero.title}
         </Heading>
         <Paragraph
           variant="large"
@@ -37,8 +44,7 @@ const { render = true } = Astro.props;
           data-reveal
           style="--reveal-order: 2"
         >
-          Specialists who speak the language of your sector, its rules and its
-          systems.
+          {hero.lede}
         </Paragraph>
         <ul
           class="industry-detail_jump"
@@ -58,7 +64,9 @@ const { render = true } = Astro.props;
         {INDUSTRIES.map((industry, index) => (
           <li class="industry-detail_item" id={industry.id} data-reveal>
             <PhotoTile
-              photo={INDUSTRY_PHOTOS[industry.id]}
+              href={industryHref(industry)}
+              photo={industry.photo?.src}
+              photoPosition={industry.photo?.position}
               class="industry-detail_tile theme-dark"
             >
               <span class="photo-tile_eyebrow" slot="top">
@@ -79,29 +87,40 @@ const { render = true } = Astro.props;
                   <dd>{industry.challenge}</dd>
                 </div>
                 <div>
-                  <dt>What our teams build</dt>
+                  <dt>What we deliver</dt>
                   <dd>{industry.build}</dd>
                 </div>
               </dl>
+              {/* The figure shows once one is entered in Sanity. Like every
+                  figure, it must be confirmed there before launch. */}
               <div class="industry-detail_outcome">
-                <span
-                  class="industry-detail_metric"
-                  set:html={tbc(industry.metric)}
-                />
+                {industry.metric && (
+                  <span class="industry-detail_metric">
+                    {industry.metric.value}
+                  </span>
+                )}
                 <span>
                   <strong>{industry.outcome}</strong>
-                  <span>{industry.metricLabel}</span>
+                  {industry.metric && <span>{industry.metric.label}</span>}
                 </span>
               </div>
-              <Button
-                element="link"
-                href={`${CTA.primary.href}?topic=${industry.id}`}
-                emphasis="tertiary"
-                class="industry-detail_link"
-              >
-                Talk to us about {industry.short}
-                <Icon src={arrow} variant="small" class="button_icon" />
-              </Button>
+              <ButtonWrapper>
+                <Button
+                  element="link"
+                  href={industryHref(industry)}
+                  emphasis="secondary"
+                >
+                  Explore {industry.short}
+                  <Icon src={arrow} variant="small" class="button_icon" />
+                </Button>
+                <Button
+                  element="link"
+                  href={`${CTA.primary.href}?topic=${industry.id}`}
+                  emphasis="tertiary"
+                >
+                  Talk to us about {industry.short}
+                </Button>
+              </ButtonWrapper>
             </div>
           </li>
         ))}

@@ -65,6 +65,16 @@ const content = await slotContent(Astro.slots);
       'button:not([type]), button[type="submit"], input[type="submit"]',
     );
 
+    /* Sending hides the fields, so a long form can leave the visitor below
+       its message; bring the message into view. */
+    const reveal = (selector: string, block: ScrollLogicalPosition) =>
+      form.querySelector(selector)?.scrollIntoView({
+        block,
+        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+
     fields.addEventListener("submit", async (event) => {
       const endpoint = form.dataset.endpoint;
 
@@ -85,9 +95,11 @@ const content = await slotContent(Astro.slots);
         }
         form.dataset.state = "sent";
         fields.reset();
+        reveal(".form_note-sent", "center");
       } catch {
         form.dataset.state = "failed";
         if (submit) submit.disabled = false;
+        reveal(".form_note-failed", "nearest");
       }
     });
   }

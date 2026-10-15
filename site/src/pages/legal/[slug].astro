@@ -1,0 +1,31 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import LegalDocument from "@/components/content/LegalDocument.astro";
+import LegalStrip from "@/components/content/LegalStrip.astro";
+
+export async function getStaticPaths() {
+  const documents = await getCollection("legal");
+  return documents.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+type Props = { entry: CollectionEntry<"legal"> };
+
+const { entry } = Astro.props;
+---
+
+<Layout title={entry.data.title} description={entry.data.description}>
+  {/* The document */}
+  <Section paddingTop="small">
+    <LegalDocument entry={entry} />
+  </Section>
+
+  {/* Privacy requests */}
+  <Section theme="tint" paddingTop="small" paddingBottom="small">
+    <LegalStrip />
+  </Section>
+</Layout>

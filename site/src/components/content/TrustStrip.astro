@@ -5,22 +5,19 @@ import { tbc } from "@/data/site.ts";
 interface Props {
   /** Set to `false` to omit the component. */
   render?: boolean;
+  /** Pill label above the figures. */
+  label?: string;
+  /** Figures and what each one measures. */
+  stats: { value: string; label: string }[];
 }
 
-const { render = true } = Astro.props;
-
-const stats = [
-  { value: "[XX]+", label: "Years powering enterprise technology" },
-  { value: "[XX]+", label: "Global enterprises served" },
-  { value: "[XX]+", label: "Specialists in our talent network" },
-  { value: "[X] wks", label: "Average time to a productive team" },
-];
+const { render = true, label = "ManyaIT at a glance", stats } = Astro.props;
 ---
 
 {
-  render && (
+  render && stats.length > 0 && (
     <div class="trust-strip_wrap theme-dark" data-reveal>
-      <Eyebrow>ManyaIT at a glance</Eyebrow>
+      <Eyebrow>{label}</Eyebrow>
       <ul class="trust-strip_list">
         {stats.map((stat, index) => (
           <li

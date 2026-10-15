@@ -1,0 +1,175 @@
+---
+import Heading from "@/components/typography/Heading.astro";
+import Paragraph from "@/components/typography/Paragraph.astro";
+import { dateOrPlaceholder } from "@/utils/html.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** The article's H1. */
+  title: string;
+  /** One line under the title. */
+  summary?: string;
+  /** Category and article type, shown above the title. */
+  category: string;
+  type: string;
+  /** Byline. */
+  author: string;
+  /** ISO date, or a bracketed placeholder until it's set. */
+  published: string;
+  /** Read time in minutes. */
+  minutes: number;
+  /** Wide photo under the header. */
+  photo?: string;
+}
+
+const {
+  render = true,
+  title,
+  summary,
+  category,
+  type,
+  author,
+  published,
+  minutes,
+  photo,
+} = Astro.props;
+---
+
+{
+  render && (
+    <header class="article-header_wrap">
+      <div class="article-header_text">
+        <nav class="article-header_crumbs" aria-label="Breadcrumb">
+          <ol>
+            <li>
+              <a href="/">Home</a>
+            </li>
+            <li>
+              <a href="/insights">Insights</a>
+            </li>
+            <li>
+              <span aria-current="page">{category}</span>
+            </li>
+          </ol>
+        </nav>
+        {/* Divs, not paragraphs: a paragraph's leading-trim pseudo-elements
+            would become flex items and indent the first entry. */}
+        <div class="article-header_kicker">
+          <span>{category}</span>
+          <span>{type}</span>
+        </div>
+        <Heading tag="h1" variant="h2" maxWidth={26}>
+          {title}
+        </Heading>
+        {summary && (
+          <Paragraph variant="large" maxWidth={52}>
+            {summary}
+          </Paragraph>
+        )}
+        <div class="article-header_byline">
+          <span>By {author}</span>
+          <span set:html={dateOrPlaceholder(published)} />
+          <span>{minutes} min read</span>
+        </div>
+      </div>
+      {photo && (
+        <img
+          class="article-header_photo"
+          src={photo}
+          alt=""
+          fetchpriority="high"
+          decoding="async"
+        />
+      )}
+    </header>
+  )
+}
+
+<style is:global>
+  @layer components {
+    .article-header_wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-7);
+    }
+
+    .article-header_text {
+      width: 100%;
+      max-width: 44rem;
+      margin-inline: auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      & :is(.heading, .text, p) {
+        margin-block: 0;
+      }
+    }
+
+    .article-header_crumbs ol {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.25rem 0.5rem;
+      font-size: var(--text-small);
+      color: var(--text-2);
+      & li + li::before {
+        content: "/";
+        margin-right: 0.5rem;
+        color: var(--slate-300);
+      }
+      & a {
+        color: var(--text-2);
+        text-decoration: none;
+        transition: color var(--hover-duration) var(--hover-ease);
+        @media (hover: hover) {
+          &:hover {
+            color: var(--accent-text);
+          }
+        }
+      }
+      & [aria-current] {
+        color: var(--text);
+      }
+    }
+
+    /* Category and type, and the byline: separated by a middle dot. */
+    .article-header_kicker,
+    .article-header_byline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem 0.75rem;
+      & > span + span::before {
+        content: "·";
+        margin-right: 0.75rem;
+        color: var(--text-2);
+      }
+    }
+
+    .article-header_kicker {
+      font-family: var(--heading-family);
+      font-size: 0.75rem;
+      font-weight: var(--heading-bold);
+      letter-spacing: var(--letter-spacing-wide);
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .article-header_byline {
+      padding-top: var(--space-2);
+      font-size: var(--text-small);
+      color: var(--text-2);
+    }
+
+    .article-header_photo {
+      width: 100%;
+      aspect-ratio: 21 / 9;
+      border-radius: var(--radius-main);
+      object-fit: cover;
+      @media (width < 48rem) {
+        aspect-ratio: 4 / 3;
+      }
+    }
+  }
+</style>

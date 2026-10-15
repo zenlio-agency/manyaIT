@@ -1,0 +1,43 @@
+---
+import RichText from "@/components/typography/RichText.astro";
+import { markPlaceholders, wrapTables } from "@/utils/html.ts";
+
+/* The slot is a rendered Insights article; tables scroll inside their own
+   box and bracketed placeholders are marked for review. */
+const html = markPlaceholders(wrapTables(await Astro.slots.render("default")));
+---
+
+<RichText class="article_text">
+  <Fragment set:html={html} />
+</RichText>
+
+<style is:global>
+  @layer components {
+    .article_text {
+      & h2 {
+        font-size: var(--h4);
+        scroll-margin-top: calc(var(--nav-height) + var(--space-5));
+        &:not(:first-child) {
+          margin-top: var(--space-8);
+        }
+      }
+      & a {
+        color: var(--link-text);
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+        @media (hover: hover) {
+          &:hover {
+            color: var(--link-text-hover);
+          }
+        }
+      }
+      & strong {
+        color: var(--text);
+      }
+      & ol > li::marker {
+        font-weight: var(--heading-bold);
+        color: var(--accent);
+      }
+    }
+  }
+</style>

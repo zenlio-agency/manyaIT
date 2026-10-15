@@ -1,0 +1,542 @@
+---
+import Heading from "@/components/typography/Heading.astro";
+import Button from "@/components/Button.astro";
+import Icon from "@/components/media/Icon.astro";
+import arrow from "@/assets/icons/ui-arrow.svg";
+import Form from "@/components/form/Form.astro";
+import Fieldset from "@/components/form/Fieldset.astro";
+import Input from "@/components/form/Input.astro";
+import Select from "@/components/form/Select.astro";
+import Textarea from "@/components/form/Textarea.astro";
+import Choice from "@/components/form/Choice.astro";
+import FileInput from "@/components/form/FileInput.astro";
+import { TALENT_NETWORK, JOIN_STEPS } from "@/data/careers.ts";
+import { roles } from "@/sanity/content.ts";
+import { LEGAL, mailLink } from "@/data/legal.ts";
+import { tbc } from "@/data/site.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+}
+
+const { render = true } = Astro.props;
+
+const ROLES = await roles();
+
+const roleOptions = [
+  ...ROLES.map((role) => ({
+    value: role.slug,
+    label: `${role.title} · ${role.location}`,
+  })),
+  {
+    value: TALENT_NETWORK.slug,
+    label: `${TALENT_NETWORK.title} (no specific role)`,
+  },
+];
+
+const experience = [
+  "Less than 2 years",
+  "2–4 years",
+  "5–7 years",
+  "8–10 years",
+  "11–15 years",
+  "More than 15 years",
+];
+
+const availability = [
+  "Immediately",
+  "Within 2 weeks",
+  "Within 30 days",
+  "Within 60 days",
+  "Within 90 days",
+  "More than 90 days",
+];
+
+/* What happens after sending: a person reads every application (see the
+   Applicant Privacy Notice), then the joining steps from /careers. */
+const steps = [
+  {
+    title: "A person reads it",
+    text: "Our people team reviews every application. No decision is made by software alone.",
+  },
+  ...JOIN_STEPS.slice(1),
+];
+---
+
+{
+  render && (
+    <div class="careers-apply_wrap" data-apply>
+      <div class="careers-apply_card">
+        {/* /api/apply files each application in HighLevel (site/api/apply.ts). */}
+        <Form
+          name="application"
+          action="/api/apply"
+          enctype="multipart/form-data"
+          successMessage="Thank you. Your application is with our people team, and a person will review it."
+          errorMessage={`Your application didn't send. Please try again, or email your CV to ${LEGAL.careersEmail}.`}
+        >
+          <Fieldset legend="The role">
+            <Select
+              label="Role you're applying for"
+              name="role"
+              options={roleOptions}
+              placeholder="Choose a role"
+              required
+              data-role-select
+            />
+            {/* The chosen role's title, so HighLevel shows a name, not an id. */}
+            <input type="hidden" name="role-title" data-role-title />
+          </Fieldset>
+
+          <Fieldset legend="About you" variant="columns">
+            <Input variant="first-name" name="first-name" required />
+            <Input variant="last-name" name="last-name" required />
+            <Input
+              variant="email"
+              name="email"
+              placeholder="name@example.com"
+              required
+            />
+            <Input
+              variant="phone"
+              name="phone"
+              label="Phone"
+              placeholder="With country code, e.g. +91"
+              required
+            />
+            <Input
+              label="Current location"
+              name="location"
+              placeholder="City, country"
+              autocomplete="address-level2"
+              required
+            />
+            <Input
+              variant="url"
+              label="LinkedIn profile"
+              name="linkedin"
+              placeholder="https://www.linkedin.com/in/…"
+            />
+          </Fieldset>
+
+          <Fieldset legend="Your experience" variant="columns">
+            <div class="careers-apply_wide">
+              {/* The site's host accepts up to 4.5 MB per request. */}
+              <FileInput
+                label="CV or résumé"
+                name="cv"
+                maxMegabytes={4}
+                required
+              />
+            </div>
+            <Select
+              label="Years of experience"
+              name="experience"
+              options={experience}
+              placeholder="Choose a range"
+              required
+            />
+            <Select
+              label="When could you start?"
+              name="availability"
+              options={availability}
+              placeholder="Choose one"
+              required
+            />
+            <div class="careers-apply_wide">
+              <Input
+                variant="url"
+                label="Portfolio, GitHub or other link"
+                name="portfolio"
+                placeholder="https://"
+              />
+            </div>
+            <div class="careers-apply_wide">
+              <Textarea
+                label="Anything else we should know?"
+                name="note"
+                placeholder="The work you're looking for, or anything your CV doesn't say"
+                minLines={4}
+                maxlength="1500"
+              />
+            </div>
+          </Fieldset>
+
+          <Fieldset legend="Work eligibility">
+            <Fieldset
+              legend="Are you legally authorized to work in the country where this role is based?"
+              legendStyle="label"
+              variant="inline"
+            >
+              <Choice
+                type="radio"
+                name="authorized"
+                value="yes"
+                label="Yes"
+                required
+              />
+              <Choice type="radio" name="authorized" value="no" label="No" />
+            </Fieldset>
+            <Fieldset
+              legend="Will you now or in the future need visa sponsorship to work there?"
+              legendStyle="label"
+              variant="inline"
+            >
+              <Choice
+                type="radio"
+                name="sponsorship"
+                value="yes"
+                label="Yes"
+                required
+              />
+              <Choice type="radio" name="sponsorship" value="no" label="No" />
+            </Fieldset>
+            <p class="careers-apply_hint text-style-small">
+              We don't need your nationality, visa type, date of birth or a
+              photo. Please leave them out of your CV too.
+            </p>
+          </Fieldset>
+
+          {/* Applying and keeping a profile on file are separate choices,
+              and the second is never ticked for you. */}
+          <div class="careers-apply_consent">
+            <Choice
+              label="I agree to ManyaIT using my details to consider me for this role."
+              name="consent"
+              value="yes"
+              required
+            />
+            <Choice
+              label="Also keep my profile on file so you can contact me about other relevant roles."
+              name="talent-network"
+              value="yes"
+              data-talent-choice
+            />
+            <p
+              class="careers-apply_hint text-style-small"
+              set:html={tbc(
+                `We keep profiles on file for ${LEGAL.talentRetention}. Our <a href="/legal/applicant-privacy">Applicant Privacy Notice</a> explains who sees your details and how long we keep them.`,
+              )}
+            />
+          </div>
+
+          {/* Left empty by people; bots fill it in, and the receiving end
+              drops anything that has it. */}
+          <div class="careers-apply_trap" aria-hidden="true">
+            <label>
+              Leave this empty
+              <input
+                type="text"
+                name="website"
+                tabindex="-1"
+                autocomplete="off"
+              />
+            </label>
+          </div>
+
+          <div class="careers-apply_submit">
+            <Button type="submit">
+              Submit application
+              <Icon src={arrow} variant="small" class="button_icon" />
+            </Button>
+            <p
+              class="careers-apply_hint text-style-small"
+              set:html={tbc(
+                `ManyaIT never charges a fee at any stage. Report any request for payment to ${mailLink(LEGAL.careersEmail)}.`,
+              )}
+            />
+          </div>
+        </Form>
+      </div>
+
+      <div class="careers-apply_role">
+        <p class="careers-apply_role_label">You're applying for</p>
+        <div class="careers-apply_role_card" data-role-card="">
+          <p class="careers-apply_role_title">Choose a role in the form</p>
+          <p class="careers-apply_role_team">
+            Or register your interest to be considered for future roles.
+          </p>
+        </div>
+        {ROLES.map((role) => (
+          <div
+            class="careers-apply_role_card"
+            data-role-card={role.slug}
+            hidden
+          >
+            <p class="careers-apply_role_title">{role.title}</p>
+            <p class="careers-apply_role_team">{role.team}</p>
+            <ul class="careers-apply_role_meta">
+              <li>{role.location}</li>
+              <li>{role.experience}</li>
+              <li>{role.mode}</li>
+            </ul>
+          </div>
+        ))}
+        <div
+          class="careers-apply_role_card"
+          data-role-card={TALENT_NETWORK.slug}
+          hidden
+        >
+          <p class="careers-apply_role_title">{TALENT_NETWORK.title}</p>
+          <p class="careers-apply_role_team">{TALENT_NETWORK.text}</p>
+        </div>
+      </div>
+
+      <aside class="careers-apply_next" aria-labelledby="apply-next-heading">
+        <Heading tag="h2" variant="h5" id="apply-next-heading">
+          What happens next
+        </Heading>
+        <ol class="careers-apply_steps">
+          {steps.map((step, index) => (
+            <li>
+              <span class="careers-apply_step_index">{index + 1}</span>
+              <span class="careers-apply_step_text">
+                <strong>{step.title}</strong>
+                <span>{step.text}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+      </aside>
+    </div>
+  )
+}
+
+<script>
+  for (const wrap of document.querySelectorAll<HTMLElement>("[data-apply]")) {
+    const select = wrap.querySelector<HTMLSelectElement>(
+      "select[data-role-select]",
+    );
+    const cards = [...wrap.querySelectorAll<HTMLElement>("[data-role-card]")];
+    const talent = wrap.querySelector<HTMLInputElement>(
+      "input[data-talent-choice]",
+    );
+    const title = wrap.querySelector<HTMLInputElement>(
+      "input[data-role-title]",
+    );
+    if (!select) continue;
+
+    /* The role comes from the link that brought you here
+       (/careers/apply?role=…). Without JavaScript you choose it. */
+    const wanted = new URLSearchParams(location.search).get("role");
+    if (wanted && [...select.options].some((o) => o.value === wanted)) {
+      select.value = wanted;
+    }
+
+    const sync = () => {
+      const chosen = cards.some(
+        (card) => card.dataset.roleCard === select.value,
+      )
+        ? select.value
+        : "";
+      for (const card of cards) card.hidden = card.dataset.roleCard !== chosen;
+      if (title) {
+        title.value = chosen
+          ? (cards
+              .find((card) => card.dataset.roleCard === chosen)
+              ?.querySelector(".careers-apply_role_title")
+              ?.textContent?.trim() ?? "")
+          : "";
+      }
+      /* Choosing the Talent Network is already asking to be kept on file. */
+      if (talent) {
+        const network = select.value === "talent-network";
+        talent.checked = network || (talent.checked && !talent.disabled);
+        talent.disabled = network;
+      }
+    };
+    select.addEventListener("change", sync);
+    select.form?.addEventListener("reset", () => requestAnimationFrame(sync));
+    sync();
+  }
+</script>
+
+<style is:global>
+  @layer components {
+    :where(.careers-apply_wrap) :where(.heading, .text) {
+      margin-block: 0;
+    }
+
+    /* The role sits above the form on small screens, and beside it, over
+       what happens next, from 64rem. */
+    .careers-apply_wrap {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: "role" "form" "next";
+      gap: var(--space-6) var(--section-space-small);
+      align-items: start;
+      @media (width >= 64rem) {
+        grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+        grid-template-rows: auto 1fr;
+        grid-template-areas: "form role" "form next";
+      }
+    }
+
+    .careers-apply_card {
+      grid-area: form;
+      padding: var(--space-6);
+      border: var(--border-width) solid var(--border);
+      border-radius: var(--radius-main);
+      background-color: var(--background-2);
+      box-shadow: var(--shadow-raised);
+      @media (width >= 48rem) {
+        padding: var(--space-7) var(--space-6);
+      }
+      & .form_fields {
+        row-gap: var(--space-7);
+      }
+      & .careers-apply_consent {
+        padding-top: var(--space-6);
+        border-top: var(--border-width) solid var(--divider);
+      }
+      & .form-choice_mark {
+        --_mark: var(--background);
+        --_mark-hover: var(--accent-soft);
+        --_mark-chosen: var(--accent);
+        --_ink: var(--white);
+        border-color: var(--border);
+      }
+    }
+
+    .careers-apply_wide {
+      @media (width >= 48rem) {
+        grid-column: 1 / -1;
+      }
+    }
+
+    .careers-apply_hint {
+      margin-block: 0;
+      color: var(--text-2);
+      & a {
+        color: var(--link-text);
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+      }
+    }
+
+    .careers-apply_consent {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .careers-apply_trap {
+      position: absolute;
+      left: -100vw;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+
+    .careers-apply_submit {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-3);
+    }
+
+    .careers-apply_role {
+      grid-area: role;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .careers-apply_role_label {
+      margin: 0;
+      font-size: var(--text-small);
+      color: var(--text-2);
+    }
+
+    .careers-apply_role_card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      padding: var(--space-5);
+      border-radius: var(--radius-main);
+      background-color: var(--background-3);
+      border: var(--border-width) solid var(--border);
+      &[hidden] {
+        display: none;
+      }
+      & p {
+        margin: 0;
+      }
+    }
+
+    .careers-apply_role_title {
+      font-family: var(--heading-family);
+      font-weight: var(--heading-bold);
+      font-size: 1.25rem;
+      color: var(--text);
+    }
+
+    .careers-apply_role_team {
+      font-size: var(--text-small);
+      color: var(--text-body);
+    }
+
+    .careers-apply_role_meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-top: var(--space-2);
+      font-size: 0.78rem;
+      & li {
+        padding: 0.25rem 0.65rem;
+        border-radius: var(--radius-round);
+        background-color: var(--background);
+        color: var(--text-body);
+      }
+    }
+
+    .careers-apply_next {
+      grid-area: next;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .careers-apply_steps {
+      display: flex;
+      flex-direction: column;
+      border-top: var(--border-width) solid var(--border);
+      & li {
+        display: flex;
+        gap: var(--space-4);
+        padding-block: var(--space-4);
+        border-bottom: var(--border-width) solid var(--border);
+      }
+    }
+
+    .careers-apply_step_index {
+      flex: none;
+      display: grid;
+      place-items: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background-color: var(--accent-soft);
+      color: var(--accent-text);
+      font-family: var(--heading-family);
+      font-size: 0.72rem;
+      font-weight: var(--heading-bold);
+    }
+
+    .careers-apply_step_text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      font-size: var(--text-small);
+      line-height: 1.55;
+      color: var(--text-body);
+      & strong {
+        font-family: var(--heading-family);
+        font-weight: var(--heading-bold);
+        color: var(--text);
+      }
+    }
+  }
+</style>

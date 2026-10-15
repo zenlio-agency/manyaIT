@@ -1,0 +1,109 @@
+---
+import SectionHeader from "@/components/content/SectionHeader.astro";
+import Paragraph from "@/components/typography/Paragraph.astro";
+import Button from "@/components/Button.astro";
+import Icon from "@/components/media/Icon.astro";
+import Accordion from "@/components/interactive/Accordion.astro";
+import AccordionItem from "@/components/interactive/AccordionItem.astro";
+import arrow from "@/assets/icons/ui-arrow.svg";
+import { tbc } from "@/data/site.ts";
+import { settings } from "@/sanity/content.ts";
+import JsonLd from "@/components/utility/JsonLd.astro";
+import { faqPage } from "@/utils/schema.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Pill label above the heading. */
+  eyebrow?: string;
+  /** Section heading. */
+  heading?: string;
+  /** Paragraph under the heading. */
+  intro?: string;
+  /** Questions and answers. */
+  items?: { question: string; answer: string }[];
+  /** Button under the intro. Defaults to starting a conversation. */
+  link?: { label: string; href: string };
+}
+
+const {
+  render = true,
+  eyebrow = "FAQ",
+  heading = "Questions we hear often",
+  intro = "Can't find what you're looking for? Ask us directly.",
+  items = [],
+  link = (await settings()).cta.primary,
+} = Astro.props;
+---
+
+{
+  render && items.length > 0 && (
+    <div class="faq-list_wrap">
+      {/* The questions and answers shown below, for search engines. */}
+      <JsonLd nodes={[faqPage(items)]} />
+      <SectionHeader
+        class="faq-list_head"
+        layout="stack"
+        eyebrow={eyebrow}
+        heading={heading}
+        intro={intro}
+        introVariant="main"
+      >
+        <Button
+          slot="action"
+          element="link"
+          href={link.href}
+          emphasis="secondary"
+        >
+          {link.label}
+          <Icon src={arrow} variant="small" class="button_icon" />
+        </Button>
+      </SectionHeader>
+      <Accordion class="faq-list_items" openFirst data-reveal>
+        {items.map((item) => (
+          <AccordionItem heading={item.question}>
+            <Paragraph>
+              <Fragment set:html={tbc(item.answer)} />
+            </Paragraph>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </div>
+  )
+}
+
+<style is:global>
+  @layer components {
+    /* The header stays in view beside the long column on desktop. */
+    .faq-list_head {
+      @media (width >= 64rem) {
+        position: sticky;
+        top: calc(var(--nav-height) + var(--space-5));
+      }
+    }
+
+    /* Spacing here comes from gaps, so type margins step aside. */
+    :where(.faq-list_head) :where(.heading, .text) {
+      margin-block: 0;
+    }
+
+    .faq-list_wrap {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-7) var(--section-space-small);
+      align-items: start;
+      @media (width >= 64rem) {
+        grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      }
+    }
+
+    .faq-list_items {
+      border-top: var(--border-width) solid var(--border);
+      & .accordion_body .text {
+        max-width: 62ch;
+        color: var(--text-body);
+      }
+    }
+  }
+</style>

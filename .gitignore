@@ -1,0 +1,7 @@
+# Conversation logs
+chat_history.md
+
+# Environment files
+.env
+.env.local
+.env.*.local

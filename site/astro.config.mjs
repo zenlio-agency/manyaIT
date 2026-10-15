@@ -3,14 +3,63 @@ import { defineConfig, fontProviders } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 import { SITE_URL } from "./src/consts.ts";
 import { isNoindexRoute } from "./src/utils/seo.ts";
+import {
+  SANITY_DATASET,
+  SANITY_PROJECT_ID,
+} from "./src/sanity/config.ts";
+import contentCheck from "./src/integrations/content-check.ts";
 
 export default defineConfig({
   site: SITE_URL,
+  /* Pages live at addresses without a trailing slash, as every link writes
+     them. vercel.json redirects the slashed form. */
+  trailingSlash: "never",
+
+  /* Legal page redirects, and the former Locations and capability pages.
+     Keep in step with vercel.json (and public/_redirects). */
+  redirects: {
+    "/locations": "/about#locations",
+    "/privacy": "/legal/privacy",
+    "/privacy-policy": "/legal/privacy",
+    "/terms": "/legal/terms",
+    "/terms-of-use": "/legal/terms",
+    "/cookie-policy": "/legal/cookies",
+    "/accessibility": "/legal/accessibility",
+    "/capabilities/talent-solutions": "/capabilities/specialist-talent",
+    "/capabilities/workforce-solutions": "/capabilities/specialist-talent",
+  },
+
+  /* Allow ngrok and Cloudflare (cloudflared) tunnels for local review */
+  server: {
+    allowedHosts: [
+      ".ngrok-free.app",
+      ".ngrok-free.dev",
+      ".ngrok.app",
+      ".ngrok.dev",
+      ".ngrok.io",
+      ".trycloudflare.com",
+    ],
+  },
+
+  /* Sanity images */
+  image: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.sanity.io",
+        pathname: `/images/${SANITY_PROJECT_ID}/${SANITY_DATASET}/**`,
+      },
+    ],
+  },
+
   integrations: [
     sitemap({
       filter: (page) => !isNoindexRoute(new URL(page).pathname),
     }),
+    /* Claims, placeholders, copy rules and legal addresses, after each build */
+    contentCheck(),
   ],
+
   fonts: [
     {
       name: "Inter",
@@ -27,6 +76,7 @@ export default defineConfig({
         ],
       },
     },
+
     {
       name: "Plus Jakarta Sans",
       cssVariable: "--font-plus-jakarta",
@@ -51,6 +101,7 @@ export default defineConfig({
         ],
       },
     },
+
     {
       name: "Poppins",
       cssVariable: "--font-poppins",
@@ -77,5 +128,10 @@ export default defineConfig({
       },
     },
   ],
-  vite: { build: { cssTarget: "safari15.4" } },
+
+  vite: {
+    build: {
+      cssTarget: "safari15.4",
+    },
+  },
 });

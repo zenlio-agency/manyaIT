@@ -1,0 +1,193 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { slug } from "@/utils/slug.ts";
+
+interface Props extends Omit<HTMLAttributes<"input">, "type"> {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Field label. */
+  label: string;
+  /** Submitted name. Defaults to the label slug. */
+  name?: string;
+  /** Accepted file types, as file extensions. Defaults to PDF and Word. */
+  accept?: string;
+  /** Largest file allowed, in megabytes. Defaults to `5`.
+   *
+   * @min 1
+   */
+  maxMegabytes?: number;
+  /** Line under the drop zone. Defaults to the types and size allowed. */
+  hint?: string;
+  /** Require a file and mark the label. */
+  required?: boolean;
+}
+
+const {
+  render = true,
+  label,
+  name,
+  accept = ".pdf,.doc,.docx",
+  maxMegabytes = 5,
+  hint = `PDF or Word, up to ${maxMegabytes} MB`,
+  required = false,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const id = `file-${slug(name ?? label)}`;
+---
+
+{
+  render && (
+    <div class:list={["field", "form-file", className]} data-file-field>
+      <label class="field-label text-style-main" for={id}>
+        <span>{label}</span>
+        {required && (
+          <span class="field-star" aria-hidden="true">
+            *
+          </span>
+        )}
+      </label>
+      <div class="form-file_zone">
+        <input
+          class="form-file_input"
+          type="file"
+          id={id}
+          name={name ?? slug(label)}
+          accept={accept}
+          required={required || undefined}
+          aria-describedby={`${id}-hint`}
+          data-max-bytes={maxMegabytes * 1024 * 1024}
+          {...rest}
+        />
+        <svg class="form-file_icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 15V4m0 0-4 4m4-4 4 4M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" />
+        </svg>
+        <span class="form-file_prompt" data-file-name aria-hidden="true">
+          <strong>Choose a file</strong> or drag it here
+        </span>
+        <span class="form-file_hint text-style-small" id={`${id}-hint`}>
+          {hint}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+<script>
+  /* Shows the chosen file, and refuses one that's too large or of a type
+     the field doesn't take, before anything is sent. */
+  for (const field of document.querySelectorAll<HTMLElement>(
+    "[data-file-field]",
+  )) {
+    const input = field.querySelector<HTMLInputElement>("input[type=file]");
+    const name = field.querySelector<HTMLElement>("[data-file-name]");
+    if (!input || !name) continue;
+    const prompt = name.innerHTML;
+    const max = Number(input.dataset.maxBytes);
+    const types = input.accept
+      .split(",")
+      .map((type) => type.trim().toLowerCase());
+
+    const sync = () => {
+      const file = input.files?.[0];
+      field.dataset.filled = file ? "true" : "false";
+      if (!file) {
+        name.innerHTML = prompt;
+        input.setCustomValidity("");
+        return;
+      }
+      const megabytes = (file.size / 1024 / 1024).toFixed(1);
+      const size =
+        file.size < 1024 * 1024
+          ? `${Math.max(1, Math.round(file.size / 1024))} KB`
+          : `${megabytes} MB`;
+      name.textContent = `${file.name} · ${size}`;
+      const extension = `.${file.name.split(".").pop()?.toLowerCase()}`;
+      if (types.length && !types.includes(extension)) {
+        input.setCustomValidity("Please choose a PDF or Word file.");
+      } else if (max && file.size > max) {
+        input.setCustomValidity(
+          `This file is ${megabytes} MB. Please choose one under ${max / 1024 / 1024} MB.`,
+        );
+      } else {
+        input.setCustomValidity("");
+      }
+      if (!input.validity.valid) input.reportValidity();
+    };
+
+    input.addEventListener("change", sync);
+    input.form?.addEventListener("reset", () => requestAnimationFrame(sync));
+  }
+</script>
+
+<style is:global>
+  @layer components {
+    .form-file_zone {
+      position: relative;
+      display: grid;
+      justify-items: center;
+      gap: var(--space-2);
+      padding: var(--space-6) var(--space-5);
+      border: var(--border-width) dashed
+        color-mix(in srgb, var(--text) 25%, var(--border));
+      border-radius: var(--radius-small);
+      background-color: var(--background);
+      text-align: center;
+      transition:
+        background-color var(--hover-duration) var(--hover-ease),
+        border-color var(--hover-duration) var(--hover-ease);
+      @media (hover: hover) {
+        &:hover {
+          border-color: var(--accent);
+          background-color: var(--accent-soft);
+        }
+      }
+      &:has(:focus-visible) {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 0.2rem var(--accent-soft);
+      }
+      [data-filled="true"] & {
+        border-style: solid;
+        border-color: var(--accent);
+      }
+    }
+
+    /* The input covers the zone, so clicking or dropping a file anywhere
+       on it works without script. */
+    .form-file_input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .form-file_icon {
+      width: 1.5rem;
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .form-file_prompt {
+      color: var(--text-body);
+      overflow-wrap: anywhere;
+      & strong {
+        color: var(--accent-text);
+        font-weight: var(--primary-medium);
+      }
+      [data-filled="true"] & {
+        color: var(--text);
+        font-weight: var(--primary-medium);
+      }
+    }
+
+    .form-file_hint {
+      color: var(--text-2);
+    }
+  }
+</style>

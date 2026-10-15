@@ -3,12 +3,12 @@ import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
 import IndustryDetail from "@/components/content/IndustryDetail.astro";
 import CtaFinal from "@/components/content/CtaFinal.astro";
+import { page } from "@/sanity/content.ts";
+
+const { seo } = await page("page-industries");
 ---
 
-<Layout
-  title="Industries"
-  description="ManyaIT specialists for banking, telecom, healthcare and energy: talent that already knows your sector, its rules and its systems."
->
+<Layout title={seo.title} description={seo.description}>
   {/* Industries in detail */}
   <Section paddingTop="small">
     <IndustryDetail />

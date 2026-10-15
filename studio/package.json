@@ -1,0 +1,36 @@
+{
+  "name": "manyait-studio",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build",
+    "deploy": "sanity exec scripts/preflight.ts --with-user-token && sanity deploy",
+    "typegen": "sanity schema extract --force && sanity typegen generate",
+    "validate": "sanity schema validate",
+    "check": "tsc --noEmit",
+    "preflight": "sanity exec scripts/preflight.ts --with-user-token",
+    "seed": "sanity exec scripts/preflight.ts --with-user-token && sanity datasets import seed/production.ndjson --dataset production --missing",
+    "refresh": "npx sanity@latest exec scripts/preflight.ts --with-user-token && npx sanity@latest datasets import seed/production.ndjson --dataset production --replace && npx sanity@latest exec scripts/clear-old-drafts.ts --with-user-token"
+  },
+  "dependencies": {
+    "@sanity/icons": "^5.2.3",
+    "@sanity/ui": "^4.3.0",
+    "@sanity/vision": "^6.17.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "sanity": "^6.17.0",
+    "styled-components": "^6.5.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^6.0.3"
+  }
+}

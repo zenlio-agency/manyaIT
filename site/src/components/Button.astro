@@ -172,6 +172,7 @@ const named = {
       font-weight: var(--heading-medium);
       letter-spacing: 0.005em;
       white-space: nowrap;
+      max-width: 100%;
       background-color: var(--button-background);
       color: var(--button-text);
       border: var(--border-width) solid var(--button-border);
@@ -184,6 +185,11 @@ const named = {
         background-color var(--hover-duration) var(--hover-ease),
         color var(--hover-duration) var(--hover-ease),
         border-color var(--hover-duration) var(--hover-ease);
+      /* On a phone, a label longer than the row wraps rather than pushing
+         the page wider. */
+      @media (width < 30rem) {
+        white-space: normal;
+      }
       @media (hover: hover) {
         &:hover:not(:disabled) {
           background-color: var(--button-background-hover);

@@ -2,20 +2,14 @@
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
 import ContactConversation from "@/components/content/ContactConversation.astro";
-import GlobalPresence from "@/components/content/GlobalPresence.astro";
+import { page } from "@/sanity/content.ts";
+
+const { seo } = await page("page-contact");
 ---
 
-<Layout
-  title="Start a Conversation"
-  description="Tell ManyaIT what you want to build. Our team will set up a call and map the first step with you."
->
+<Layout title={seo.title} description={seo.description}>
   {/* Conversation */}
   <Section paddingTop="small">
     <ContactConversation />
-  </Section>
-
-  {/* Locations */}
-  <Section theme="tint" id="locations">
-    <GlobalPresence />
   </Section>
 </Layout>

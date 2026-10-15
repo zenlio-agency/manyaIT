@@ -2,14 +2,14 @@
 import Eyebrow from "@/components/typography/Eyebrow.astro";
 import Heading from "@/components/typography/Heading.astro";
 import Paragraph from "@/components/typography/Paragraph.astro";
-import Button from "@/components/Button.astro";
-import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
 import Icon from "@/components/media/Icon.astro";
-import arrow from "@/assets/icons/ui-arrow.svg";
 import arrowUp from "@/assets/icons/ui-arrow-up-right.svg";
 import PhotoTile from "@/components/item/PhotoTile.astro";
-import { CAPABILITIES, tbc } from "@/data/site.ts";
+import { tbc } from "@/data/site.ts";
+import { LEGAL, mailLink } from "@/data/legal.ts";
 import { CAREERS_POINT_PHOTOS } from "@/data/photos.ts";
+import { applyHref } from "@/data/careers.ts";
+import { capabilities, page, roles } from "@/sanity/content.ts";
 
 interface Props {
   /** Set to `false` to omit the component. */
@@ -18,57 +18,32 @@ interface Props {
 
 const { render = true } = Astro.props;
 
+const [CAPABILITIES, ROLES, { hero }] = await Promise.all([
+  capabilities(),
+  roles(),
+  page("page-careers"),
+]);
+
 const points = [
   {
-    title: "Real enterprise work",
-    text: "Banking platforms, telecom networks, healthcare data and energy operations. Systems millions of people rely on.",
+    title: "Enterprise-scale impact",
+    text: "Platforms in banking, telecommunications, healthcare, energy and retail that serve customers at enterprise scale.",
   },
   {
-    title: "Long-term ownership",
-    text: "You join a dedicated team, learn one business deeply and own its systems.",
+    title: "End-to-end ownership",
+    text: "Take work from architecture to production, and see the business results it creates.",
   },
   {
     title: "Learning & growth",
-    text: "Paid certifications on SAP, cloud and AI platforms, and new leads and architects promoted from within.",
+    text: "Certifications across SAP, cloud and AI platforms, with leads and architects promoted from within.",
   },
   {
-    title: "Dallas + Hyderabad",
-    text: "Daily overlap with decision-makers, so you work with the people who own the outcome, not through layers.",
+    title: "Global by design",
+    text: "One delivery organization across time zones, working directly with the leaders who own each outcome.",
   },
 ];
 
 const teams = [...CAPABILITIES.map((cap) => cap.title), "Client Partnership"];
-
-const roles = [
-  {
-    title: "Senior Java Engineer",
-    team: "Digital Product Engineering",
-    location: "Hyderabad",
-    experience: "5–8 yrs",
-    mode: "Hybrid",
-  },
-  {
-    title: "SAP S/4HANA Functional Lead",
-    team: "SAP & Enterprise Data",
-    location: "Hyderabad",
-    experience: "4–7 yrs",
-    mode: "Hybrid",
-  },
-  {
-    title: "AI Automation Engineer",
-    team: "Agentic AI & Automation",
-    location: "Hyderabad",
-    experience: "3–6 yrs",
-    mode: "On-site",
-  },
-  {
-    title: "Client Partner",
-    team: "Client Partnership",
-    location: "Dallas",
-    experience: "8+ yrs",
-    mode: "On-site",
-  },
-];
 ---
 
 {
@@ -76,9 +51,9 @@ const roles = [
     <div class="careers_wrap">
       <div class="careers_top">
         <div class="careers_intro">
-          <Eyebrow data-reveal>Careers</Eyebrow>
+          <Eyebrow data-reveal>{hero.eyebrow}</Eyebrow>
           <Heading tag="h1" variant="h1" data-reveal style="--reveal-order: 1">
-            Build systems that matter.
+            {hero.title}
           </Heading>
           <Paragraph
             variant="large"
@@ -86,30 +61,15 @@ const roles = [
             data-reveal
             style="--reveal-order: 2"
           >
-            Join teams working on real enterprise platforms across Dallas and
-            Hyderabad. You own the work, learn the business and see the impact
-            over years, not sprints.
+            {hero.lede}
           </Paragraph>
           <Paragraph maxWidth={52} data-reveal style="--reveal-order: 3">
             <Fragment
               set:html={tbc(
-                "Every ManyaITian gets a growth plan in their first 90 days, with the certifications to earn, a mentor to learn from and a role to grow into. [Program name, e.g. ManyaIT Ascend]",
+                "Every new team member receives a growth plan within their first 90 days, with certifications to pursue, a mentor to learn from and a role to grow into.",
               )}
             />
           </Paragraph>
-          <ButtonWrapper data-reveal style="--reveal-order: 4">
-            <Button element="link" href="#roles">
-              Explore Opportunities
-              <Icon src={arrow} variant="small" class="button_icon" />
-            </Button>
-            <Button
-              element="link"
-              href="/contact?topic=careers"
-              emphasis="secondary"
-            >
-              Join the Talent Network
-            </Button>
-          </ButtonWrapper>
         </div>
         <ul class="careers_points">
           {points.map((point, index) => (
@@ -160,8 +120,8 @@ const roles = [
             <span class="sr-only">Location</span>
             <select name="location">
               <option value="">All locations</option>
-              <option>Dallas</option>
-              <option>Hyderabad</option>
+              <option>United States</option>
+              <option>India</option>
               <option>Remote</option>
             </select>
           </label>
@@ -176,14 +136,15 @@ const roles = [
           </label>
         </form>
         <ul class="careers_roles" aria-live="polite">
-          {roles.map((role) => (
+          {ROLES.map((role) => (
             <li
               class="careers_role"
-              data-text={`${role.title} ${role.team}`.toLowerCase()}
-              data-location={role.location}
+              data-text={`${role.title} ${role.team} ${role.location}`.toLowerCase()}
+              data-country={role.country}
+              data-mode={role.mode}
               data-team={role.team}
             >
-              <a class="careers_role_link" href="/contact?topic=careers">
+              <a class="careers_role_link" href={applyHref(role.slug)}>
                 <span class="careers_role_main">
                   <span class="careers_role_title">{role.title}</span>
                   <span class="careers_role_team">{role.team}</span>
@@ -194,20 +155,21 @@ const roles = [
                   <span>{role.mode}</span>
                 </span>
                 <span class="careers_role_go">
+                  <span class="careers_role_go_label">Apply</span>
                   <Icon src={arrowUp} variant="small" />
                 </span>
               </a>
             </li>
           ))}
         </ul>
-        <p class="careers_empty" hidden>
-          No roles match right now. Join the Talent Network and we'll reach out
-          when one opens.
+        <p class="careers_empty" hidden={ROLES.length > 0}>
+          No open roles match your filters right now. Register your interest and
+          our people team will reach out when a relevant role opens.
         </p>
         <p
           class="careers_trust text-style-small"
           set:html={tbc(
-            "ManyaIT never charges a fee at any stage. Report any payment request to [careers email].",
+            `ManyaIT never charges a fee at any stage. Report any payment request to ${mailLink(LEGAL.careersEmail)}, and see <a href="/legal/job-offer-fraud">how to spot a fake offer</a>. Our <a href="/legal/applicant-privacy">Applicant Privacy Notice</a> explains how we handle your details.`,
           )}
         />
       </div>
@@ -233,7 +195,9 @@ const roles = [
       for (const role of roles) {
         const match =
           (!query || (role.dataset.text ?? "").includes(query)) &&
-          (!location || role.dataset.location === location) &&
+          (!location ||
+            role.dataset.country === location ||
+            (location === "Remote" && role.dataset.mode === "Remote")) &&
           (!team || role.dataset.team === team);
         role.hidden = !match;
         if (match) shown++;
@@ -276,9 +240,6 @@ const roles = [
       display: flex;
       flex-direction: column;
       gap: var(--space-4);
-      & .button-wrapper {
-        margin-top: var(--space-3);
-      }
     }
 
     .careers_points {
@@ -370,6 +331,25 @@ const roles = [
       display: flex;
       flex-direction: column;
       border-top: var(--border-width) solid var(--divider);
+      max-height: 28rem;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-right: var(--space-2);
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      &::-webkit-scrollbar-thumb {
+        background-color: var(--border);
+        border-radius: var(--radius-round);
+      }
+      &::-webkit-scrollbar-thumb:hover {
+        background-color: var(--accent);
+      }
     }
 
     .careers_role {
@@ -437,19 +417,37 @@ const roles = [
       }
     }
 
+    /* A round arrow on small screens; "Apply" joins it from tablet up. */
     .careers_role_go {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      place-items: center;
-      width: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      min-width: 2.5rem;
       height: 2.5rem;
-      border-radius: 50%;
+      border-radius: var(--radius-round);
+      font-size: var(--text-small);
+      font-weight: var(--primary-medium);
+      @media (width >= 48rem) {
+        padding-inline: 1rem 0.85rem;
+      }
       border: var(--border-width) solid var(--border);
       color: var(--text);
       transition:
         background-color var(--hover-duration) var(--hover-ease),
         border-color var(--hover-duration) var(--hover-ease),
         color var(--hover-duration) var(--hover-ease);
+    }
+
+    .careers_role_go_label {
+      @media (width < 48rem) {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
     }
 
     .careers_empty {
@@ -464,6 +462,11 @@ const roles = [
 
     .careers_trust {
       color: var(--text-2);
+      & a {
+        color: var(--link-text);
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+      }
     }
   }
 </style>

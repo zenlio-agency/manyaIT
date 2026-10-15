@@ -361,7 +361,7 @@
   --accent: var(--blue-300);
   --accent-soft: color-mix(in srgb, var(--blue-300) 16%, transparent);
   --accent-text: var(--blue-200);
-  --logo-flag: var(--blue-400);
+  --logo-flag: var(--blue-500);
   --focus-ring: var(--blue-300);
 
   --selection-background: var(--blue-300);

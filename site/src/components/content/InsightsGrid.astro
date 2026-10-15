@@ -1,124 +1,78 @@
 ---
-import Eyebrow from "@/components/typography/Eyebrow.astro";
-import Heading from "@/components/typography/Heading.astro";
-import Paragraph from "@/components/typography/Paragraph.astro";
+import SectionHeader from "@/components/content/SectionHeader.astro";
 import PhotoTile from "@/components/item/PhotoTile.astro";
-import { tbc } from "@/data/site.ts";
-import { INSIGHT_PHOTOS } from "@/data/photos.ts";
+import { insightHref } from "@/utils/insights.ts";
+import { articles as allArticles, categories, home } from "@/sanity/content.ts";
 
 interface Props {
   /** Set to `false` to omit the component. */
   render?: boolean;
+  /** Paragraph under the heading. */
+  intro?: string;
 }
 
-const { render = true } = Astro.props;
+const [articles, topics, { sections }] = await Promise.all([
+  allArticles(),
+  categories(),
+  home(),
+]);
+const header = sections.insights;
 
-const filters = [
-  "All",
-  "AI",
-  "Data",
-  "SAP",
-  "Digital Engineering",
-  "Enterprise Technology",
-];
+const { render = true, intro = header.intro } = Astro.props;
 
-const articles = [
-  {
-    category: "AI",
-    type: "Perspective",
-    title:
-      "Why most AI pilots stall, and what the ones in production did differently",
-    summary:
-      "The gap between demo and daily use is rarely the model. It is data, ownership and how the work is run.",
-    featured: true,
-  },
-  {
-    category: "Data",
-    type: "Guide",
-    title: "AI-ready data starts long before the model",
-    summary:
-      "What a data product needs in place before it can feed an AI use case.",
-  },
-  {
-    category: "SAP",
-    type: "Explainer",
-    title: "Clean core, explained for the people who fund it",
-    summary:
-      "What an upgrade-ready SAP S/4HANA core means for cost, risk and speed.",
-  },
-  {
-    category: "Enterprise Technology",
-    type: "Field notes",
-    title: "Two cities, one team: how a platform runs around the clock",
-    summary:
-      "Handoffs, overlap hours and the habits that keep a two-city team working as one.",
-  },
-  {
-    category: "Digital Engineering",
-    type: "Field notes",
-    title: "Modernizing a legacy application without freezing the roadmap",
-    summary: "How to keep shipping while the platform underneath is rebuilt.",
-  },
-];
-
-const slug = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+const filters = [{ title: "All", slug: "all" }, ...topics];
 ---
 
 {
   render && (
     <div class="insights_wrap" data-insights>
-      <div class="insights_head">
-        <div class="insights_intro">
-          <Eyebrow data-reveal>Insights</Eyebrow>
-          <Heading maxWidth={20} data-reveal style="--reveal-order: 1">
-            Ideas shaping technology, data and AI.
-          </Heading>
-          <Paragraph
-            variant="large"
-            maxWidth={46}
-            data-reveal
-            style="--reveal-order: 2"
-          >
-            Field notes from the teams building and running enterprise
-            platforms.
-          </Paragraph>
-        </div>
+      <SectionHeader
+        eyebrow={header.eyebrow}
+        heading={header.heading}
+        intro={intro}
+      >
         <div
+          slot="action"
           class="insights_filters"
           role="group"
           aria-label="Filter insights"
-          data-reveal
-          style="--reveal-order: 3"
         >
           {filters.map((filter, index) => (
             <button
               class="insights_filter"
               type="button"
               aria-pressed={index === 0 ? "true" : "false"}
-              data-filter={filter === "All" ? "all" : slug(filter)}
+              data-filter={filter.slug}
             >
-              {filter}
+              {filter.title}
             </button>
           ))}
         </div>
-      </div>
+      </SectionHeader>
 
       <div class="insights_grid">
         {articles.map((article, index) => (
           <article
             class:list={["insights_item", article.featured && "is-featured"]}
-            data-category={slug(article.category)}
+            data-category={article.categorySlug}
             data-reveal
             style={`--reveal-order: ${index % 3}`}
           >
-            <PhotoTile photo={INSIGHT_PHOTOS[index]} class="insights_tile">
+            <PhotoTile
+              href={insightHref(article)}
+              photo={article.photo.src}
+              photoPosition={article.photo.position}
+              photoWidth={article.photo.width}
+              photoHeight={article.photo.height}
+              class="insights_tile"
+            >
               {/* Small tiles keep just the category so the line never wraps. */}
               <span class="photo-tile_eyebrow insights_meta" slot="top">
                 <span>{article.category}</span>
                 {article.featured && (
                   <Fragment>
                     <span>{article.type}</span>
-                    <span set:html={tbc("[X] min read")} />
+                    <span>{article.minutes} min read</span>
                   </Fragment>
                 )}
               </span>
@@ -132,7 +86,7 @@ const slug = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, "-");
               </h3>
               <Fragment slot="reveal">
                 <p class="photo-tile_text">{article.summary}</p>
-                <span class="insights_soon">Coming soon</span>
+                <span class="insights_more">Read article →</span>
               </Fragment>
             </PhotoTile>
           </article>
@@ -180,29 +134,11 @@ const slug = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       gap: var(--space-7);
     }
 
-    .insights_head {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: var(--space-6) var(--section-space-small);
-      align-items: end;
-      @media (width >= 64rem) {
-        grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
-      }
-    }
-
-    .insights_intro {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-4);
-    }
-
+    /* Under the intro, starting where it starts. */
     .insights_filters {
       display: flex;
       flex-wrap: wrap;
       gap: var(--space-2);
-      @media (width >= 64rem) {
-        justify-content: flex-end;
-      }
     }
 
     .insights_filter {
@@ -270,7 +206,7 @@ const slug = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       }
     }
 
-    .insights_soon {
+    .insights_more {
       margin-top: var(--space-1);
       padding: 0.25rem 0.65rem;
       border-radius: var(--radius-round);

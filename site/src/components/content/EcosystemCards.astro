@@ -1,71 +1,74 @@
 ---
-import Eyebrow from "@/components/typography/Eyebrow.astro";
-import Heading from "@/components/typography/Heading.astro";
-import Paragraph from "@/components/typography/Paragraph.astro";
-import PhotoTile from "@/components/item/PhotoTile.astro";
-import { ECOSYSTEM, tbc } from "@/data/site.ts";
+import SectionHeader from "@/components/content/SectionHeader.astro";
+import { tbc } from "@/data/site.ts";
+import { ecosystem, home, type EcosystemCompany } from "@/sanity/content.ts";
 
 interface Props {
   /** Set to `false` to omit the component. */
   render?: boolean;
-  /** Companies to show, each confirmed in writing. Defaults to `ECOSYSTEM`. */
-  companies?: typeof ECOSYSTEM;
+  /** Companies to show, each confirmed in writing. Defaults to the ones in
+      Sanity. */
+  companies?: EcosystemCompany[];
 }
 
-const { render = true, companies = ECOSYSTEM } = Astro.props;
+const [all, { sections }] = await Promise.all([ecosystem(), home()]);
+const intro = sections.ecosystem;
+const { render = true, companies = all } = Astro.props;
+
+/** The address shown on the card, without the scheme or `www.`. */
+const siteLabel = (href: string) =>
+  new URL(href).hostname.replace(/^www\./, "");
 ---
 
 {
   render && companies.length > 0 && (
     <div class="ecosystem_wrap">
-      <div class="ecosystem_head">
-        <div class="ecosystem_intro">
-          <Eyebrow data-reveal>The ManyaIT ecosystem</Eyebrow>
-          <Heading maxWidth={20} data-reveal style="--reveal-order: 1">
-            More capabilities. One connected ecosystem.
-          </Heading>
-        </div>
-        <Paragraph
-          variant="large"
-          maxWidth={44}
-          data-reveal
-          style="--reveal-order: 2"
-        >
-          Companies that share ManyaIT's standards of engineering and ownership,
-          so enterprises can add capabilities without adding complexity.
-        </Paragraph>
-      </div>
+      <SectionHeader
+        layout="stack"
+        eyebrow={intro.eyebrow}
+        heading={intro.heading}
+        headingVariant="h3"
+        intro={intro.intro}
+        introVariant="main"
+      />
       <ul class="ecosystem_list">
-        {companies.map((company, index) => (
-          <li data-reveal style={`--reveal-order: ${index}`}>
-            <PhotoTile
-              href={company.href}
-              target={company.href ? "_blank" : undefined}
-              rel={company.href ? "noopener" : undefined}
-              class="ecosystem_tile"
-            >
-              <span class="ecosystem_logo" slot="top">
-                {company.logo ? (
-                  <img src={company.logo} alt="" loading="lazy" />
-                ) : (
-                  <span set:html={tbc("[Logo]")} />
-                )}
-              </span>
-              <span
-                class="photo-tile_eyebrow ecosystem_relationship"
-                set:html={tbc(company.relationship)}
-              />
-              <span
-                class="photo-tile_title is-small"
-                set:html={tbc(company.name)}
-              />
-              <span class="photo-tile_text" set:html={tbc(company.line)} />
-              {company.href && (
-                <span class="photo-tile_more">Visit site ↗</span>
-              )}
-            </PhotoTile>
-          </li>
-        ))}
+        {companies.map((company, index) => {
+          const Tag = company.href ? "a" : "div";
+          const link = company.href
+            ? { href: company.href, target: "_blank", rel: "noopener" }
+            : {};
+          return (
+            <li data-reveal style={`--reveal-order: ${index + 1}`}>
+              <Tag class="ecosystem_card" {...link}>
+                <span class="ecosystem_logo">
+                  {company.logo ? (
+                    <img
+                      src={company.logo}
+                      alt={company.name}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : (
+                    <span class="ecosystem_name" set:html={tbc(company.name)} />
+                  )}
+                </span>
+                <span class="ecosystem_body">
+                  <span class="ecosystem_focus" set:html={tbc(company.focus)} />
+                  <span class="ecosystem_line" set:html={tbc(company.line)} />
+                  {company.href && (
+                    <span class="ecosystem_more">
+                      {siteLabel(company.href)}
+                      <span class="ecosystem_arrow" aria-hidden="true">
+                        ↗
+                      </span>
+                      <span class="sr-only">(opens in a new tab)</span>
+                    </span>
+                  )}
+                </span>
+              </Tag>
+            </li>
+          );
+        })}
       </ul>
     </div>
   )
@@ -77,70 +80,115 @@ const { render = true, companies = ECOSYSTEM } = Astro.props;
     :where(.ecosystem_wrap) :where(.heading, .text) {
       margin-block: 0;
     }
+
+    /* A short band: the intro on the left, the companies on the right. */
     .ecosystem_wrap {
       width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-8);
-    }
-
-    .ecosystem_head {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
-      gap: var(--space-5) var(--section-space-small);
-      align-items: end;
+      gap: var(--space-6) var(--section-space-small);
+      align-items: center;
       @media (width >= 64rem) {
-        grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+        grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
       }
-    }
-
-    .ecosystem_intro {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-4);
     }
 
     .ecosystem_list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .ecosystem_card {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
-      gap: var(--site-gutter);
-      @media (width >= 30rem) {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-      @media (width >= 64rem) {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+      align-items: center;
+      gap: var(--space-5);
+      padding: var(--space-5);
+      border: var(--border-width) solid var(--border);
+      border-radius: var(--radius-main);
+      background-color: var(--background-2);
+      color: inherit;
+      text-decoration: none;
+      transition:
+        border-color var(--hover-duration) var(--hover-ease),
+        box-shadow var(--hover-duration) var(--hover-ease);
+      @media (width >= 40rem) {
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: var(--space-6);
+        padding: var(--space-5) var(--space-6);
       }
     }
 
-    /* Ink tiles in the photo-tile shape; the logo sits top-left. */
-    .ecosystem_tile {
-      height: 100%;
-      min-height: 17rem;
-      & > .photo-tile_content {
-        height: 100%;
+    a.ecosystem_card {
+      @media (hover: hover) {
+        &:hover {
+          border-color: var(--accent);
+          box-shadow: var(--shadow-raised);
+          .ecosystem_arrow {
+            translate: 0.15rem -0.15rem;
+          }
+        }
       }
     }
 
+    /* The logo keeps its own colours, set off from the copy by a rule. */
     .ecosystem_logo {
-      display: grid;
-      place-items: center;
-      height: 3.5rem;
-      margin-bottom: auto;
-      padding-inline: var(--space-4);
-      border-radius: var(--radius-medium);
-      background-color: rgb(255 255 255 / 0.12);
-      border: var(--border-width) solid rgb(255 255 255 / 0.18);
-      font-family: var(--heading-family);
-      font-size: 0.8rem;
-      color: rgb(255 255 255 / 0.75);
+      display: flex;
+      align-items: center;
       & img {
-        max-height: 2rem;
+        height: 4.5rem;
         width: auto;
       }
+      @media (width >= 40rem) {
+        align-self: stretch;
+        padding-right: var(--space-6);
+        border-right: var(--border-width) solid var(--divider);
+      }
     }
 
-    .ecosystem_relationship {
-      margin-top: var(--space-6);
+    .ecosystem_name {
+      font-family: var(--display-family);
+      font-size: var(--h5);
+      font-weight: var(--heading-bold);
+    }
+
+    .ecosystem_body {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-2);
+    }
+
+    .ecosystem_focus {
+      font-family: var(--heading-family);
+      font-size: 0.72rem;
+      font-weight: var(--heading-bold);
+      letter-spacing: var(--letter-spacing-wide);
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .ecosystem_line {
+      font-size: var(--text-small);
+      line-height: 1.6;
+      color: var(--text-body);
+      text-wrap: pretty;
+    }
+
+    .ecosystem_more {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding-top: var(--space-1);
+      font-family: var(--heading-family);
+      font-size: var(--text-small);
+      font-weight: var(--heading-medium);
+      color: var(--accent-text);
+    }
+
+    .ecosystem_arrow {
+      transition: translate var(--hover-duration) var(--hover-ease);
     }
   }
 </style>

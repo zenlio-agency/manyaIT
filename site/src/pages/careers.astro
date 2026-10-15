@@ -2,20 +2,87 @@
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
 import CareersOpenings from "@/components/content/CareersOpenings.astro";
-import GlobalPresence from "@/components/content/GlobalPresence.astro";
+import FeatureGrid from "@/components/content/FeatureGrid.astro";
+import ProcessSteps from "@/components/content/ProcessSteps.astro";
+import FaqList from "@/components/content/FaqList.astro";
+import CtaFinal from "@/components/content/CtaFinal.astro";
+import { capabilityHref } from "@/data/site.ts";
+import { JOIN_STEPS, TALENT_NETWORK, applyHref } from "@/data/careers.ts";
+import { capabilities, page } from "@/sanity/content.ts";
+
+const [CAPABILITIES, { faqIntro, faq, seo }] = await Promise.all([
+  capabilities(),
+  page("page-careers"),
+]);
+
+/* One line per career track, keyed by capability id. */
+const tracks: Record<string, string> = {
+  "cap-data":
+    "Build the platforms and pipelines every decision runs on, as a data engineer, analytics engineer, architect or BI developer.",
+  "cap-sap":
+    "Lead S/4HANA transformations, BTP extensions and SAP data programs, as a functional lead, ABAP or BTP developer, or integration specialist.",
+  "cap-ai":
+    "Ship generative AI and machine learning to production, as an ML engineer, GenAI engineer, data scientist or MLOps engineer.",
+  "cap-flow":
+    "Build agents and workflows that complete real work, as an automation engineer, agent developer or process analyst.",
+  "cap-code":
+    "Design, build and run web, mobile and cloud products, as a full-stack, mobile, platform or quality engineer.",
+};
 ---
 
-<Layout
-  title="Careers"
-  description="Build systems that matter. Work on enterprise platforms millions of people rely on, with mentors, certifications and a clear path to grow."
->
+<Layout title={seo.title} description={seo.description}>
   {/* Openings */}
   <Section paddingTop="small" id="careers">
     <CareersOpenings />
   </Section>
 
-  {/* Locations */}
-  <Section theme="tint" id="locations">
-    <GlobalPresence />
+  {/* Career tracks */}
+  <Section theme="tint" id="tracks">
+    <FeatureGrid
+      eyebrow="Career tracks"
+      heading="Find the team that fits your craft."
+      intro="Every track works on real enterprise platforms, with a clear path from engineer to lead and architect."
+      items={[
+        ...CAPABILITIES.map((cap) => ({
+          title: cap.title,
+          text: tracks[cap.id],
+          href: capabilityHref(cap),
+          icon: cap.icon,
+        })),
+        {
+          title: "Client Partnership",
+          text: "Partner with enterprise leaders to shape programs and roadmaps, as a client partner or solution architect.",
+        },
+      ]}
+      linkLabel="See the work"
+    />
+  </Section>
+
+  {/* How to join */}
+  <Section theme="dark" id="process">
+    <ProcessSteps
+      eyebrow="Joining ManyaIT"
+      heading="A transparent path to your next role."
+      intro="Every stage helps you understand the work, the team and where your career can go. There is no fee at any stage."
+      steps={JOIN_STEPS}
+    />
+  </Section>
+
+  {/* FAQ */}
+  <Section id="faq">
+    <FaqList
+      heading={faqIntro.heading || undefined}
+      intro={faqIntro.intro || undefined}
+      link={{
+        label: "Register Your Interest",
+        href: applyHref(TALENT_NETWORK.slug),
+      }}
+      items={faq}
+    />
+  </Section>
+
+  {/* Final CTA */}
+  <Section theme="dark" paddingTop="large">
+    <CtaFinal />
   </Section>
 </Layout>

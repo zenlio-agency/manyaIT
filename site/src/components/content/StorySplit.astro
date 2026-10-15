@@ -1,0 +1,167 @@
+---
+import Eyebrow from "@/components/typography/Eyebrow.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Paragraph from "@/components/typography/Paragraph.astro";
+import { tbc } from "@/data/site.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Pill label above the heading. */
+  eyebrow?: string;
+  /** Section heading. */
+  heading?: string;
+  /** Body paragraphs, in order. */
+  paragraphs?: string[];
+  /** Short facts under the paragraphs. */
+  points?: { title: string; text: string }[];
+  /** Photo beside the copy. */
+  photo?: string;
+  /** Photo alt text. Omit for decorative photos. */
+  photoAlt?: string;
+  /** Put the photo on the left on wide screens. */
+  reverse?: boolean;
+}
+
+const {
+  render = true,
+  eyebrow,
+  heading,
+  paragraphs = [],
+  points = [],
+  photo,
+  photoAlt = "",
+  reverse = false,
+} = Astro.props;
+---
+
+{
+  render && heading && paragraphs.length > 0 && (
+    <div
+      class:list={[
+        "story-split_wrap",
+        photo && "has-photo",
+        reverse && "is-reversed",
+      ]}
+    >
+      <div class="story-split_copy">
+        {eyebrow && <Eyebrow data-reveal>{eyebrow}</Eyebrow>}
+        <Heading maxWidth={18} data-reveal style="--reveal-order: 1">
+          {heading}
+        </Heading>
+        <div class="story-split_body" data-reveal style="--reveal-order: 2">
+          {paragraphs.map((paragraph, index) => (
+            <Paragraph variant={index === 0 ? "large" : "main"} maxWidth={58}>
+              <Fragment set:html={tbc(paragraph)} />
+            </Paragraph>
+          ))}
+        </div>
+        {points.length > 0 && (
+          <dl class="story-split_points" data-reveal style="--reveal-order: 3">
+            {points.map((point) => (
+              <div>
+                <dt>{point.title}</dt>
+                <dd set:html={tbc(point.text)} />
+              </div>
+            ))}
+          </dl>
+        )}
+      </div>
+      {photo && (
+        <div class="story-split_media" data-reveal style="--reveal-order: 1">
+          <img src={photo} alt={photoAlt} loading="lazy" decoding="async" />
+        </div>
+      )}
+    </div>
+  )
+}
+
+<style is:global>
+  @layer components {
+    /* Spacing here comes from gaps, so type margins step aside. */
+    :where(.story-split_wrap) :where(.heading, .text) {
+      margin-block: 0;
+    }
+
+    .story-split_wrap {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-7) var(--section-space-small);
+      align-items: center;
+      @media (width >= 64rem) {
+        &.has-photo {
+          grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+        }
+        &.is-reversed {
+          grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+          & .story-split_media {
+            order: -1;
+          }
+        }
+      }
+    }
+
+    .story-split_copy {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-5);
+    }
+
+    .story-split_body {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      & .text {
+        color: var(--text-body);
+      }
+      & .text-style-large {
+        color: var(--text);
+      }
+    }
+
+    .story-split_points {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-4) var(--space-6);
+      padding-top: var(--space-5);
+      border-top: var(--border-width) solid var(--border);
+      @media (width >= 30rem) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      & div {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+      }
+      & dt {
+        font-family: var(--display-family);
+        font-size: var(--h6);
+        font-weight: var(--heading-bold);
+        color: var(--text);
+      }
+      & dd {
+        margin: 0;
+        font-size: var(--text-small);
+        color: var(--text-2);
+      }
+    }
+
+    .story-split_media {
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      border-radius: 1.5rem;
+      background-color: var(--background-3);
+      @media (width >= 64rem) {
+        aspect-ratio: 5 / 6;
+      }
+      & img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+  }
+</style>

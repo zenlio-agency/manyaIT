@@ -8,7 +8,9 @@ import linkedin from "@/assets/icons/social-linkedin.svg";
 import x from "@/assets/icons/social-x.svg";
 import facebook from "@/assets/icons/social-facebook.svg";
 import youtube from "@/assets/icons/social-youtube.svg";
-import { CAPABILITIES, INDUSTRIES, NAV, CTA, SOCIAL } from "@/data/site.ts";
+import instagram from "@/assets/icons/social-instagram.svg";
+import { NAV, capabilityHref, industryHref } from "@/data/site.ts";
+import { capabilities, industries, settings } from "@/sanity/content.ts";
 import { SITE_NAME } from "@/consts.ts";
 
 interface Props {
@@ -21,12 +23,18 @@ interface Props {
 const { render = true, overlap = false } = Astro.props;
 const path = Astro.url.pathname.replace(/\/+$/, "") || "/";
 
-const icons = { linkedin, x, facebook, youtube };
+const icons = { linkedin, x, facebook, youtube, instagram };
+
+const [CAPABILITIES, INDUSTRIES, { cta: CTA, social: SOCIAL }] =
+  await Promise.all([capabilities(), industries(), settings()]);
 
 type MenuLink = { label: string; href: string };
 type Menu = {
-  columns: { eyebrow: string; links: MenuLink[] }[];
+  /* A column without an eyebrow lines its links up with the one before. */
+  columns: { eyebrow?: string; links: MenuLink[] }[];
   footerLinks?: MenuLink[];
+  /* The column the footer links sit under; the last one by default. */
+  footerColumn?: number;
   showSocials?: boolean;
   feature: { label: string; title: string; text: string; href: string };
 };
@@ -34,11 +42,16 @@ type Menu = {
 const capLinks = (ids: string[]) =>
   CAPABILITIES.filter((cap) => ids.includes(cap.id)).map((cap) => ({
     label: cap.title,
-    href: `/#${cap.id}`,
+    href: capabilityHref(cap),
   }));
 
-/* Each panel opens inside the bar: link columns, small footer links under
-   the last column, and a feature card on the right. */
+const industryLinks = (ids: string[]) =>
+  INDUSTRIES.filter((industry) => ids.includes(industry.id)).map(
+    (industry) => ({ label: industry.title, href: industryHref(industry) }),
+  );
+
+/* Each panel opens inside the bar: link columns, optional small footer
+   links under one of them, and a feature card on the right. */
 const MENUS: Record<string, Menu> = {
   capabilities: {
     columns: [
@@ -48,18 +61,19 @@ const MENUS: Record<string, Menu> = {
       },
       {
         eyebrow: "Platforms & Engineering",
-        links: capLinks(["cap-sap", "cap-code"]),
+        links: [
+          ...capLinks(["cap-sap", "cap-code"]),
+          { label: "Specialist Talent", href: "/capabilities/specialist-talent" },
+        ],
       },
     ],
-    footerLinks: [
-      { label: "All capabilities", href: "/#capabilities" },
-      { label: "Why ManyaIT", href: "/#why" },
-    ],
+    footerLinks: [{ label: "All capabilities", href: "/capabilities" }],
+    footerColumn: 0,
     showSocials: true,
     feature: {
       label: "Get started",
-      title: "Teams ready in weeks",
-      text: "Share the skills you need and we'll shape the team around your roadmap.",
+      title: "From objective to production",
+      text: "Tell us the outcome you're targeting, and we'll map the route from strategy to a running platform.",
       href: CTA.primary.href,
     },
   },
@@ -67,27 +81,23 @@ const MENUS: Record<string, Menu> = {
     columns: [
       {
         eyebrow: "Industries",
-        links: INDUSTRIES.map((industry) => ({
-          label: industry.title,
-          href: `/industries#${industry.id}`,
-        })),
+        links: industryLinks([
+          "industry-banking",
+          "industry-telecom",
+          "industry-healthcare",
+        ]),
       },
-      {
-        eyebrow: "Explore",
-        links: [
-          { label: "All industries", href: "/industries" },
-          { label: "Global presence", href: "/#locations" },
-          { label: "Insights", href: "/#insights" },
-        ],
-      },
+      { links: industryLinks(["industry-energy", "industry-retail"]) },
     ],
     footerLinks: [
+      { label: "All industries", href: "/industries" },
       { label: "Talk to us about your sector", href: CTA.primary.href },
     ],
+    footerColumn: 0,
     feature: {
       label: "Industries",
-      title: "Talent that knows your sector",
-      text: "Specialists fluent in the rules and systems of your industry.",
+      title: "Built for your sector",
+      text: "Technology, data and AI programs shaped by your industry's regulation, core systems and operating pressures.",
       href: "/industries",
     },
   },
@@ -99,7 +109,7 @@ const MENUS: Record<string, Menu> = {
     <header class:list={["nav_wrap", overlap && "overlap"]} data-nav>
       <div class="nav_card">
         <div class="nav_bar">
-          <a class="nav_logo" href="/" aria-label={`${SITE_NAME} home`}>
+          <a class="nav_logo" href="/" aria-label={SITE_NAME}>
             <Logo />
           </a>
 
@@ -133,14 +143,6 @@ const MENUS: Record<string, Menu> = {
           </nav>
 
           <div class="nav_actions">
-            <Button
-              element="link"
-              href={CTA.secondary.href}
-              emphasis="secondary"
-              class="nav_secondary"
-            >
-              {CTA.secondary.label}
-            </Button>
             <Button element="link" href={CTA.primary.href}>
               {CTA.primary.label}
             </Button>
@@ -162,10 +164,19 @@ const MENUS: Record<string, Menu> = {
           <div class="nav_mega_inner">
             {Object.entries(MENUS).map(([key, menu]) => (
               <div class="nav_panel" id={`menu-${key}`} data-panel={key} hidden>
-                <div class="nav_panel_grid">
+                <div
+                  class="nav_panel_grid"
+                  style={`--_columns: ${menu.columns.length}`}
+                >
                   {menu.columns.map((column, index) => (
                     <div class="nav_column">
-                      <span class="nav_eyebrow">{column.eyebrow}</span>
+                      {column.eyebrow ? (
+                        <span class="nav_eyebrow">{column.eyebrow}</span>
+                      ) : (
+                        <span class="nav_eyebrow is-blank" aria-hidden="true">
+                          &nbsp;
+                        </span>
+                      )}
                       <ul class="nav_column_links">
                         {column.links.map((link) => (
                           <li>
@@ -176,7 +187,8 @@ const MENUS: Record<string, Menu> = {
                           </li>
                         ))}
                       </ul>
-                      {index === menu.columns.length - 1 &&
+                      {index ===
+                        (menu.footerColumn ?? menu.columns.length - 1) &&
                         menu.footerLinks && (
                           <ul class="nav_column_footer">
                             {menu.footerLinks.map((link) => (
@@ -189,14 +201,7 @@ const MENUS: Record<string, Menu> = {
                     </div>
                   ))}
                   <a class="nav_feature theme-dark" href={menu.feature.href}>
-                    <svg
-                      class="nav_feature_mark"
-                      viewBox="0 0 190 120"
-                      aria-hidden="true"
-                    >
-                      <path d="M0 0 161 119.5H135L24 37.6v58.9L0 119.5Z" />
-                      <path d="M189.5 0v119.5H167V36l-57.6 34.7-13.7-9.7Z" />
-                    </svg>
+                    <Logo markOnly class="nav_feature_logo" />
                     <span class="nav_feature_caption">
                       <span class="nav_feature_label">
                         {menu.feature.label}
@@ -213,7 +218,16 @@ const MENUS: Record<string, Menu> = {
                   <ul class="nav_socials">
                     {SOCIAL.map((item) => (
                       <li>
-                        <a href={item.href} aria-label={item.label}>
+                        <a
+                          href={item.href}
+                          aria-label={
+                            item.href === "#"
+                              ? item.label
+                              : `${item.label} (opens in a new tab)`
+                          }
+                          target={item.href === "#" ? undefined : "_blank"}
+                          rel={item.href === "#" ? undefined : "noopener"}
+                        >
                           <Icon src={icons[item.icon]} variant="small" />
                         </a>
                       </li>
@@ -247,13 +261,16 @@ const MENUS: Record<string, Menu> = {
                       id={`mobile-${item.menu}`}
                       hidden
                     >
-                      {MENUS[item.menu].columns
-                        .flatMap((column) => column.links)
-                        .map((link) => (
-                          <li>
-                            <a href={link.href}>{link.label}</a>
-                          </li>
-                        ))}
+                      {[
+                        ...MENUS[item.menu].columns.flatMap(
+                          (column) => column.links,
+                        ),
+                        ...(MENUS[item.menu].footerLinks ?? []),
+                      ].map((link) => (
+                        <li>
+                          <a href={link.href}>{link.label}</a>
+                        </li>
+                      ))}
                     </ul>
                   </li>
                 ) : (
@@ -270,13 +287,6 @@ const MENUS: Record<string, Menu> = {
               )}
             </ul>
             <div class="nav_mobile_actions">
-              <Button
-                element="link"
-                href={CTA.secondary.href}
-                emphasis="secondary"
-              >
-                {CTA.secondary.label}
-              </Button>
               <Button element="link" href={CTA.primary.href}>
                 {CTA.primary.label}
               </Button>
@@ -345,12 +355,81 @@ const MENUS: Record<string, Menu> = {
       root.classList.toggle("nav-locked", open && !desktop.matches);
     };
 
+    let closeTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    const cancelClose = () => {
+      if (closeTimeout) {
+        clearTimeout(closeTimeout);
+        closeTimeout = null;
+      }
+    };
+
+    const scheduleClose = (delay = 200) => {
+      cancelClose();
+      closeTimeout = setTimeout(() => {
+        showMenu(null);
+      }, delay);
+    };
+
+    const navCard = nav.querySelector<HTMLElement>(".nav_card");
+    const navMega = nav.querySelector<HTMLElement>(".nav_mega");
+
     for (const trigger of triggers) {
+      trigger.addEventListener("mouseenter", () => {
+        if (!desktop.matches) return;
+        cancelClose();
+        const key = trigger.dataset.menuTrigger ?? null;
+        if (key) showMenu(key);
+      });
+
+      trigger.addEventListener("focus", () => {
+        if (!desktop.matches) return;
+        cancelClose();
+        const key = trigger.dataset.menuTrigger ?? null;
+        if (key) showMenu(key);
+      });
+
       trigger.addEventListener("click", () => {
         const key = trigger.dataset.menuTrigger ?? null;
         showMenu(current === key ? null : key);
       });
     }
+
+    navMega?.addEventListener("mouseenter", () => {
+      if (!desktop.matches) return;
+      cancelClose();
+    });
+
+    navCard?.addEventListener("mouseleave", () => {
+      if (!desktop.matches) return;
+      if (current) {
+        scheduleClose(200);
+      }
+    });
+
+    nav
+      .querySelectorAll<HTMLElement>(
+        ".nav_main a.nav_link, .nav_logo, .nav_actions",
+      )
+      .forEach((el) => {
+        el.addEventListener("mouseenter", () => {
+          if (!desktop.matches) return;
+          if (current) {
+            scheduleClose(150);
+          }
+        });
+      });
+
+    navCard?.addEventListener("focusout", (event) => {
+      if (!desktop.matches) return;
+      if (
+        current &&
+        event.relatedTarget instanceof Node &&
+        !navCard.contains(event.relatedTarget)
+      ) {
+        scheduleClose(100);
+      }
+    });
 
     toggle.addEventListener("click", () =>
       setMobile(toggle.getAttribute("aria-expanded") !== "true"),
@@ -622,7 +701,8 @@ const MENUS: Record<string, Menu> = {
 
     .nav_panel_grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+      /* One track per link column, then the feature card. */
+      grid-template-columns: repeat(var(--_columns, 2), minmax(0, 1fr)) auto;
       gap: 2.5rem;
       padding: 0.5rem 2rem 2rem;
     }
@@ -641,6 +721,10 @@ const MENUS: Record<string, Menu> = {
       font-size: 0.75rem;
       font-weight: var(--primary-medium);
       color: var(--text-2);
+      /* Keeps the eyebrow's height so the links line up. */
+      &.is-blank {
+        visibility: hidden;
+      }
     }
 
     .nav_column_links {
@@ -704,7 +788,8 @@ const MENUS: Record<string, Menu> = {
       min-height: 16rem;
       display: flex;
       flex-direction: column;
-      justify-content: flex-end;
+      justify-content: space-between;
+      gap: var(--space-5);
       padding: var(--space-5);
       border-radius: 1rem;
       overflow: clip;
@@ -723,9 +808,6 @@ const MENUS: Record<string, Menu> = {
       color: var(--text);
       @media (hover: hover) {
         &:hover {
-          .nav_feature_mark {
-            translate: 0 -0.25rem;
-          }
           .nav_feature_arrow {
             translate: 0.25rem 0;
           }
@@ -733,13 +815,9 @@ const MENUS: Record<string, Menu> = {
       }
     }
 
-    .nav_feature_mark {
-      position: absolute;
-      top: var(--space-5);
-      left: var(--space-5);
-      width: 5rem;
-      fill: color-mix(in srgb, var(--white) 22%, transparent);
-      transition: translate 600ms var(--reveal-ease);
+    /* The navbar mark in its dark-background colours, as in the footer. */
+    .nav_feature_logo {
+      font-size: 1.5rem;
     }
 
     .nav_feature_caption {
@@ -882,13 +960,6 @@ const MENUS: Record<string, Menu> = {
 
       .nav_mega {
         display: grid;
-      }
-    }
-
-    /* Six pill links plus both buttons need the full 1440px bar. */
-    @media (64rem <= width < 90rem) {
-      .nav_actions .nav_secondary {
-        display: none;
       }
     }
   }

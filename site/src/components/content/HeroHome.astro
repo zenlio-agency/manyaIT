@@ -6,7 +6,7 @@ import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
 import Icon from "@/components/media/Icon.astro";
 import CapabilityReel from "@/components/content/CapabilityReel.astro";
 import arrow from "@/assets/icons/ui-arrow.svg";
-import { CTA } from "@/data/site.ts";
+import { home, settings } from "@/sanity/content.ts";
 
 interface Props {
   /** Set to `false` to omit the component. */
@@ -15,21 +15,13 @@ interface Props {
 
 const { render = true } = Astro.props;
 
-const points = [
-  "Vetted, AI-ready talent",
-  "Teams live in weeks",
-  "Flexible scale",
-];
+const [{ hero }, { cta: CTA }] = await Promise.all([home(), settings()]);
 ---
 
 {
   render && (
     <div class="hero-home_wrap">
       <div class="hero-home_copy">
-        <div class="hero-home_badge" data-reveal style="--reveal-order: 0">
-          <span class="hero-home_pulse" aria-hidden="true" />
-          Technology &amp; Talent Partners
-        </div>
         <Heading
           tag="h1"
           variant="display"
@@ -37,8 +29,9 @@ const points = [
           data-reveal
           style="--reveal-order: 1"
         >
-          Build the capabilities your enterprise{" "}
-          <span class="hero-home_mark">needs next.</span>
+          {/* The space sits in the text: Astro drops one between tags. */}
+          {`${hero.heading} `}
+          <span class="hero-home_mark">{hero.highlight}</span>
         </Heading>
         <Paragraph
           maxWidth={60}
@@ -46,16 +39,14 @@ const points = [
           data-reveal
           style="--reveal-order: 2"
         >
-          ManyaIT helps global enterprises build and scale capability centers
-          with AI-ready tech talent, matched to your stack and productive from
-          week one.
+          {hero.lede}
         </Paragraph>
         <ul
           class="hero-home_points text-style-small"
           data-reveal
           style="--reveal-order: 3"
         >
-          {points.map((point) => (
+          {hero.points.map((point) => (
             <li>{point}</li>
           ))}
         </ul>
@@ -64,21 +55,10 @@ const points = [
             {CTA.primary.label}
             <Icon src={arrow} variant="small" class="button_icon" />
           </Button>
-          <Button element="link" href="/#capabilities" emphasis="secondary">
+          <Button element="link" href="/capabilities" emphasis="secondary">
             Explore Capabilities
           </Button>
         </ButtonWrapper>
-        <p
-          class="hero-home_alt text-style-small"
-          data-reveal
-          style="--reveal-order: 5"
-        >
-          Building your career?{" "}
-          <a href={CTA.secondary.href}>
-            {CTA.secondary.label}
-            <span aria-hidden="true"> →</span>
-          </a>
-        </p>
       </div>
       <CapabilityReel class="hero-home_reel" />
     </div>
@@ -127,55 +107,8 @@ const points = [
       );
     }
 
-    /* Same pill as the section labels (Eyebrow), with a pulsing dot. */
-    .hero-home_badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      padding: 0.45rem 1rem 0.45rem 0.8rem;
-      border: var(--border-width) solid var(--border);
-      border-radius: var(--radius-round);
-      background-color: var(--background-2);
-      font-family: var(--primary-family);
-      font-size: var(--text-small);
-      font-weight: var(--primary-regular);
-      line-height: 1.2;
-      color: var(--text);
-    }
-
-    .hero-home_pulse {
-      position: relative;
-      flex: none;
-      width: 0.45rem;
-      height: 0.45rem;
-      border-radius: 50%;
-      background-color: var(--accent);
-      &::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        border-radius: inherit;
-        background-color: var(--accent);
-        animation: hero-pulse 2.6s var(--hover-ease) infinite;
-      }
-    }
-
-    @keyframes hero-pulse {
-      0% {
-        scale: 1;
-        opacity: 0.6;
-      }
-      70%,
-      100% {
-        scale: 2.8;
-        opacity: 0;
-      }
-    }
-
-    /* Larger type, but the tighter leading and top margin hand back the
-       extra height, so nothing below the headline moves. */
+    /* Larger type, with tighter leading to hand back the extra height. */
     .hero-home_title {
-      margin-top: var(--space-4);
       max-width: 26ch;
       font-family: var(--display-family);
       font-size: clamp(2.25rem, 1.5rem + 3.3vw, 4.25rem);
@@ -227,21 +160,6 @@ const points = [
           height: 0.35rem;
           border-radius: 50%;
           background-color: var(--accent);
-        }
-      }
-    }
-
-    .hero-home_alt {
-      margin-top: var(--space-4);
-      color: var(--text-2);
-      & a {
-        color: var(--link-text);
-        font-weight: var(--primary-bold);
-        transition: color var(--hover-duration) var(--hover-ease);
-        @media (hover: hover) {
-          &:hover {
-            color: var(--link-text-hover);
-          }
         }
       }
     }

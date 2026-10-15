@@ -1,0 +1,155 @@
+---
+import Eyebrow from "@/components/typography/Eyebrow.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Paragraph from "@/components/typography/Paragraph.astro";
+
+type HeadingTag = "h1" | "h2" | "h3";
+type HeadingVariant = "display" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Pill label above the heading. */
+  eyebrow?: string;
+  /** Section heading. */
+  heading: string;
+  headingTag?: HeadingTag;
+  /** Type size of the heading, when it differs from its tag. */
+  headingVariant?: HeadingVariant;
+  /** Paragraph that introduces the section. */
+  intro?: string;
+  /** Type size of the intro. */
+  introVariant?: "large" | "main";
+  /**
+   * `split`: eyebrow and heading on the left, intro and action on the right
+   * from 64rem, for a header above its section's content. `stack`: one
+   * column, for a header beside its content.
+   */
+  layout?: "split" | "stack";
+  class?: string;
+}
+
+const {
+  render = true,
+  eyebrow,
+  heading,
+  headingTag = "h2",
+  headingVariant,
+  intro,
+  introVariant = "large",
+  layout = "split",
+  class: className,
+} = Astro.props;
+
+const hasAction = Astro.slots.has("action");
+---
+
+{
+  render && heading && (
+    <div
+      class:list={[
+        "section-head",
+        `is-${layout}`,
+        intro && "has-intro",
+        hasAction && "has-action",
+        className,
+      ]}
+    >
+      <div class="section-head_title">
+        {eyebrow && <Eyebrow data-reveal>{eyebrow}</Eyebrow>}
+        <Heading
+          tag={headingTag}
+          variant={headingVariant}
+          data-reveal
+          style="--reveal-order: 1"
+        >
+          {heading}
+        </Heading>
+      </div>
+      {intro && (
+        <Paragraph
+          variant={introVariant}
+          class="section-head_intro"
+          data-reveal
+          style="--reveal-order: 2"
+        >
+          {intro}
+        </Paragraph>
+      )}
+      {hasAction && (
+        <div class="section-head_action" data-reveal style="--reveal-order: 3">
+          <slot name="action" />
+        </div>
+      )}
+    </div>
+  )
+}
+
+<style is:global>
+  @layer components {
+    /* One column on small screens, in reading order: eyebrow, heading,
+       intro, action. */
+    .section-head {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-5);
+    }
+
+    .section-head_title {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-4);
+    }
+
+    /* About 48 characters a line. Set here rather than through Paragraph's
+       maxWidth, which a reveal style would override. */
+    .section-head_intro {
+      max-width: 48ch;
+    }
+
+    .section-head_action {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+    }
+
+    /* From 64rem a split header has two columns, 7:5. The intro's bottom
+       lines up with the heading's, and the action sits under the intro;
+       with no intro, the action takes its place. */
+    @media (width >= 64rem) {
+      .section-head.is-split {
+        display: grid;
+        grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+        grid-template-areas: "title .";
+        gap: var(--space-5) var(--section-space-small);
+        align-items: end;
+        &.has-intro {
+          grid-template-areas: "title intro";
+        }
+        &.has-action {
+          grid-template-areas: "title action";
+        }
+        &.has-intro.has-action {
+          grid-template-areas:
+            "title intro"
+            ". action";
+          & .section-head_action {
+            align-self: start;
+          }
+        }
+        & .section-head_title {
+          grid-area: title;
+        }
+        & .section-head_intro {
+          grid-area: intro;
+        }
+        & .section-head_action {
+          grid-area: action;
+        }
+      }
+    }
+  }
+</style>

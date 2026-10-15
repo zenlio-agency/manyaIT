@@ -1,0 +1,19 @@
+---
+/**
+ * Writes Schema.org nodes as one JSON-LD block. Build the nodes with the
+ * helpers in `utils/schema.ts`; empty entries are skipped.
+ */
+interface Props {
+  nodes: (Record<string, unknown> | undefined)[];
+}
+
+const nodes = Astro.props.nodes.filter(Boolean);
+const data =
+  nodes.length === 1
+    ? { "@context": "https://schema.org", ...nodes[0] }
+    : { "@context": "https://schema.org", "@graph": nodes };
+/* Keep "</script>" in any text from ending the block early. */
+const json = JSON.stringify(data).replace(/</g, "\\u003c");
+---
+
+{nodes.length > 0 && <script is:inline type="application/ld+json" set:html={json} />}

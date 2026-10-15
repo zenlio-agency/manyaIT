@@ -1,0 +1,24 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import LegalHeader from "@/components/content/LegalHeader.astro";
+import PrivacyRequestForm from "@/components/content/PrivacyRequestForm.astro";
+---
+
+<Layout
+  title="Privacy requests"
+  description="Ask ManyaIT for a copy of your data, a correction or a deletion, opt out of marketing, or appeal a decision."
+>
+  {/* Header */}
+  <Section paddingTop="small" paddingBottom="none">
+    <LegalHeader
+      title="Privacy requests"
+      lede="Ask for a copy of the information we hold about you, have it corrected or deleted, opt out of marketing, or appeal a decision we made. It's free, and you don't need an account."
+    />
+  </Section>
+
+  {/* The form, with what happens next */}
+  <Section paddingTop="small">
+    <PrivacyRequestForm />
+  </Section>
+</Layout>

@@ -1,0 +1,101 @@
+---
+import SectionHeader from "@/components/content/SectionHeader.astro";
+import Icon from "@/components/media/Icon.astro";
+import check from "@/assets/icons/check.svg";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Pill label above the heading. */
+  eyebrow?: string;
+  /** Section heading. */
+  heading?: string;
+  /** Paragraph under the heading. */
+  text?: string;
+  /** One-line proof points, stacked beside the copy on wide screens. */
+  points?: string[];
+}
+
+const { render = true, eyebrow, heading, text, points = [] } = Astro.props;
+---
+
+{
+  render && heading && (
+    <div class="team-panel_wrap">
+      <SectionHeader
+        layout="stack"
+        eyebrow={eyebrow}
+        heading={heading}
+        intro={text}
+      />
+      {points.length > 0 && (
+        <ul class="team-panel_points">
+          {points.map((point, index) => (
+            <li
+              class="team-panel_point"
+              data-reveal
+              style={`--reveal-order: ${index + 1}`}
+            >
+              <span class="team-panel_check">
+                <Icon src={check} variant="small" />
+              </span>
+              {point}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+<style is:global>
+  @layer components {
+    /* Spacing here comes from gaps, so type margins step aside. */
+    :where(.team-panel_wrap) :where(.heading, .text) {
+      margin-block: 0;
+    }
+
+    .team-panel_wrap {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-7) var(--section-space-small);
+      align-items: center;
+      @media (width >= 64rem) {
+        grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      }
+    }
+
+    .team-panel_points {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .team-panel_point {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-4) var(--space-5);
+      border: var(--border-width) solid var(--border);
+      border-radius: var(--radius-main);
+      background-color: var(--background-2);
+      font-family: var(--display-family);
+      font-size: var(--text-main);
+      font-weight: var(--heading-bold);
+      line-height: 1.35;
+      color: var(--text);
+    }
+
+    .team-panel_check {
+      display: grid;
+      place-items: center;
+      flex: none;
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 50%;
+      background-color: var(--accent-soft);
+      color: var(--accent-text);
+    }
+  }
+</style>

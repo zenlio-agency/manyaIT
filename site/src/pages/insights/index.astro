@@ -1,0 +1,91 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import HeroDetail from "@/components/content/HeroDetail.astro";
+import InsightsGrid from "@/components/content/InsightsGrid.astro";
+import FeatureGrid from "@/components/content/FeatureGrid.astro";
+import CtaFinal from "@/components/content/CtaFinal.astro";
+import { capabilityHref } from "@/data/site.ts";
+import { capabilities, page, settings } from "@/sanity/content.ts";
+
+const [CAPABILITIES, { hero, seo }, { cta: CTA }] = await Promise.all([
+  capabilities(),
+  page("page-insights"),
+  settings(),
+]);
+
+const capability = (id: string) =>
+  capabilityHref(CAPABILITIES.find((cap) => cap.id === id)!);
+---
+
+<Layout title={seo.title} description={seo.description}>
+  {/* Hero */}
+  <Section paddingTop="small">
+    <HeroDetail
+      crumbs={[{ label: "Home", href: "/" }, { label: "Insights" }]}
+      eyebrow={hero.eyebrow}
+      title={hero.title}
+      lede={hero.lede}
+      points={hero.points}
+      primary={{ label: "Read the articles", href: "#articles" }}
+      secondary={CTA.primary}
+      photo={hero.photo?.src}
+      photoAlt={hero.photo?.alt}
+      photoPosition={hero.photo?.position}
+    />
+  </Section>
+
+  {/* Articles */}
+  <Section theme="tint" id="articles">
+    <InsightsGrid
+      intro="Field notes from the teams architecting and running enterprise platforms."
+    />
+  </Section>
+
+  {/* Topics */}
+  <Section id="topics">
+    <FeatureGrid
+      eyebrow="Topics"
+      heading="What we write about"
+      intro="Practical writing for technology leaders and engineers, grounded in the platforms our teams work on."
+      items={[
+        {
+          title: "Applied and agentic AI",
+          text: "What it takes to move AI from demo to daily use, and to keep it safe once it's there.",
+          href: capability("cap-ai"),
+        },
+        {
+          title: "Data platforms",
+          text: "Architecture, governance and the habits that make data trustworthy enough to act on.",
+          href: capability("cap-data"),
+        },
+        {
+          title: "SAP and clean core",
+          text: "Decision-maker guides to S/4HANA, BTP and the choices that shape an SAP roadmap.",
+          href: capability("cap-sap"),
+        },
+        {
+          title: "Digital engineering",
+          text: "Modernization, platform engineering and shipping software without drama.",
+          href: capability("cap-code"),
+        },
+        {
+          title: "Distributed delivery",
+          text: "Operating models, handovers and governance for teams that run platforms across time zones.",
+          href: "/insights/two-cities-one-team",
+        },
+        {
+          title: "Industry field notes",
+          text: "What our teams see in banking, telecom, healthcare and energy programs.",
+          href: "/industries",
+        },
+      ]}
+      linkLabel="Explore"
+    />
+  </Section>
+
+  {/* Final CTA */}
+  <Section theme="dark" paddingTop="large">
+    <CtaFinal />
+  </Section>
+</Layout>

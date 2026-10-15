@@ -20,10 +20,15 @@ const {
 } = Astro.props;
 
 const content = await slotContent(Astro.slots);
+
+/* The pill labels over sections and page headings are switched off across
+   the site at ManyaIT's request. Their words stay in the code and the
+   Studio; set this to true to bring them back. */
+const SHOW_EYEBROWS = false;
 ---
 
 {
-  render && content && (
+  SHOW_EYEBROWS && render && content && (
     <div
       class:list={["eyebrow_wrap", variant !== "default" && variant, className]}
       {...rest}

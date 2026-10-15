@@ -1,9 +1,8 @@
 ---
-import Eyebrow from "@/components/typography/Eyebrow.astro";
-import Heading from "@/components/typography/Heading.astro";
-import Paragraph from "@/components/typography/Paragraph.astro";
+import SectionHeader from "@/components/content/SectionHeader.astro";
 import dots from "@/data/world-dots.json";
-import { HUBS, tbc } from "@/data/site.ts";
+import { tbc } from "@/data/site.ts";
+import { hubs } from "@/sanity/content.ts";
 
 interface Props {
   /** Set to `false` to omit the component. */
@@ -11,6 +10,8 @@ interface Props {
 }
 
 const { render = true } = Astro.props;
+
+const HUBS = await hubs();
 
 /* Same equirectangular grid the dot map was generated on. */
 const project = (lat: number, lon: number) => ({
@@ -27,20 +28,21 @@ const pct = (value: number, of: number) =>
   render && (
     <div class="presence_wrap">
       <div class="presence_intro">
-        <Eyebrow data-reveal>Global presence</Eyebrow>
-        <Heading data-reveal style="--reveal-order: 1">
-          Two cities. One team.
-        </Heading>
-        <Paragraph
-          variant="large"
-          maxWidth={52}
-          data-reveal
-          style="--reveal-order: 2"
-        >
-          Client leadership in Dallas. Engineering depth in Hyderabad. One plan,
-          one standard of work, and a working day that hands over instead of
-          stopping.
-        </Paragraph>
+        <SectionHeader
+          layout="stack"
+          eyebrow="Global delivery"
+          heading="One operating model, around the clock."
+          intro="Client leadership aligned to your business hours and engineering depth across time zones, run as one delivery organization with shared governance, one backlog and a follow-the-sun cadence. Programs scale with your roadmap, and operations and knowledge move in-house whenever you choose."
+        />
+        <ul class="presence_hubs" data-reveal style="--reveal-order: 3">
+          {HUBS.map((hub) => (
+            <li class="presence_hub">
+              <span class="presence_hub_role">{hub.role}</span>
+              <span class="presence_hub_entity">{hub.entity}</span>
+              <span class="presence_hub_text">{hub.text}</span>
+            </li>
+          ))}
+        </ul>
       </div>
 
       <figure class="presence_map theme-dark" data-reveal>
@@ -50,7 +52,7 @@ const pct = (value: number, of: number) =>
             class="presence_svg"
             viewBox={`0 0 ${dots.width} ${dots.height + 1}`}
             role="img"
-            aria-label="Dotted world map highlighting the United States, Canada and India, with ManyaIT hubs in Dallas and Hyderabad"
+            aria-label="Dotted world map highlighting North America and India, with a ManyaIT hub in each"
           >
             <defs>
               {/* Land dots fade from the top into the dark canvas below. */}
@@ -94,26 +96,16 @@ const pct = (value: number, of: number) =>
                 aria-expanded="false"
                 aria-controls={`presence-tip-${pin.id}`}
               >
-                <span class="presence_marker_city">{pin.short}</span>
-                <span
-                  class="presence_marker_time"
-                  data-clock={pin.timeZone}
-                  data-locale={pin.locale}
-                >
-                  --:--
-                </span>
+                <span class="presence_marker_city">{pin.country}</span>
               </button>
               <div
                 class="presence_tip"
                 id={`presence-tip-${pin.id}`}
                 role="tooltip"
               >
-                <span class="presence_tip_city">{pin.city}</span>
+                <span class="presence_tip_city">{pin.country}</span>
                 <span class="presence_tip_role">{pin.role}</span>
-                <span
-                  class="presence_tip_address"
-                  set:html={tbc(pin.address)}
-                />
+                <span class="presence_tip_address" set:html={tbc(pin.entity)} />
               </div>
             </div>
           ))}
@@ -121,9 +113,9 @@ const pct = (value: number, of: number) =>
         <figcaption class="presence_caption">
           <span class="presence_legend">
             <span class="presence_legend_dot" aria-hidden="true" />
-            United States · Canada · India
+            Delivery footprint
           </span>
-          <span set:html={tbc("Serving enterprises in [X] countries.")} />
+          <span>One team across the United States and India.</span>
         </figcaption>
       </figure>
     </div>
@@ -131,35 +123,6 @@ const pct = (value: number, of: number) =>
 }
 
 <script>
-  /* Live local time for each hub. */
-  const clocks = [
-    ...document.querySelectorAll<HTMLElement>(".presence_wrap [data-clock]"),
-  ];
-  const tick = () => {
-    for (const clock of clocks) {
-      try {
-        clock.textContent = new Intl.DateTimeFormat(
-          clock.dataset.locale || "en-US",
-          {
-            hour: "2-digit",
-            minute: "2-digit",
-            timeZone: clock.dataset.clock,
-            timeZoneName: "short",
-          },
-        )
-          .format(new Date())
-          /* en-IN writes "am"; match the US clock's "AM". */
-          .replace(/\b(am|pm)\b/, (period) => period.toUpperCase());
-      } catch {
-        /* An unknown zone leaves the placeholder in place. */
-      }
-    }
-  };
-  if (clocks.length) {
-    tick();
-    window.setInterval(tick, 30_000);
-  }
-
   /* Hover shows the address; a tap or click pins it open, for touch. */
   const markers = [...document.querySelectorAll<HTMLElement>("[data-marker]")];
   const setOpen = (marker: HTMLElement, open: boolean) => {
@@ -203,6 +166,51 @@ const pct = (value: number, of: number) =>
       display: flex;
       flex-direction: column;
       gap: var(--space-4);
+    }
+
+    /* One card per hub: its role, the company and what it carries. */
+    .presence_hubs {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--site-gutter);
+      margin-top: var(--space-3);
+      @media (width >= 48rem) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .presence_hub {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      padding: var(--space-5) var(--space-6);
+      border: var(--border-width) solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius-main);
+      background-color: var(--background-2);
+    }
+
+    .presence_hub_role {
+      font-family: var(--display-family);
+      font-size: var(--h5);
+      font-weight: var(--heading-bold);
+      line-height: 1.25;
+      color: var(--text);
+    }
+
+    .presence_hub_entity {
+      font-family: var(--heading-family);
+      font-size: 0.75rem;
+      font-weight: var(--heading-bold);
+      letter-spacing: var(--letter-spacing-wide);
+      text-transform: uppercase;
+      color: var(--accent-text);
+    }
+
+    .presence_hub_text {
+      font-size: var(--text-small);
+      line-height: 1.6;
+      color: var(--text-body);
     }
 
     /* Dark rounded canvas holding the map, its glow and the legend. */
@@ -329,12 +337,6 @@ const pct = (value: number, of: number) =>
       color: var(--white);
     }
 
-    .presence_marker_time {
-      font-size: 0.72rem;
-      font-variant-numeric: tabular-nums;
-      color: var(--blue-300);
-    }
-
     .presence_tip {
       position: absolute;
       bottom: calc(100% + 0.6rem);
@@ -428,9 +430,6 @@ const pct = (value: number, of: number) =>
       .presence_tip {
         top: calc(100% + 0.5rem);
         bottom: auto;
-      }
-      .presence_marker_time {
-        display: none;
       }
     }
 

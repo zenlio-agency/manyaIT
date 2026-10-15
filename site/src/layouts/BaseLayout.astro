@@ -4,6 +4,10 @@ import BaseHead from "@/components/utility/BaseHead.astro";
 import SkipLink from "@/components/global/SkipLink.astro";
 import Nav from "@/components/global/Nav.astro";
 import Footer from "@/components/global/Footer.astro";
+import JsonLd from "@/components/utility/JsonLd.astro";
+import { settings } from "@/sanity/content.ts";
+import { breadcrumbs, siteGraph } from "@/utils/schema.ts";
+import { isNoindexRoute } from "@/utils/seo.ts";
 import type { SeoProps } from "@/types.ts";
 
 type Props = SeoProps & {
@@ -15,15 +19,57 @@ type Props = SeoProps & {
    * `paddingTop="navoverlap"` to clear the bar.
    */
   overlap?: boolean;
+  /** This page's name in the breadcrumb trail. Defaults to the title. */
+  breadcrumb?: string;
+  /** Structured data for this page (helpers in `utils/schema.ts`), added
+      to the company, site and breadcrumb nodes every page carries. */
+  schema?: (Record<string, unknown> | undefined)[];
 };
 
-const { theme = "inherit", overlap = false, ...seo } = Astro.props;
+const {
+  theme = "inherit",
+  overlap = false,
+  breadcrumb,
+  schema = [],
+  ...seo
+} = Astro.props;
+
+const site = await settings();
+const sameAs = site.social
+  .map((profile) => profile.href)
+  .filter((href) => /^https?:\/\//.test(href));
+const indexable = !(seo.noindex ?? isNoindexRoute(Astro.url.pathname));
+const crumbName = breadcrumb ?? seo.title;
+const structured = indexable
+  ? [
+      ...siteGraph(sameAs, site.description, site.contact),
+      crumbName ? breadcrumbs(Astro.url.pathname, crumbName) : undefined,
+      ...schema,
+    ]
+  : [];
 ---
 
 <!doctype html>
 <html lang="en" class:list={[theme !== "inherit" && `theme-${theme}`]}>
   <head>
+    <!-- Google Tag Manager -->
+    <script is:inline>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-5DW2SKHR');</script>
+    <!-- End Google Tag Manager -->
+    <!-- Google tag (gtag.js) -->
+    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-0HDNRPQCGF"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-0HDNRPQCGF');
+    </script>
     <BaseHead {...seo} />
+    <JsonLd nodes={structured} />
     <script is:inline>
       (() => {
         const root = document.documentElement;
@@ -56,6 +102,10 @@ const { theme = "inherit", overlap = false, ...seo } = Astro.props;
     <slot name="head" />
   </head>
   <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5DW2SKHR"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
     <SkipLink />
     <Nav overlap={overlap} />
     <main id="main" tabindex="-1">

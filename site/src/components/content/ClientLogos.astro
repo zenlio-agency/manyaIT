@@ -1,7 +1,8 @@
 ---
 import Heading from "@/components/typography/Heading.astro";
 import Button from "@/components/Button.astro";
-import { CLIENT_LOGOS, tbc } from "@/data/site.ts";
+import { tbc } from "@/data/site.ts";
+import { home, logoRows } from "@/sanity/content.ts";
 
 interface Props {
   /** Set to `false` to omit the component. */
@@ -10,14 +11,32 @@ interface Props {
 
 const { render = true } = Astro.props;
 
-/* Two rows moving in opposite directions. Each panel repeats its logos until
-   it is wider than a large screen, so the loop never shows a gap. */
-const half = Math.ceil(CLIENT_LOGOS.length / 2);
-const rows = [CLIENT_LOGOS.slice(0, half), CLIENT_LOGOS.slice(half)].filter(
-  (row) => row.length,
-);
-const fill = (row: (typeof rows)[number]) =>
-  Array.from({ length: Math.ceil(10 / row.length) }, () => row).flat();
+/* One row per entry, moving in alternate directions. Each panel repeats its
+   logos until it is wider than a large screen, so the loop never shows a
+   gap. */
+const [allRows, { logosHeading }] = await Promise.all([logoRows(), home()]);
+const rows = allRows.filter((row) => row.logos.length);
+const fill = (logos: (typeof rows)[number]["logos"]) =>
+  Array.from({ length: Math.ceil(12 / logos.length) }, () => logos).flat();
+
+/* Logos of very different shapes read as the same size when they cover about
+   the same area, so each height comes from the file's own aspect ratio. A
+   logo whose shape isn't known keeps the default height. */
+const AREA = 14.5;
+/* Intrinsic size for the width and height attributes, matching the CSS
+   height below, so browsers know each logo's box before it loads. */
+const sizeOf = (ratio?: number) => {
+  if (!ratio) return {};
+  const height = Math.round(16 * Math.min(Math.max(Math.sqrt(AREA / ratio), 1.1), 2.75));
+  return { width: Math.round(height * ratio), height };
+};
+const heightOf = (ratio?: number) => {
+  if (!ratio) return undefined;
+  const rem = Math.min(Math.max(Math.sqrt(AREA / ratio), 1.1), 2.75);
+  /* The ratio reserves the logo's width before it loads, so the row
+     doesn't shift. */
+  return `--_logo-height: ${rem.toFixed(2)}rem; aspect-ratio: ${ratio.toFixed(4)}`;
+};
 ---
 
 {
@@ -31,7 +50,9 @@ const fill = (row: (typeof rows)[number]) =>
           maxWidth={30}
           data-reveal
         >
-          Trusted by global enterprises. <strong>Powered by our talent.</strong>
+          {/* The space sits in the text: Astro drops one between tags. */}
+          {`${logosHeading.start} `}
+          <strong>{logosHeading.emphasis}</strong>
         </Heading>
         <Button
           variant="play"
@@ -51,14 +72,14 @@ const fill = (row: (typeof rows)[number]) =>
               {[0, 1].map((copy) => (
                 <ul
                   class="client-logos_panel"
+                  aria-label={copy === 0 ? row.label : undefined}
                   aria-hidden={copy === 1 ? "true" : undefined}
-                  inert={copy === 1}
                 >
-                  {fill(row).map((logo, i) => (
+                  {fill(row.logos).map((logo, i) => (
                     <li
                       class="client-logos_tile"
                       aria-hidden={
-                        copy === 0 && i >= row.length ? "true" : undefined
+                        copy === 0 && i >= row.logos.length ? "true" : undefined
                       }
                     >
                       {logo.src ? (
@@ -66,6 +87,8 @@ const fill = (row: (typeof rows)[number]) =>
                           class="client-logos_img"
                           src={logo.src}
                           alt={logo.name}
+                          {...sizeOf(logo.ratio)}
+                          style={heightOf(logo.ratio)}
                           loading="lazy"
                           decoding="async"
                         />
@@ -102,6 +125,14 @@ const fill = (row: (typeof rows)[number]) =>
     toggle?.addEventListener("click", () =>
       setPlaying(block.dataset.state !== "playing"),
     );
+    /* No visible button: a pointer pauses a row by hovering, a tap or
+       click stops or restarts both rows, and the keyboard reaches the
+       toggle. */
+    block
+      .querySelector(".client-logos_rows")
+      ?.addEventListener("click", () =>
+        setPlaying(block.dataset.state !== "playing"),
+      );
   }
 </script>
 
@@ -126,9 +157,18 @@ const fill = (row: (typeof rows)[number]) =>
       gap: var(--space-5);
     }
 
+    /* Shown only when the keyboard reaches it. */
     .client-logos_toggle {
       flex: none;
       font-size: 0.75rem;
+      &:not(:focus-visible) {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
     }
 
     .client-logos_rows {
@@ -164,9 +204,10 @@ const fill = (row: (typeof rows)[number]) =>
       .client-logos_wrap[data-state="playing"] & {
         animation-play-state: running;
       }
+      /* Only the row under the pointer stops; the other keeps moving. */
       .client-logos_wrap[data-state="playing"]
-        .client-logos_rows:is(:hover, :focus-within)
-        & {
+        .client-logos_row:is(:hover, :focus-within)
+        > & {
         animation-play-state: paused;
       }
     }
@@ -182,24 +223,20 @@ const fill = (row: (typeof rows)[number]) =>
       gap: var(--_gap);
     }
 
+    /* Logos sit straight on the section, with no card behind them. */
     .client-logos_tile {
       flex: none;
       display: grid;
       place-items: center;
-      width: 12rem;
-      height: 5rem;
-      padding: var(--space-4) var(--space-5);
-      background-color: var(--white);
-      border: var(--border-width) solid var(--border);
-      border-radius: var(--radius-main);
+      height: 4.5rem;
+      padding-inline: var(--space-5);
     }
 
     .client-logos_img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
+      width: auto;
+      height: var(--_logo-height, 2.25rem);
       filter: grayscale(1);
-      opacity: 0.7;
+      opacity: 0.6;
       transition:
         filter var(--hover-duration) var(--hover-ease),
         opacity var(--hover-duration) var(--hover-ease);

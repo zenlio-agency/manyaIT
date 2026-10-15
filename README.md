@@ -2,11 +2,12 @@
 
 ManyaIT website redesign.
 
-| Folder       | What it is                                                     |
-| ------------ | -------------------------------------------------------------- |
-| `site/`      | The website, built with Astro and Lumos. See `site/README.md`. |
+| Folder       | What it is                                                                      |
+| ------------ | ------------------------------------------------------------------------------- |
+| `site/`      | The website, built with Astro and Lumos. See `site/README.md`.                  |
+| `studio/`    | Sanity Studio, where HR and marketing edit content. See `studio/README.md`.     |
 | `content/`   | Homepage copy (`homepage-copy.md`) and the legal pack design (`legal-pack.md`). |
-| `wireframe/` | Black-and-white homepage wireframe.                            |
+| `wireframe/` | Black-and-white homepage wireframe.                                             |
 
 ## Site
 

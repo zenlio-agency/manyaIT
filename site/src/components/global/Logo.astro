@@ -1,7 +1,4 @@
 ---
-import Icon from "@/components/media/Icon.astro";
-import mark from "@/assets/logo/logo-icon.svg";
-
 interface Props {
   /** Set to `false` to omit the component. */
   render?: boolean;
@@ -16,11 +13,48 @@ const { render = true, markOnly = false, class: className } = Astro.props;
 {
   render && (
     <span class:list={["logo_wrap", className]}>
-      <Icon src={mark} variant="full-width" class="logo_mark" />
-      {!markOnly && (
-        <span class="logo_word" aria-hidden="true">
-          Manya <span class="logo_it">IT</span>
-        </span>
+      {markOnly ? (
+        <>
+          <img
+            src="/images/logo-mark.png"
+            alt=""
+            class="logo_mark logo_light"
+            width="34"
+            height="22"
+            loading="eager"
+            decoding="async"
+          />
+          <img
+            src="/images/logo-mark-dark.png"
+            alt=""
+            class="logo_mark logo_dark"
+            width="34"
+            height="22"
+            loading="eager"
+            decoding="async"
+          />
+        </>
+      ) : (
+        <>
+          <img
+            src="/images/logo-brand.png"
+            alt="Manya IT"
+            class="logo_img logo_light"
+            width="153"
+            height="24"
+            loading="eager"
+            decoding="async"
+          />
+          <img
+            src="/images/logo-brand-dark.png"
+            alt="Manya IT"
+            class="logo_img logo_dark"
+            width="153"
+            height="24"
+            loading="eager"
+            decoding="async"
+          />
+        </>
       )}
     </span>
   )
@@ -31,39 +65,42 @@ const { render = true, markOnly = false, class: className } = Astro.props;
     .logo_wrap {
       display: inline-flex;
       align-items: center;
-      gap: 0.7em;
-      color: var(--text);
+      line-height: 1;
 
-      .logo_mark {
-        width: 2.15em;
-        aspect-ratio: 190 / 120;
-        .logo_body {
-          fill: currentcolor;
-        }
-        .logo_flag {
-          fill: var(--logo-flag);
-          transition: translate 600ms var(--reveal-ease);
-        }
+      & .logo_img {
+        height: 24px !important;
+        width: auto !important;
+        object-fit: contain;
       }
 
-      .logo_word {
-        font-family: var(--heading-family);
-        font-size: 0.95em;
-        font-weight: var(--heading-bold);
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-        white-space: nowrap;
-        line-height: 1;
+      & .logo_mark {
+        height: 22px !important;
+        width: auto !important;
+        object-fit: contain;
       }
 
-      .logo_it {
-        color: var(--logo-flag);
+      & .logo_light {
+        display: block;
+      }
+
+      & .logo_dark {
+        display: none;
+      }
+    }
+
+    .theme-dark .logo_wrap {
+      & .logo_light {
+        display: none;
+      }
+
+      & .logo_dark {
+        display: block;
       }
     }
 
     @media (hover: hover) {
-      a:hover > .logo_wrap .logo_flag {
-        translate: 0 -0.06em;
+      a:hover > .logo_wrap {
+        opacity: 0.85;
       }
     }
   }

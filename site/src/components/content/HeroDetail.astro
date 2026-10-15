@@ -1,0 +1,265 @@
+---
+import type { SvgComponent } from "astro/types";
+import Eyebrow from "@/components/typography/Eyebrow.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Paragraph from "@/components/typography/Paragraph.astro";
+import Button from "@/components/Button.astro";
+import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
+import Icon from "@/components/media/Icon.astro";
+import arrow from "@/assets/icons/ui-arrow.svg";
+
+type Link = { label: string; href: string };
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Breadcrumb trail. The last item is the current page and needs no `href`. */
+  crumbs?: { label: string; href?: string }[];
+  /** Pill label above the heading. */
+  eyebrow?: string;
+  /** Page heading. */
+  title?: string;
+  /** Introductory paragraph. */
+  lede?: string;
+  /** Short highlights shown as a checked list. */
+  points?: string[];
+  /** Solid button. */
+  primary?: Link;
+  /** Outlined button. */
+  secondary?: Link;
+  /** Photo beside the copy. */
+  photo?: string;
+  /** Photo alt text. Omit for decorative photos. */
+  photoAlt?: string;
+  /** The photo's focal point, as a CSS `object-position`. */
+  photoPosition?: string;
+  /** Icon badge over the photo. */
+  icon?: SvgComponent;
+}
+
+const {
+  render = true,
+  crumbs = [],
+  eyebrow,
+  title,
+  lede,
+  points = [],
+  primary,
+  secondary,
+  photo,
+  photoAlt = "",
+  photoPosition,
+  icon,
+} = Astro.props;
+---
+
+{
+  render && title && (
+    <div class:list={["hero-detail_wrap", photo && "has-photo"]}>
+      <div class="hero-detail_copy">
+        {crumbs.length > 0 && (
+          <nav class="hero-detail_crumbs" aria-label="Breadcrumb" data-reveal>
+            <ol>
+              {crumbs.map((crumb) => (
+                <li>
+                  {crumb.href ? (
+                    <a href={crumb.href}>{crumb.label}</a>
+                  ) : (
+                    <span aria-current="page">{crumb.label}</span>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )}
+        {eyebrow && (
+          <Eyebrow data-reveal style="--reveal-order: 1">
+            {eyebrow}
+          </Eyebrow>
+        )}
+        <Heading
+          tag="h1"
+          variant="h1"
+          maxWidth={18}
+          data-reveal
+          style="--reveal-order: 1"
+        >
+          {title}
+        </Heading>
+        {lede && (
+          <Paragraph
+            variant="large"
+            maxWidth={54}
+            data-reveal
+            style="--reveal-order: 2"
+          >
+            {lede}
+          </Paragraph>
+        )}
+        {points.length > 0 && (
+          <ul class="hero-detail_points" data-reveal style="--reveal-order: 3">
+            {points.map((point) => (
+              <li>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m5 12.5 4.5 4.5L19 7.5" />
+                </svg>
+                {point}
+              </li>
+            ))}
+          </ul>
+        )}
+        {(primary || secondary) && (
+          <ButtonWrapper data-reveal style="--reveal-order: 4">
+            {primary && (
+              <Button element="link" href={primary.href}>
+                {primary.label}
+                <Icon src={arrow} variant="small" class="button_icon" />
+              </Button>
+            )}
+            {secondary && (
+              <Button element="link" href={secondary.href} emphasis="secondary">
+                {secondary.label}
+              </Button>
+            )}
+          </ButtonWrapper>
+        )}
+      </div>
+      {photo && (
+        <div class="hero-detail_media" data-reveal style="--reveal-order: 2">
+          <img
+            src={photo}
+            alt={photoAlt}
+            style={photoPosition ? `object-position: ${photoPosition};` : undefined}
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+          />
+          {icon && (
+            <span class="hero-detail_badge">
+              <Icon src={icon} />
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+<style is:global>
+  @layer components {
+    /* Spacing here comes from gaps, so type margins step aside. */
+    :where(.hero-detail_wrap) :where(.heading, .text) {
+      margin-block: 0;
+    }
+
+    /* Inner-page hero: copy on the left, a tall photo on the right. */
+    .hero-detail_wrap {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-7) var(--section-space-small);
+      align-items: center;
+      @media (width >= 64rem) {
+        &.has-photo {
+          grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+        }
+      }
+    }
+
+    .hero-detail_copy {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-4);
+      & > .heading {
+        margin-bottom: var(--space-2);
+      }
+      & .button-wrapper {
+        margin-top: var(--space-3);
+      }
+    }
+
+    .hero-detail_crumbs ol {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.25rem 0.5rem;
+      font-size: var(--text-small);
+      color: var(--text-2);
+      & li + li::before {
+        content: "/";
+        margin-right: 0.5rem;
+        color: var(--slate-300);
+      }
+      & a {
+        color: var(--text-2);
+        text-decoration: none;
+        transition: color var(--hover-duration) var(--hover-ease);
+        @media (hover: hover) {
+          &:hover {
+            color: var(--accent-text);
+          }
+        }
+      }
+      & [aria-current] {
+        color: var(--text);
+      }
+    }
+
+    .hero-detail_points {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2) var(--space-5);
+      & li {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: var(--text-small);
+        color: var(--text-body);
+      }
+      & svg {
+        flex: none;
+        width: 1.1rem;
+        height: 1.1rem;
+        fill: none;
+        stroke: var(--accent);
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+    }
+
+    .hero-detail_media {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      border-radius: 1.5rem;
+      background-color: var(--background-3);
+      @media (width >= 64rem) {
+        aspect-ratio: 4 / 5;
+      }
+      & img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    /* Glass badge carrying the capability icon. */
+    .hero-detail_badge {
+      position: absolute;
+      left: var(--space-4);
+      bottom: var(--space-4);
+      display: grid;
+      place-items: center;
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: var(--radius-medium);
+      background-color: rgb(255 255 255 / 0.18);
+      border: var(--border-width) solid rgb(255 255 255 / 0.3);
+      color: var(--white);
+      -webkit-backdrop-filter: blur(0.75rem);
+      backdrop-filter: blur(0.75rem);
+    }
+  }
+</style>

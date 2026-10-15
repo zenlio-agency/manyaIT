@@ -1,44 +1,30 @@
 /**
- * Photography for the image tiles. These are free Unsplash photos standing in
- * until ManyaIT's own photography is ready. To swap one, put the file in
- * `public/images/` and replace its URL with the path (e.g. "/images/team.jpg").
+ * Photography for the sections whose words still live in code: free Unsplash
+ * photos, standing in until ManyaIT's own photography is ready. They are
+ * served from `public/images/` as WebP, so pages make no third-party
+ * requests. To swap one, replace the file and keep its name, or add a new
+ * file and change its path here.
+ *
+ * Photos for capabilities, industries, articles, page headers and the
+ * homepage reel are edited in Sanity instead.
  */
-const unsplash = (id: string, width = 1200) =>
-  `https://images.unsplash.com/${id}?w=${width}&q=70&auto=format&fit=crop`;
-
-/** Keyed by capability id. */
-export const CAPABILITY_PHOTOS: Record<string, string> = {
-  "cap-data": unsplash("photo-1551288049-bebda4e38f71"),
-  "cap-sap": unsplash("photo-1558494949-ef010cbdcc31"),
-  "cap-ai": unsplash("photo-1655720828018-edd2daec9349"),
-  "cap-flow": unsplash("photo-1531746790731-6c087fecd65a"),
-  "cap-code": unsplash("photo-1461749280684-dccba630e2f6"),
-};
-
-/** Keyed by industry id. */
-export const INDUSTRY_PHOTOS: Record<string, string> = {
-  "industry-banking": unsplash("photo-1563986768609-322da13575f3", 900),
-  "industry-telecom": unsplash("photo-1544197150-b99a580bb7a8", 900),
-  "industry-healthcare": unsplash("photo-1576091160399-112ba8d25d1d", 900),
-  "industry-energy": unsplash("photo-1473341304170-971dccb5ac1e", 900),
-};
-
-/** One per Insights article, in order. */
-export const INSIGHT_PHOTOS = [
-  unsplash("photo-1677442136019-21780ecad995"),
-  unsplash("photo-1460925895917-afdab827c52f", 900),
-  unsplash("photo-1504868584819-f8e8b4b6d7e3", 900),
-  unsplash("photo-1504384308090-c894fdcc538d", 900),
-  unsplash("photo-1498050108023-c5249f4df085", 900),
-];
+const image = (name: string) => `/images/${name}.webp`;
 
 /** The homepage careers card. */
-export const CAREERS_PHOTO = unsplash("photo-1522071820081-009f0129c71c", 1600);
+export const CAREERS_PHOTO = image("careers-home");
 
 /** One per careers-page point, in order. */
-export const CAREERS_POINT_PHOTOS = [
-  unsplash("photo-1486312338219-ce68d2c6f44d", 900),
-  unsplash("photo-1519389950473-47ba0277781c", 900),
-  unsplash("photo-1531482615713-2afd69097998", 900),
-  unsplash("photo-1552664730-d307ca884978", 900),
-];
+export const CAREERS_POINT_PHOTOS = [1, 2, 3, 4].map((n) =>
+  image(`careers-point-${n}`),
+);
+
+/** The About page's story section. */
+export const ABOUT_PHOTOS = {
+  story: image("about-story"),
+};
+
+/** The careers page's "Life at ManyaIT" section. */
+export const CAREERS_LIFE_PHOTO = image("careers-life");
+
+/** The Locations page hero. */
+export const LOCATIONS_PHOTO = image("locations-hero");

@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "astro dev",
     "check": "astro check",
-    "build": "astro build",
+    "build": "astro build --force && node scripts/check-dist.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "format": "prettier --write .",
@@ -19,7 +19,12 @@
   "dependencies": {
     "@astrojs/check": "^0.9.10",
     "@astrojs/sitemap": "^3.7.3",
+    "@portabletext/to-html": "^6.0.0",
+    "@sanity/client": "^8.9.0",
+    "@sanity/image-url": "^2.1.1",
     "astro": "^7.2.9",
+    "github-slugger": "^2.0.0",
+    "groq": "^6.17.0",
     "typescript": "^6.0.3"
   },
   "devDependencies": {

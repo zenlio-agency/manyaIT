@@ -1,13 +1,12 @@
 ---
-import Eyebrow from "@/components/typography/Eyebrow.astro";
-import Heading from "@/components/typography/Heading.astro";
-import Paragraph from "@/components/typography/Paragraph.astro";
+import SectionHeader from "@/components/content/SectionHeader.astro";
 import Button from "@/components/Button.astro";
 import Icon from "@/components/media/Icon.astro";
 import PhotoTile from "@/components/item/PhotoTile.astro";
 import arrow from "@/assets/icons/ui-arrow.svg";
-import { CAPABILITIES, CTA } from "@/data/site.ts";
-import { CAPABILITY_PHOTOS } from "@/data/photos.ts";
+import capTalent from "@/assets/icons/cap-talent.svg";
+import { capabilityHref } from "@/data/site.ts";
+import { capabilities, home } from "@/sanity/content.ts";
 
 interface Props {
   /** Set to `false` to omit the component. */
@@ -15,34 +14,40 @@ interface Props {
 }
 
 const { render = true } = Astro.props;
+
+const [CAPABILITIES, { sections }] = await Promise.all([
+  capabilities(),
+  home(),
+]);
+const intro = sections.capabilities;
 ---
 
 {
   render && (
     <div class="bento_wrap">
-      <div class="bento_head">
-        <div class="bento_intro">
-          <Eyebrow data-reveal>Capabilities</Eyebrow>
-          <Heading maxWidth={20} data-reveal style="--reveal-order: 1">
-            Expertise across the modern enterprise stack
-          </Heading>
-        </div>
-        <Paragraph
-          variant="large"
-          maxWidth={44}
-          data-reveal
-          style="--reveal-order: 2"
+      <SectionHeader
+        eyebrow={intro.eyebrow}
+        heading={intro.heading}
+        intro={intro.intro}
+      >
+        <Button
+          slot="action"
+          element="link"
+          href="/capabilities"
+          emphasis="secondary"
         >
-          Specialist teams for the platforms that matter most, ready to plug
-          into your roadmap.
-        </Paragraph>
-      </div>
+          All Capabilities
+        </Button>
+      </SectionHeader>
 
       <div class="bento_grid">
         {CAPABILITIES.map((cap, index) => (
           <PhotoTile
-            href={`${CTA.primary.href}?topic=${cap.id}`}
-            photo={CAPABILITY_PHOTOS[cap.id]}
+            href={capabilityHref(cap)}
+            photo={cap.photo?.src}
+            photoPosition={cap.photo?.position}
+            photoWidth={cap.photo?.width}
+            photoHeight={cap.photo?.height}
             class={`bento_tile is-${cap.id}`}
             id={cap.id}
             data-reveal
@@ -57,7 +62,7 @@ const { render = true } = Astro.props;
             <Fragment slot="reveal">
               <p class="photo-tile_text">{cap.line}</p>
               <span class="photo-tile_more">
-                Talk to us
+                Explore
                 <Icon src={arrow} variant="small" />
               </span>
             </Fragment>
@@ -65,20 +70,30 @@ const { render = true } = Astro.props;
         ))}
 
         <PhotoTile
-          tone="brand"
-          class="bento_tile is-cta"
+          href="/capabilities/specialist-talent"
+          photo="/images/specialist-talent-hero.webp"
+          photoWidth={1024}
+          photoHeight={576}
+          class="bento_tile is-cap-talent"
+          id="cap-talent"
           data-reveal
           style="--reveal-order: 2"
         >
-          <h3 class="photo-tile_title is-large">Need a team fast?</h3>
-          <p class="photo-tile_text bento_cta_text">
-            Share the skills you need. We'll have the right people ready in
-            weeks.
-          </p>
-          <Button element="link" href={CTA.primary.href} emphasis="secondary">
-            {CTA.primary.label}
-            <Icon src={arrow} variant="small" class="button_icon" />
-          </Button>
+          <span class="photo-tile_icon" slot="top">
+            <Icon src={capTalent} variant="small" />
+          </span>
+          <h3 class="photo-tile_title">
+            Specialist Talent
+          </h3>
+          <Fragment slot="reveal">
+            <p class="photo-tile_text">
+              The right specialists, engaged the way your business needs them, across the U.S. and India.
+            </p>
+            <span class="photo-tile_more">
+              Explore
+              <Icon src={arrow} variant="small" />
+            </span>
+          </Fragment>
         </PhotoTile>
       </div>
     </div>
@@ -95,23 +110,7 @@ const { render = true } = Astro.props;
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: var(--space-8);
-    }
-
-    .bento_head {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: var(--space-5) var(--section-space-small);
-      align-items: end;
-      @media (width >= 64rem) {
-        grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-      }
-    }
-
-    .bento_intro {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-4);
+      gap: var(--space-7);
     }
 
     /* Photo mosaic: Data leads as a large square, the rest fill around it. */
@@ -127,14 +126,14 @@ const { render = true } = Astro.props;
           "data data"
           "sap ai"
           "flow code"
-          "cta cta";
+          "talent talent";
       }
       @media (width >= 64rem) {
         grid-template-columns: repeat(4, minmax(0, 1fr));
         grid-template-areas:
           "data data sap sap"
           "data data ai flow"
-          "code code cta cta";
+          "code code talent talent";
       }
       /* Areas only exist from 48rem; on phones the tiles simply stack. */
       @media (width >= 48rem) {
@@ -153,8 +152,8 @@ const { render = true } = Astro.props;
         & > .is-cap-code {
           grid-area: code;
         }
-        & > .is-cta {
-          grid-area: cta;
+        & > .is-cap-talent {
+          grid-area: talent;
         }
       }
     }
@@ -164,9 +163,20 @@ const { render = true } = Astro.props;
       scroll-margin-top: calc(var(--nav-height) + var(--space-5));
     }
 
-    .bento_cta_text {
-      margin-bottom: var(--space-2);
-      font-size: var(--text-main);
+    /* The two single-column tiles are too short for the icon, the title
+       and the one-liner together, so the icon steps aside while the
+       one-liner shows (always, on touch screens). */
+    @media (width >= 64rem) {
+      .bento_tile:is(.is-cap-ai, .is-cap-flow) {
+        &:is(:hover, :focus-visible, :focus-within) .photo-tile_icon {
+          display: none;
+        }
+        @media (hover: none) {
+          & .photo-tile_icon {
+            display: none;
+          }
+        }
+      }
     }
   }
 </style>

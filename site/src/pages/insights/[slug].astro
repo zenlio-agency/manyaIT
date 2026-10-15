@@ -1,0 +1,82 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import ArticleHeader from "@/components/content/ArticleHeader.astro";
+import ArticleBody from "@/components/content/ArticleBody.astro";
+import RelatedTiles from "@/components/content/RelatedTiles.astro";
+import { blogPosting } from "@/utils/schema.ts";
+import { insightHref } from "@/utils/insights.ts";
+import { articles, type Article } from "@/sanity/content.ts";
+
+export async function getStaticPaths() {
+  const all = await articles();
+  return all.map((article) => ({
+    params: { slug: article.id },
+    props: {
+      article,
+      others: all.filter((other) => other.id !== article.id),
+    },
+  }));
+}
+
+type Props = {
+  article: Article;
+  others: Article[];
+};
+
+const { article, others } = Astro.props;
+
+/* Article structured data. Dates are left out until they are real. */
+const posting = blogPosting({
+  title: article.title,
+  description: article.description,
+  pathname: Astro.url.pathname,
+  image: article.photo.src,
+  published: article.published,
+  updated: article.updated,
+  author: article.author,
+});
+---
+
+<Layout
+  title={article.seoTitle || article.title}
+  description={article.description}
+  type="article"
+  breadcrumb={article.title}
+  schema={[posting]}
+>
+
+  {/* Header and photo */}
+  <Section paddingTop="small" paddingBottom="none">
+    <ArticleHeader
+      title={article.title}
+      summary={article.summary}
+      category={article.category}
+      type={article.type}
+      author={article.author}
+      published={article.published}
+      minutes={article.minutes}
+      photo={article.photo.src}
+    />
+  </Section>
+
+  {/* The article */}
+  <Section paddingTop="small">
+    <ArticleBody article={article} />
+  </Section>
+
+  {/* More articles */}
+  <Section theme="tint">
+    <RelatedTiles
+      eyebrow="Keep reading"
+      heading="More insights"
+      link={{ label: "All insights", href: "/insights" }}
+      items={others.slice(0, 3).map((other) => ({
+        title: other.title,
+        text: other.summary,
+        href: insightHref(other),
+        photo: other.photo.src,
+      }))}
+    />
+  </Section>
+</Layout>

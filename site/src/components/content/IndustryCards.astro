@@ -1,13 +1,11 @@
 ---
-import Eyebrow from "@/components/typography/Eyebrow.astro";
-import Heading from "@/components/typography/Heading.astro";
-import Paragraph from "@/components/typography/Paragraph.astro";
+import SectionHeader from "@/components/content/SectionHeader.astro";
 import Button from "@/components/Button.astro";
 import Icon from "@/components/media/Icon.astro";
 import PhotoTile from "@/components/item/PhotoTile.astro";
 import arrow from "@/assets/icons/ui-arrow.svg";
-import { INDUSTRIES } from "@/data/site.ts";
-import { INDUSTRY_PHOTOS } from "@/data/photos.ts";
+import { industryHref } from "@/data/site.ts";
+import { home, industries } from "@/sanity/content.ts";
 
 interface Props {
   /** Set to `false` to omit the component. */
@@ -15,30 +13,30 @@ interface Props {
 }
 
 const { render = true } = Astro.props;
+
+const [INDUSTRIES, { sections }] = await Promise.all([industries(), home()]);
+const intro = sections.industries;
 ---
 
 {
   render && (
     <div class="industry-cards_wrap">
-      <div class="industry-cards_head">
-        <div class="industry-cards_intro">
-          <Eyebrow data-reveal>Industries</Eyebrow>
-          <Heading maxWidth={20} data-reveal style="--reveal-order: 1">
-            Talent that already knows your industry.
-          </Heading>
-        </div>
-        <div class="industry-cards_aside" data-reveal style="--reveal-order: 2">
-          <Paragraph variant="large" maxWidth={44}>
-            Specialists who speak the language of your sector, its rules and its
-            systems.
-          </Paragraph>
-          <Button element="link" href="/industries" emphasis="secondary">
-            Explore Industries
-          </Button>
-        </div>
-      </div>
+      <SectionHeader
+        eyebrow={intro.eyebrow}
+        heading={intro.heading}
+        intro={intro.intro || undefined}
+      >
+        <Button
+          slot="action"
+          element="link"
+          href="/industries"
+          emphasis="secondary"
+        >
+          Explore Industries
+        </Button>
+      </SectionHeader>
 
-      <ul class="industry-cards_list">
+      <ul class="industry-cards_list" style={`--_count: ${INDUSTRIES.length}`}>
         {INDUSTRIES.map((industry, index) => (
           <li
             class="industry-cards_item"
@@ -47,8 +45,9 @@ const { render = true } = Astro.props;
             style={`--reveal-order: ${index}`}
           >
             <PhotoTile
-              href={`/industries#${industry.id}`}
-              photo={INDUSTRY_PHOTOS[industry.id]}
+              href={industryHref(industry)}
+              photo={industry.photo?.src}
+              photoPosition={industry.photo?.position}
               class="industry-cards_tile"
             >
               <span class="photo-tile_eyebrow" slot="top">
@@ -56,7 +55,7 @@ const { render = true } = Astro.props;
               </span>
               <h3 class="photo-tile_title is-small">{industry.title}</h3>
               <Fragment slot="reveal">
-                <p class="photo-tile_text">{industry.summary}</p>
+                <p class="photo-tile_text">{industry.line}</p>
                 <span class="photo-tile_more">
                   Learn more
                   <Icon src={arrow} variant="small" />
@@ -84,25 +83,7 @@ const { render = true } = Astro.props;
       gap: var(--space-7);
     }
 
-    .industry-cards_head {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: var(--space-5) var(--section-space-small);
-      align-items: end;
-      @media (width >= 64rem) {
-        grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-      }
-    }
-
-    .industry-cards_intro,
-    .industry-cards_aside {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: var(--space-4);
-    }
-
-    /* Portrait photo tiles: two across, four from 80rem. */
+    /* Portrait photo tiles: two across, then all in one row from 80rem. */
     .industry-cards_list {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
@@ -111,7 +92,7 @@ const { render = true } = Astro.props;
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
       @media (width >= 80rem) {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(var(--_count), minmax(0, 1fr));
       }
     }
 
@@ -123,6 +104,16 @@ const { render = true } = Astro.props;
       aspect-ratio: 3 / 4;
       @media (30rem <= width < 80rem) {
         aspect-ratio: 4 / 3;
+      }
+    }
+
+    /* Two across, an odd last tile spans the row instead of sitting alone. */
+    .industry-cards_item:last-child:nth-child(odd) {
+      @media (30rem <= width < 80rem) {
+        grid-column: 1 / -1;
+        & .industry-cards_tile {
+          aspect-ratio: 8 / 3;
+        }
       }
     }
   }

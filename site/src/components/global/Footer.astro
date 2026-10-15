@@ -1,20 +1,9 @@
 ---
-import Icon from "@/components/media/Icon.astro";
 import Logo from "@/components/global/Logo.astro";
-import Button from "@/components/Button.astro";
-import arrow from "@/assets/icons/ui-arrow.svg";
-import linkedin from "@/assets/icons/social-linkedin.svg";
-import x from "@/assets/icons/social-x.svg";
-import facebook from "@/assets/icons/social-facebook.svg";
-import youtube from "@/assets/icons/social-youtube.svg";
-import {
-  CAPABILITIES,
-  INDUSTRIES,
-  HUBS,
-  SOCIAL,
-  CTA,
-  tbc,
-} from "@/data/site.ts";
+import SocialLinks from "@/components/global/SocialLinks.astro";
+import { capabilityHref, industryHref } from "@/data/site.ts";
+import { capabilities, hubs, industries, settings } from "@/sanity/content.ts";
+import { LEGAL_LINKS } from "@/data/legal.ts";
 import { SITE_NAME } from "@/consts.ts";
 
 interface Props {
@@ -23,16 +12,20 @@ interface Props {
 }
 
 const { render = true } = Astro.props;
-const icons = { linkedin, x, facebook, youtube };
+
+const [CAPABILITIES, INDUSTRIES, HUBS, { footerLine }] = await Promise.all([
+  capabilities(),
+  industries(),
+  hubs(),
+  settings(),
+]);
 
 const company = [
-  { label: "About", href: "/#why" },
+  { label: "About", href: "/about" },
   { label: "Careers", href: "/careers" },
-  { label: "Insights", href: "/#insights" },
-  { label: "Locations", href: "/#locations" },
+  { label: "Insights", href: "/insights" },
   { label: "Contact", href: "/contact" },
 ];
-const legal = ["Privacy", "Terms", "Cookies", "Accessibility"];
 ---
 
 {
@@ -41,36 +34,10 @@ const legal = ["Privacy", "Terms", "Cookies", "Accessibility"];
       <div class="footer_inner">
         <div class="footer_top">
           <div class="footer_brand">
-            <a class="footer_logo" href="/" aria-label={`${SITE_NAME} home`}>
+            <a class="footer_logo" href="/" aria-label={SITE_NAME}>
               <Logo />
             </a>
-            <p class="footer_line text-style-large">
-              Technology &amp; talent partners for global enterprises. AI-ready
-              teams that help your capability center grow.
-            </p>
-            <form class="footer_news" data-news novalidate>
-              <label class="footer_news_label" for="news-email">
-                The ManyaIT Brief: ideas on technology, data and AI, once a
-                month.
-              </label>
-              <div class="footer_news_row">
-                <input
-                  id="news-email"
-                  class="footer_news_input"
-                  type="email"
-                  name="email"
-                  autocomplete="email"
-                  placeholder="Work email"
-                  required
-                />
-                <Button type="submit">Subscribe</Button>
-              </div>
-              <p class="footer_news_note text-style-small" role="status" />
-            </form>
-            <Button element="link" href={CTA.primary.href} emphasis="tertiary">
-              {CTA.primary.label}
-              <Icon src={arrow} variant="small" class="button_icon" />
-            </Button>
+            <p class="footer_line">{footerLine}</p>
           </div>
 
           <nav class="footer_cols" aria-label="Footer">
@@ -79,11 +46,16 @@ const legal = ["Privacy", "Terms", "Cookies", "Accessibility"];
               <ul>
                 {CAPABILITIES.map((cap) => (
                   <li>
-                    <a class="footer_link" href={`/#${cap.id}`}>
+                    <a class="footer_link" href={capabilityHref(cap)}>
                       {cap.title}
                     </a>
                   </li>
                 ))}
+                <li>
+                  <a class="footer_link" href="/capabilities/specialist-talent">
+                    Specialist Talent
+                  </a>
+                </li>
               </ul>
             </div>
             <div class="footer_col">
@@ -91,7 +63,7 @@ const legal = ["Privacy", "Terms", "Cookies", "Accessibility"];
               <ul>
                 {INDUSTRIES.map((industry) => (
                   <li>
-                    <a class="footer_link" href={`/#${industry.id}`}>
+                    <a class="footer_link" href={industryHref(industry)}>
                       {industry.title}
                     </a>
                   </li>
@@ -115,12 +87,23 @@ const legal = ["Privacy", "Terms", "Cookies", "Accessibility"];
               <ul class="footer_hubs">
                 {HUBS.map((hub) => (
                   <li>
-                    <span class="footer_hub_city">{hub.city}</span>
+                    <a class="footer_link" href="/about#locations">
+                      {hub.city}
+                    </a>
                     <span class="footer_hub_role">{hub.role}</span>
-                    <span
-                      class="footer_hub_address"
-                      set:html={tbc(hub.address)}
-                    />
+                    <address class="footer_hub_address">{hub.address}</address>
+                    <a
+                      class="footer_link footer_hub_contact"
+                      href={`tel:${hub.phone.replace(/[^+\d]/g, "")}`}
+                    >
+                      {hub.phone}
+                    </a>
+                    <a
+                      class="footer_link footer_hub_contact"
+                      href={`mailto:${hub.email}`}
+                    >
+                      {hub.email}
+                    </a>
                   </li>
                 ))}
               </ul>
@@ -133,28 +116,16 @@ const legal = ["Privacy", "Terms", "Cookies", "Accessibility"];
             &copy; <span data-year>{new Date().getFullYear()}</span> {SITE_NAME}{" "}
             Inc. All rights reserved.
           </p>
-          <ul class="footer_legal text-style-small">
-            {legal.map((label) => (
+          <ul class="footer_legal">
+            {LEGAL_LINKS.map((link) => (
               <li>
-                <a class="footer_link" href="#">
-                  {label}
+                <a class="footer_link" href={link.href}>
+                  {link.label}
                 </a>
               </li>
             ))}
           </ul>
-          <ul class="footer_social">
-            {SOCIAL.map((item) => (
-              <li>
-                <a
-                  class="footer_social_link"
-                  href={item.href}
-                  aria-label={item.label}
-                >
-                  <Icon src={icons[item.icon]} variant="small" />
-                </a>
-              </li>
-            ))}
-          </ul>
+          <SocialLinks />
         </div>
       </div>
     </footer>
@@ -164,23 +135,6 @@ const legal = ["Privacy", "Terms", "Cookies", "Accessibility"];
 <script>
   const year = document.querySelector<HTMLSpanElement>("[data-year]");
   if (year) year.textContent = new Date().getFullYear().toString();
-
-  /* No email platform is connected yet, so the form says so rather than
-     pretending to have subscribed anyone. */
-  for (const form of document.querySelectorAll<HTMLFormElement>(
-    "[data-news]",
-  )) {
-    const note = form.querySelector<HTMLParagraphElement>(".footer_news_note");
-    const input = form.querySelector<HTMLInputElement>("input");
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
-      if (!note || !input) return;
-      note.textContent = input.checkValidity()
-        ? "Thanks. Sign-ups open with the first issue of The ManyaIT Brief."
-        : "Enter a work email address, like name@company.com.";
-      form.dataset.state = input.checkValidity() ? "done" : "invalid";
-    });
-  }
 </script>
 
 <style is:global>
@@ -188,8 +142,8 @@ const legal = ["Privacy", "Terms", "Cookies", "Accessibility"];
     .footer_wrap {
       display: flex;
       justify-content: center;
-      padding-top: var(--section-space-small);
-      padding-bottom: var(--space-6);
+      padding-top: var(--space-8);
+      padding-bottom: var(--space-5);
       padding-inline: var(--site-margin);
       background-color: var(--background);
       color: var(--text);
@@ -201,16 +155,16 @@ const legal = ["Privacy", "Terms", "Cookies", "Accessibility"];
       max-width: var(--max-width-main);
       display: flex;
       flex-direction: column;
-      gap: var(--section-space-small);
+      gap: var(--space-7);
     }
 
     .footer_top {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
-      gap: var(--space-8);
+      gap: var(--space-6);
       @media (width >= 64rem) {
-        grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-        gap: var(--section-space-small);
+        grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+        gap: var(--space-8);
       }
     }
 
@@ -218,71 +172,23 @@ const legal = ["Privacy", "Terms", "Cookies", "Accessibility"];
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: var(--space-5);
+      gap: var(--space-3);
     }
 
     .footer_logo {
-      font-size: 1.05rem;
+      font-size: 0.95rem;
     }
 
     .footer_line {
       max-width: 34ch;
-      color: var(--text-body);
-    }
-
-    .footer_news {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-2);
-      width: 100%;
-      max-width: 28rem;
-    }
-
-    .footer_news_label {
       font-size: var(--text-small);
-      color: var(--text-2);
-    }
-
-    .footer_news_row {
-      display: flex;
-      gap: var(--space-1);
-      padding: 0.3rem;
-      border: var(--border-width) solid var(--border);
-      border-radius: calc(var(--radius-small) + 0.3rem);
-      background-color: var(--background-2);
-      transition: border-color var(--hover-duration) var(--hover-ease);
-      &:focus-within {
-        border-color: var(--focus-ring);
-      }
-    }
-
-    .footer_news_input {
-      flex: 1;
-      min-width: 0;
-      padding-inline: 0.75rem;
-      background: transparent;
-      border: 0;
-      color: inherit;
-      &::placeholder {
-        color: var(--text-2);
-      }
-      &:focus-visible {
-        outline: none;
-      }
-    }
-
-    .footer_news_note:empty {
-      display: none;
-    }
-
-    .footer_news[data-state="invalid"] .footer_news_note {
-      color: color-mix(in srgb, var(--error) 45%, var(--white));
+      color: var(--text-body);
     }
 
     .footer_cols {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: var(--space-7) var(--space-5);
+      gap: var(--space-5);
       @media (width >= 48rem) {
         grid-template-columns: repeat(4, minmax(0, 1fr));
       }
@@ -291,11 +197,11 @@ const legal = ["Privacy", "Terms", "Cookies", "Accessibility"];
     .footer_col {
       display: flex;
       flex-direction: column;
-      gap: var(--space-4);
+      gap: var(--space-3);
       & ul {
         display: flex;
         flex-direction: column;
-        gap: var(--space-2);
+        gap: var(--space-1);
       }
     }
 
@@ -320,27 +226,32 @@ const legal = ["Privacy", "Terms", "Cookies", "Accessibility"];
     }
 
     .footer_hubs {
-      gap: var(--space-4) !important;
+      gap: var(--space-3) !important;
       & li {
         display: flex;
         flex-direction: column;
-        gap: 0.15rem;
-        font-size: var(--text-small);
+        gap: 0.1rem;
       }
     }
 
-    .footer_hub_city {
-      color: var(--text);
-      font-weight: var(--primary-bold);
-    }
-
-    .footer_hub_role,
-    .footer_hub_address {
+    .footer_hub_role {
+      font-size: 0.8rem;
       color: var(--text-2);
     }
 
+    /* The only place on the site that gives each office's city, address
+       and direct contacts. */
     .footer_hub_address {
+      margin-block: 0.3rem;
+      font-size: 0.8rem;
+      font-style: normal;
+      line-height: 1.5;
       white-space: pre-line;
+      color: var(--text-2);
+    }
+
+    .footer_hub_contact {
+      font-size: 0.8rem;
     }
 
     .footer_bottom {
@@ -348,8 +259,8 @@ const legal = ["Privacy", "Terms", "Cookies", "Accessibility"];
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: var(--space-4) var(--space-6);
-      padding-top: var(--space-5);
+      gap: var(--space-3) var(--space-6);
+      padding-top: var(--space-4);
       border-top: var(--border-width) solid var(--divider);
     }
 
@@ -357,37 +268,13 @@ const legal = ["Privacy", "Terms", "Cookies", "Accessibility"];
       color: var(--text-2);
     }
 
+    /* Sized here rather than with a text-style class, whose leading-trim
+       pseudo-elements would become flex items and indent the first link. */
     .footer_legal {
       display: flex;
       flex-wrap: wrap;
       gap: var(--space-2) var(--space-5);
-    }
-
-    .footer_social {
-      display: flex;
-      gap: var(--space-1);
-    }
-
-    .footer_social_link {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      place-items: center;
-      width: 2.5rem;
-      height: 2.5rem;
-      border: var(--border-width) solid var(--border);
-      border-radius: var(--radius-round);
-      color: var(--text-body);
-      transition:
-        background-color var(--hover-duration) var(--hover-ease),
-        color var(--hover-duration) var(--hover-ease),
-        border-color var(--hover-duration) var(--hover-ease);
-      @media (hover: hover) {
-        &:hover {
-          background-color: var(--text);
-          border-color: var(--text);
-          color: var(--background);
-        }
-      }
+      font-size: var(--text-small);
     }
   }
 </style>

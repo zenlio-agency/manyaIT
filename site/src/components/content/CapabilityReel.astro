@@ -1,13 +1,8 @@
 ---
 import type { HTMLAttributes } from "astro/types";
-import Icon from "@/components/media/Icon.astro";
+import SanityImg from "@/components/media/SanityImg.astro";
 import Button from "@/components/Button.astro";
-import capData from "@/assets/icons/cap-data.svg";
-import capSap from "@/assets/icons/cap-sap.svg";
-import capAi from "@/assets/icons/cap-ai.svg";
-import capFlow from "@/assets/icons/cap-flow.svg";
-import capCode from "@/assets/icons/cap-code.svg";
-import check from "@/assets/icons/check.svg";
+import { home } from "@/sanity/content.ts";
 
 type Props = HTMLAttributes<"div"> & {
   /** Set to `false` to omit the component. */
@@ -16,15 +11,8 @@ type Props = HTMLAttributes<"div"> & {
 
 const { render = true, class: className, ...rest } = Astro.props;
 
-/* Sample area chart for the data tile, drawn once at build time. */
-const points = [18, 22, 19, 27, 25, 31, 29, 36, 34, 41, 39, 46];
-const chartLine = points
-  .map(
-    (y, i) =>
-      `${i === 0 ? "M" : "L"}${(i / (points.length - 1)) * 100} ${50 - y}`,
-  )
-  .join(" ");
-const chartArea = `${chartLine} L100 50 L0 50 Z`;
+/* The photos and captions are edited in Sanity, on the homepage. */
+const { reel: photos } = await home();
 ---
 
 {
@@ -38,177 +26,29 @@ const chartArea = `${chartLine} L100 50 L0 50 Z`;
               aria-hidden={copy === 1 ? "true" : undefined}
               inert={copy === 1}
             >
-              <figure class="reel_tile" data-cap="data">
-                <div class="reel_box">
-                  <div class="reel_head">
-                    <Icon src={capData} variant="small" class="reel_icon" />
-                    <span>Data platform</span>
-                    <span class="reel_live">Live</span>
-                  </div>
-                  <div class="reel_sources">
-                    <span>ERP</span>
-                    <span>CRM</span>
-                    <span>IoT</span>
-                    <span class="reel_sources_to">One trusted source</span>
-                  </div>
-                  <svg
-                    class="reel_chart"
-                    viewBox="0 0 100 50"
-                    preserveAspectRatio="none"
-                    aria-hidden="true"
-                  >
-                    <path class="reel_chart_area" d={chartArea} />
-                    <path
-                      class="reel_chart_line"
-                      d={chartLine}
-                      vector-effect="non-scaling-stroke"
+              {photos.map((photo, index) => (
+                <figure class="reel_tile" data-lift={index}>
+                  <div class="reel_box">
+                    <SanityImg
+                      image={
+                        copy === 0
+                          ? photo.image
+                          : { ...photo.image, alt: "", decorative: true }
+                      }
+                      variant="densities"
+                      width={296}
+                      height={216}
+                      loading="eager"
                     />
-                  </svg>
-                </div>
-                <figcaption>Live pipelines into one trusted source</figcaption>
-              </figure>
-
-              <figure class="reel_tile" data-cap="sap">
-                <div class="reel_box">
-                  <div class="reel_head">
-                    <Icon src={capSap} variant="small" class="reel_icon" />
-                    <span>SAP S/4HANA</span>
                   </div>
-                  <ul class="reel_checks">
-                    <li>
-                      <Icon src={check} variant="small" />
-                      Finance
-                    </li>
-                    <li>
-                      <Icon src={check} variant="small" />
-                      Supply chain
-                    </li>
-                    <li>
-                      <Icon src={check} variant="small" />
-                      Extensions on SAP BTP
-                    </li>
-                  </ul>
-                  <div class="reel_meter">
-                    <span>Clean core</span>
-                    <span class="reel_meter_bar">
-                      <span />
-                    </span>
-                  </div>
-                </div>
-                <figcaption>Clean core, upgrade-ready</figcaption>
-              </figure>
-
-              <figure class="reel_tile" data-cap="ai">
-                <div class="reel_box">
-                  <div class="reel_head">
-                    <Icon src={capAi} variant="small" class="reel_icon" />
-                    <span>Knowledge assistant</span>
-                  </div>
-                  <p class="reel_ask">
-                    Which supplier contracts renew this quarter?
-                  </p>
-                  <div class="reel_answer">
-                    <span class="reel_line" style="--w: 92%" />
-                    <span class="reel_line" style="--w: 78%" />
-                    <span class="reel_line" style="--w: 60%" />
-                    <span class="reel_sources_note">
-                      Grounded in 3 documents
-                    </span>
-                  </div>
-                </div>
-                <figcaption>Knowledge assistant in production</figcaption>
-              </figure>
-
-              <figure class="reel_tile" data-cap="ai">
-                <div class="reel_box">
-                  <div class="reel_head">
-                    <Icon src={capFlow} variant="small" class="reel_icon" />
-                    <span>Request workflow</span>
-                  </div>
-                  <ol class="reel_flow">
-                    <li class="is-done">Read request</li>
-                    <li class="is-done">Check ERP</li>
-                    <li class="is-done">Draft action</li>
-                    <li class="is-waiting">Awaiting approval</li>
-                  </ol>
-                </div>
-                <figcaption>
-                  Requests resolved end to end, with approvals
-                </figcaption>
-              </figure>
-
-              <figure class="reel_tile" data-cap="digital">
-                <div class="reel_box">
-                  <div class="reel_head">
-                    <Icon src={capCode} variant="small" class="reel_icon" />
-                    <span>Release pipeline</span>
-                  </div>
-                  <ul class="reel_releases">
-                    <li>
-                      <span>Release 2.4</span>
-                      <span class="reel_status is-ok">Deployed</span>
-                    </li>
-                    <li>
-                      <span>Release 2.5</span>
-                      <span class="reel_status is-ok">Deployed</span>
-                    </li>
-                    <li>
-                      <span>Release 2.6</span>
-                      <span class="reel_status">In review</span>
-                    </li>
-                  </ul>
-                  <div class="reel_stages" aria-hidden="true">
-                    <span>Build</span>
-                    <span>Test</span>
-                    <span>Deploy</span>
-                  </div>
-                </div>
-                <figcaption>Cloud-native releases every sprint</figcaption>
-              </figure>
-
-              <figure class="reel_tile">
-                <div class="reel_box theme-dark">
-                  <div class="reel_head">
-                    <span>Two cities, one team</span>
-                    <span class="reel_live">Live</span>
-                  </div>
-                  <div class="reel_cities">
-                    <div>
-                      <span class="reel_city">Dallas</span>
-                      <span
-                        class="reel_time"
-                        data-clock="America/Chicago"
-                        data-locale="en-US"
-                      >
-                        --:--
-                      </span>
-                    </div>
-                    <span class="reel_cities_line" aria-hidden="true" />
-                    <div>
-                      <span class="reel_city">Hyderabad</span>
-                      <span
-                        class="reel_time"
-                        data-clock="Asia/Kolkata"
-                        data-locale="en-IN"
-                      >
-                        --:--
-                      </span>
-                    </div>
-                  </div>
-                  <p class="reel_cities_note">
-                    The working day hands over instead of stopping.
-                  </p>
-                </div>
-                <figcaption>Dallas · Hyderabad</figcaption>
-              </figure>
+                  <figcaption>{photo.caption}</figcaption>
+                </figure>
+              ))}
             </div>
           ))}
         </div>
       </div>
       <div class="reel_controls">
-        <span class="reel_note text-style-small">
-          Illustrative views, not client data
-        </span>
         <Button
           variant="play"
           emphasis="secondary"
@@ -235,16 +75,23 @@ const chartArea = `${chartLine} L100 50 L0 50 Z`;
     toggle?.addEventListener("click", () =>
       setPlaying(reel.dataset.state !== "playing"),
     );
+    /* No visible button: a pointer pauses the reel by hovering, a tap or
+       click stops or restarts it, and the keyboard reaches the toggle. */
+    reel
+      .querySelector(".reel_viewport")
+      ?.addEventListener("click", () =>
+        setPlaying(reel.dataset.state !== "playing"),
+      );
 
-    /* One capability at a time lifts out of the reel, walking through the
-       tiles' data-cap keys. Still for reduced motion and hidden tabs. */
-    const tiles = [...reel.querySelectorAll<HTMLElement>("[data-cap]")];
-    const keys = [...new Set(tiles.map((tile) => tile.dataset.cap))];
+    /* One photo at a time lifts out of the reel, walking through the
+       tiles' data-lift keys. Still for reduced motion and hidden tabs. */
+    const tiles = [...reel.querySelectorAll<HTMLElement>("[data-lift]")];
+    const keys = [...new Set(tiles.map((tile) => tile.dataset.lift))];
     let index = 0;
     const show = (next: number) => {
       index = next;
       tiles.forEach((tile) =>
-        tile.classList.toggle("is-active", tile.dataset.cap === keys[index]),
+        tile.classList.toggle("is-active", tile.dataset.lift === keys[index]),
       );
     };
     if (keys.length) {
@@ -254,33 +101,6 @@ const chartArea = `${chartLine} L100 50 L0 50 Z`;
         show((index + 1) % keys.length);
       }, 2600);
     }
-  }
-
-  /* Live local time for any element carrying data-clock. */
-  const clocks = [...document.querySelectorAll<HTMLElement>("[data-clock]")];
-  const tick = () => {
-    for (const clock of clocks) {
-      try {
-        clock.textContent = new Intl.DateTimeFormat(
-          clock.dataset.locale || "en-US",
-          {
-            hour: "2-digit",
-            minute: "2-digit",
-            timeZone: clock.dataset.clock,
-            timeZoneName: "short",
-          },
-        )
-          .format(new Date())
-          /* en-IN writes "am"; match the US clock's "AM". */
-          .replace(/\b(am|pm)\b/, (period) => period.toUpperCase());
-      } catch {
-        /* An unknown zone leaves the placeholder in place. */
-      }
-    }
-  };
-  if (clocks.length) {
-    tick();
-    window.setInterval(tick, 30_000);
   }
 </script>
 
@@ -345,16 +165,13 @@ const chartArea = `${chartLine} L100 50 L0 50 Z`;
       }
     }
 
+    /* Photo card. The active one rings in blue and rises a little. */
     .reel_box {
       height: 13.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-3);
-      padding: var(--space-4);
-      background-color: var(--background-2);
       border: var(--border-width) solid var(--border);
       border-radius: var(--radius-main);
       overflow: clip;
+      background-color: var(--background-3);
       transition:
         border-color 500ms var(--hover-ease),
         box-shadow 500ms var(--hover-ease),
@@ -364,300 +181,42 @@ const chartArea = `${chartLine} L100 50 L0 50 Z`;
         box-shadow: var(--shadow-float);
         translate: 0 -0.25rem;
       }
-    }
-
-    .reel_head {
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-      font-family: var(--heading-family);
-      font-size: 0.8rem;
-      font-weight: var(--heading-bold);
-      color: var(--text);
-    }
-
-    .reel_icon {
-      color: var(--accent);
-    }
-
-    .reel_live {
-      margin-left: auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      font-family: var(--primary-family);
-      font-size: 0.7rem;
-      font-weight: var(--primary-medium);
-      color: var(--success);
-      &::before {
-        content: "";
-        width: 0.4rem;
-        height: 0.4rem;
-        border-radius: 50%;
-        background-color: currentcolor;
-      }
-      .theme-dark & {
-        color: #5ad1a0;
-      }
-    }
-
-    .reel_sources {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem;
-      font-size: 0.7rem;
-      & span {
-        padding: 0.2rem 0.5rem;
-        border-radius: var(--radius-round);
-        background-color: var(--background-3);
-        color: var(--text-body);
-      }
-      & .reel_sources_to {
-        background-color: var(--accent-soft);
-        color: var(--accent-text);
-        font-weight: var(--primary-medium);
-      }
-    }
-
-    .reel_chart {
-      flex: 1;
-      width: 100%;
-      min-height: 0;
-    }
-
-    .reel_chart_area {
-      fill: var(--accent-soft);
-    }
-
-    .reel_chart_line {
-      fill: none;
-      stroke: var(--accent);
-      stroke-width: 1.6;
-    }
-
-    .reel_checks {
-      display: flex;
-      flex-direction: column;
-      gap: 0.45rem;
-      font-size: 0.8rem;
-      color: var(--text-body);
-      & li {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-      & .icon {
-        padding: 0.2rem;
-        width: 1.1rem;
-        border-radius: 50%;
-        background-color: var(--success-tint);
-        color: var(--success);
-      }
-    }
-
-    .reel_meter {
-      margin-top: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      font-size: 0.72rem;
-      color: var(--text-2);
-    }
-
-    .reel_meter_bar {
-      height: 0.35rem;
-      border-radius: var(--radius-round);
-      background-color: var(--background-3);
-      overflow: clip;
-      & span {
-        display: block;
-        width: 86%;
+      & .image {
+        width: 100%;
         height: 100%;
-        border-radius: inherit;
-        background-color: var(--accent);
+        object-fit: cover;
       }
     }
 
-    .reel_ask {
-      align-self: flex-end;
-      max-width: 85%;
-      padding: 0.45rem 0.65rem;
-      border-radius: 0.75rem 0.75rem 0.2rem 0.75rem;
-      background-color: var(--accent);
-      color: var(--white);
-      font-size: 0.75rem;
-      line-height: 1.35;
-    }
-
-    .reel_answer {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      padding: 0.6rem 0.65rem;
-      border-radius: 0.75rem 0.75rem 0.75rem 0.2rem;
-      background-color: var(--background-3);
-    }
-
-    .reel_line {
-      display: block;
-      width: var(--w);
-      height: 0.4rem;
-      border-radius: var(--radius-round);
-      background-color: var(--slate-200);
-    }
-
-    .reel_sources_note {
-      font-size: 0.68rem;
-      color: var(--accent-text);
-    }
-
-    .reel_flow {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      font-size: 0.78rem;
-      & li {
-        position: relative;
-        display: flex;
-        align-items: center;
-        gap: 0.55rem;
-        color: var(--text-body);
-        &::before {
-          content: "";
-          flex: none;
-          width: 0.6rem;
-          height: 0.6rem;
-          border-radius: 50%;
-          border: 0.125rem solid var(--border);
-        }
-      }
-      & li.is-done::before {
-        border-color: var(--accent);
-        background-color: var(--accent);
-      }
-      & li.is-waiting {
-        align-self: flex-start;
-        margin-top: 0.15rem;
-        padding: 0.2rem 0.55rem 0.2rem 0.4rem;
-        border-radius: var(--radius-round);
-        background-color: var(--warning-tint);
-        color: var(--warning);
-        font-weight: var(--primary-medium);
-        &::before {
-          border-color: var(--warning);
-          animation: reel-wait 1.6s var(--hover-ease) infinite;
-        }
-      }
-    }
-
-    @keyframes reel-wait {
-      50% {
-        background-color: var(--warning);
-      }
-    }
-
-    .reel_releases {
-      display: flex;
-      flex-direction: column;
-      font-size: 0.78rem;
-      & li {
-        display: flex;
-        justify-content: space-between;
-        padding-block: 0.35rem;
-        border-bottom: var(--border-width) solid var(--divider);
-        color: var(--text-body);
-      }
-    }
-
-    .reel_status {
-      font-size: 0.7rem;
-      color: var(--warning);
-      &.is-ok {
-        color: var(--success);
-      }
-    }
-
-    .reel_stages {
-      margin-top: auto;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.3rem;
-      font-size: 0.65rem;
-      color: var(--text-2);
-      & span {
-        padding-top: 0.35rem;
-        border-top: 0.2rem solid var(--accent);
-      }
-      & span:last-child {
-        border-top-color: var(--accent-soft);
-      }
-    }
-
-    .reel_cities {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      gap: 0.6rem;
-      & > div {
-        display: flex;
-        flex-direction: column;
-        gap: 0.2rem;
-      }
-      & > div:last-child {
-        text-align: right;
-      }
-    }
-
-    .reel_city {
-      font-size: 0.72rem;
-      color: var(--text-2);
-    }
-
-    .reel_time {
-      font-family: var(--heading-family);
-      font-size: 1.05rem;
-      font-weight: var(--heading-bold);
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
-    }
-
-    .reel_cities_line {
-      width: 2.5rem;
-      height: var(--border-width);
-      background-image: linear-gradient(
-        to right,
-        var(--accent) 50%,
-        transparent 50%
-      );
-      background-size: 0.5rem 100%;
-      animation: reel-dash 1.2s linear infinite;
-    }
-
-    @keyframes reel-dash {
-      to {
-        background-position: 0.5rem 0;
-      }
-    }
-
-    .reel_cities_note {
-      font-size: 0.75rem;
-      color: var(--text-2);
+    /* The toggle takes no space and shows only when the keyboard reaches
+       it, over the reel's bottom edge. */
+    .reel_wrap {
+      position: relative;
     }
 
     .reel_controls {
+      position: absolute;
+      inset: auto 0 0;
       width: var(--site-width);
       max-width: var(--max-width-main);
       margin-inline: auto;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--space-4);
+      justify-content: flex-end;
       color: var(--text-2);
+      pointer-events: none;
     }
 
     .reel_toggle {
       font-size: 0.75rem;
+      pointer-events: auto;
+      &:not(:focus-visible) {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {

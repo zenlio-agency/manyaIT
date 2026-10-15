@@ -1,0 +1,379 @@
+---
+import Heading from "@/components/typography/Heading.astro";
+import Paragraph from "@/components/typography/Paragraph.astro";
+import Button from "@/components/Button.astro";
+import Form from "@/components/form/Form.astro";
+import Input from "@/components/form/Input.astro";
+import Select from "@/components/form/Select.astro";
+import Textarea from "@/components/form/Textarea.astro";
+import Choice from "@/components/form/Choice.astro";
+import { LEGAL, mailLink } from "@/data/legal.ts";
+import { tbc } from "@/data/site.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+}
+
+const { render = true } = Astro.props;
+
+const types = [
+  { value: "access", label: "Access a copy of my data" },
+  { value: "correct", label: "Correct my data" },
+  { value: "delete", label: "Delete my data" },
+  { value: "marketing", label: "Opt out of marketing" },
+  {
+    value: "sale-sharing",
+    label: "Opt out of sale, sharing or targeted ads",
+  },
+  { value: "appeal", label: "Appeal a previous decision" },
+  { value: "other", label: "Something else" },
+];
+
+const relationships = [
+  { value: "visitor", label: "Website visitor" },
+  { value: "client", label: "Client contact" },
+  { value: "subscriber", label: "Marketing email subscriber" },
+  { value: "applicant", label: "Applicant or Talent Network member" },
+  { value: "other", label: "Other" },
+];
+
+const regions = [
+  { value: "india", label: "India" },
+  { value: "us", label: "United States" },
+  { value: "eu-uk", label: "European Union or United Kingdom" },
+  { value: "other", label: "Somewhere else" },
+];
+
+/* What happens after sending, beside the form. */
+const steps = [
+  {
+    title: "We confirm it's you",
+    text: "We email the address you give and may ask for one more detail we already hold. We never ask for more than we need to check.",
+  },
+  {
+    title: `We acknowledge it within ${LEGAL.acknowledge}`,
+    text: "Your acknowledgement includes a reference number to quote if you write to us again.",
+  },
+  {
+    title: "We answer in full",
+    text: "Within 45 days for Texas residents, one month for people in the EU or UK, and within the period the Digital Personal Data Protection Rules set for people in India. If we need longer, we tell you why.",
+  },
+  {
+    title: "You can appeal",
+    text: 'If you disagree with our answer, choose "Appeal a previous decision" and quote your reference. A different person reviews it, and we reply within 60 days. You can also complain to your regulator, as each privacy notice explains.',
+  },
+];
+---
+
+{
+  render && (
+    <div class="privacy-request_wrap" data-privacy-request>
+      <div class="privacy-request_card">
+        <Heading tag="h2" variant="h4" class="privacy-request_title">
+          Your request
+        </Heading>
+        <Form
+          name="privacy-request"
+          successMessage="Thanks. This preview form isn't connected yet, so nothing was sent. Once it is, you'll see a reference number here and get it by email. Until then, email your request to the privacy team."
+        >
+          <div class="privacy-request_grid">
+            <Select
+              label="What would you like us to do?"
+              name="type"
+              options={types}
+              placeholder="Choose a request"
+              required
+            />
+            <Select
+              label="Your relationship to ManyaIT"
+              name="relationship"
+              options={relationships}
+              placeholder="Choose one"
+              required
+            />
+            <Input
+              label="Full name"
+              name="name"
+              autocomplete="name"
+              placeholder="Your name"
+              required
+            />
+            <Input
+              label="Email"
+              variant="email"
+              name="email"
+              placeholder="name@example.com"
+              required
+            />
+            <Select
+              label="Where you live"
+              name="region"
+              options={regions}
+              placeholder="Choose a region"
+              required
+              data-region
+            />
+            <div class="privacy-request_state" data-state-field>
+              <Select
+                label="US state"
+                variant="state"
+                name="state"
+                placeholder="Choose a state"
+              />
+            </div>
+            <div class="privacy-request_wide">
+              <Textarea
+                label="Details"
+                name="details"
+                placeholder="Anything that helps us find your data or understand the request"
+                minLines={5}
+              />
+            </div>
+            <div class="privacy-request_wide privacy-request_agent">
+              <Choice
+                label="I'm making this request for someone else, as their authorised agent."
+                name="agent"
+                value="yes"
+                data-agent
+              />
+              <div class="privacy-request_agent_fields" data-agent-fields>
+                <Input
+                  label="Agent's full name"
+                  name="agent-name"
+                  placeholder="Your name"
+                />
+                <Input
+                  label="Agent's email"
+                  variant="email"
+                  name="agent-email"
+                  placeholder="name@example.com"
+                />
+                <p class="privacy-request_hint text-style-small">
+                  We'll ask for signed permission from the person you act for,
+                  and may ask them to confirm their identity with us directly.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="privacy-request_submit">
+            <Button type="submit">Send request</Button>
+            <p class="privacy-request_notice text-style-small">
+              We use these details only to verify and answer your request.
+            </p>
+          </div>
+        </Form>
+      </div>
+
+      <aside class="privacy-request_aside" aria-labelledby="what-happens-next">
+        <Heading tag="h2" variant="h5" id="what-happens-next">
+          What happens next
+        </Heading>
+        <ol class="privacy-request_steps">
+          {steps.map((step, index) => (
+            <li>
+              <span class="privacy-request_step_index">{index + 1}</span>
+              <span class="privacy-request_step_text">
+                <strong set:html={tbc(step.title)} />
+                <span set:html={tbc(step.text)} />
+              </span>
+            </li>
+          ))}
+        </ol>
+        <Paragraph class="privacy-request_email">
+          <Fragment
+            set:html={tbc(
+              `Prefer email? Write to ${mailLink(LEGAL.privacyEmail)} with the same details.`,
+            )}
+          />
+        </Paragraph>
+      </aside>
+    </div>
+  )
+}
+
+<script>
+  for (const wrap of document.querySelectorAll<HTMLElement>(
+    "[data-privacy-request]",
+  )) {
+    /* The state list only matters for US residents, and the agent's details
+       only when someone acts for another person. Without JavaScript both
+       stay visible. */
+    const region = wrap.querySelector<HTMLSelectElement>("select[data-region]");
+    const state = wrap.querySelector<HTMLElement>("[data-state-field]");
+    const agent = wrap.querySelector<HTMLInputElement>("input[data-agent]");
+    const agentFields = wrap.querySelector<HTMLElement>("[data-agent-fields]");
+
+    const sync = () => {
+      if (state && region) state.hidden = region.value !== "us";
+      if (agentFields && agent) {
+        agentFields.hidden = !agent.checked;
+        for (const input of agentFields.querySelectorAll("input")) {
+          input.required = agent.checked;
+        }
+      }
+    };
+    region?.addEventListener("change", sync);
+    agent?.addEventListener("change", sync);
+    wrap
+      .querySelector("form")
+      ?.addEventListener("reset", () => requestAnimationFrame(sync));
+    sync();
+  }
+</script>
+
+<style is:global>
+  @layer components {
+    :where(.privacy-request_wrap) :where(.heading, .text) {
+      margin-block: 0;
+    }
+
+    .privacy-request_wrap {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-7) var(--section-space-small);
+      align-items: start;
+      @media (width >= 64rem) {
+        grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+      }
+    }
+
+    .privacy-request_card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-5);
+      padding: var(--space-6);
+      border: var(--border-width) solid var(--border);
+      border-radius: var(--radius-main);
+      background-color: var(--background-2);
+      box-shadow: var(--shadow-raised);
+      @media (width >= 48rem) {
+        padding: var(--space-7) var(--space-6);
+      }
+      & .form_fields {
+        row-gap: var(--space-5);
+      }
+      & .form-choice_mark {
+        --_mark: var(--background);
+        --_mark-hover: var(--accent-soft);
+        --_mark-chosen: var(--accent);
+        --_ink: var(--white);
+        border-color: var(--border);
+      }
+    }
+
+    .privacy-request_grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-5);
+      align-items: start;
+      @media (width >= 48rem) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .privacy-request_wide {
+      @media (width >= 48rem) {
+        grid-column: 1 / -1;
+      }
+    }
+
+    .privacy-request_state[hidden],
+    .privacy-request_agent_fields[hidden] {
+      display: none;
+    }
+
+    .privacy-request_agent {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      padding-top: var(--space-4);
+      border-top: var(--border-width) solid var(--divider);
+    }
+
+    .privacy-request_agent_fields {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-4);
+      @media (width >= 48rem) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        & .privacy-request_hint {
+          grid-column: 1 / -1;
+        }
+      }
+    }
+
+    .privacy-request_hint,
+    .privacy-request_notice {
+      margin-block: 0;
+      color: var(--text-2);
+    }
+
+    .privacy-request_submit {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-3) var(--space-5);
+    }
+
+    .privacy-request_aside {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-5);
+      @media (width >= 64rem) {
+        position: sticky;
+        top: calc(var(--nav-height) + var(--space-6));
+      }
+    }
+
+    .privacy-request_steps {
+      display: flex;
+      flex-direction: column;
+      border-top: var(--border-width) solid var(--border);
+      & li {
+        display: flex;
+        gap: var(--space-4);
+        padding-block: var(--space-4);
+        border-bottom: var(--border-width) solid var(--border);
+      }
+    }
+
+    .privacy-request_step_index {
+      flex: none;
+      display: grid;
+      place-items: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background-color: var(--accent-soft);
+      color: var(--accent-text);
+      font-family: var(--heading-family);
+      font-size: 0.72rem;
+      font-weight: var(--heading-bold);
+    }
+
+    .privacy-request_step_text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      font-size: var(--text-small);
+      line-height: 1.55;
+      color: var(--text-body);
+      & strong {
+        font-family: var(--heading-family);
+        font-weight: var(--heading-bold);
+        color: var(--text);
+      }
+    }
+
+    .privacy-request_email {
+      font-size: var(--text-small);
+      & a {
+        color: var(--link-text);
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+      }
+    }
+  }
+</style>

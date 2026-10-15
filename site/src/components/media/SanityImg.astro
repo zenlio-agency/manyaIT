@@ -1,0 +1,78 @@
+---
+import type { ComponentProps } from "astro/types";
+import Img from "@/components/media/Img.astro";
+import {
+  altText,
+  imageSource,
+  objectPosition,
+  type SanityImage,
+} from "@/sanity/image.ts";
+
+type Props = {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** An image from a Sanity query. Nothing renders without one. */
+  image: SanityImage | null | undefined;
+  /** Responsive image mode, as on `Img`. */
+  variant?: "full-width" | "constrained" | "densities";
+  /** Display width. With `height`, crops to that shape around the hotspot.
+   *
+   * @min 1
+   * @int */
+  width?: number;
+  /** Display height.
+   *
+   * @min 1
+   * @int */
+  height?: number;
+  /** Responsive `sizes` value, for `constrained`. */
+  sizes?: string;
+  /** Output quality. */
+  quality?: "low" | "mid" | "high" | "max";
+  /** Fit without cropping and remove the skeleton tint. */
+  transparent?: boolean;
+  /** Loading behavior. */
+  loading?: "lazy" | "eager";
+  /** Fetch priority. */
+  fetchPriority?: "auto" | "high" | "low";
+  class?: string;
+};
+
+const {
+  render = true,
+  image,
+  variant = "full-width",
+  width,
+  height,
+  ...rest
+} = Astro.props;
+
+/* A fixed width and height crop the file to that shape in Sanity, around
+   the hotspot; otherwise the editor's crop sets the shape. */
+const source = image
+  ? imageSource(image, width && height ? width / height : undefined)
+  : undefined;
+
+const size = !source
+  ? {}
+  : width && height
+    ? { width, height }
+    : width
+      ? { width, height: Math.round((width * source.height) / source.width) }
+      : { width: source.width, height: source.height };
+
+const position = image ? objectPosition(image) : undefined;
+
+/* Always set `variant`: without it, `Img` would link straight to Sanity
+   instead of copying the image into the build. */
+const props = {
+  ...rest,
+  ...size,
+  variant,
+  src: source?.url ?? "",
+  alt: image ? altText(image) : "",
+  style: position ? `object-position: ${position}` : undefined,
+} as ComponentProps<typeof Img>;
+---
+
+{render && source && <Img {...props} />}

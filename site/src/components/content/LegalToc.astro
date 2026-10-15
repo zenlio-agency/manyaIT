@@ -1,0 +1,165 @@
+---
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** The page's numbered sections, in order. */
+  sections?: { slug: string; text: string }[];
+  /** `sticky` sits in the side column from 64rem; `collapsible` below it. */
+  variant?: "sticky" | "collapsible";
+}
+
+const { render = true, sections = [], variant = "sticky" } = Astro.props;
+
+const list = sections.map((section, index) => ({
+  ...section,
+  number: index + 1,
+}));
+---
+
+{
+  render &&
+    list.length > 0 &&
+    (variant === "sticky" ? (
+      <nav class="legal-toc_wrap is-sticky" aria-label="On this page" data-toc>
+        <p class="legal-toc_title">On this page</p>
+        <ol class="legal-toc_list">
+          {list.map((item) => (
+            <li>
+              <a href={`#${item.slug}`}>
+                <span class="legal-toc_num">{item.number}</span>
+                {item.text}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    ) : (
+      <details class="legal-toc_wrap is-collapsible">
+        <summary class="legal-toc_title">On this page</summary>
+        <nav aria-label="On this page">
+          <ol class="legal-toc_list">
+            {list.map((item) => (
+              <li>
+                <a href={`#${item.slug}`}>
+                  <span class="legal-toc_num">{item.number}</span>
+                  {item.text}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      </details>
+    ))
+}
+
+<script>
+  /* Marks the section being read: the last heading above the top third of
+     the screen. */
+  const toc = document.querySelector<HTMLElement>("[data-toc]");
+  const headings = [
+    ...document.querySelectorAll<HTMLElement>(".legal_body h2[id]"),
+  ];
+  if (toc && headings.length) {
+    const links = [...toc.querySelectorAll<HTMLAnchorElement>("a")];
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const line = innerHeight / 3;
+      let current = headings[0].id;
+      for (const heading of headings) {
+        if (heading.getBoundingClientRect().top <= line) current = heading.id;
+      }
+      for (const link of links) {
+        if (link.hash === `#${current}`)
+          link.setAttribute("aria-current", "location");
+        else link.removeAttribute("aria-current");
+      }
+    };
+    addEventListener(
+      "scroll",
+      () => {
+        if (!frame) frame = requestAnimationFrame(update);
+      },
+      { passive: true },
+    );
+    update();
+  }
+</script>
+
+<style is:global>
+  @layer components {
+    .legal-toc_title {
+      font-family: var(--heading-family);
+      font-size: 0.72rem;
+      font-weight: var(--heading-bold);
+      letter-spacing: var(--letter-spacing-wide);
+      text-transform: uppercase;
+      color: var(--text-2);
+    }
+
+    .legal-toc_list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      & a {
+        display: flex;
+        gap: 0.6rem;
+        padding: 0.4rem 0.75rem;
+        border-left: 0.125rem solid var(--divider);
+        font-size: var(--text-small);
+        line-height: 1.4;
+        color: var(--text-body);
+        text-decoration: none;
+        transition:
+          color var(--hover-duration) var(--hover-ease),
+          border-color var(--hover-duration) var(--hover-ease);
+        @media (hover: hover) {
+          &:hover {
+            color: var(--accent-text);
+          }
+        }
+        &[aria-current] {
+          border-left-color: var(--accent);
+          color: var(--accent-text);
+          font-weight: var(--heading-medium);
+        }
+      }
+    }
+
+    .legal-toc_num {
+      flex: none;
+      min-width: 1.1rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-2);
+    }
+
+    .legal-toc_wrap.is-sticky {
+      display: none;
+      @media (width >= 64rem) {
+        position: sticky;
+        top: calc(var(--nav-height) + var(--space-5));
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+        max-height: calc(100svh - var(--nav-height) - var(--space-7));
+        overflow-y: auto;
+      }
+    }
+
+    .legal-toc_wrap.is-collapsible {
+      border: var(--border-width) solid var(--border);
+      border-radius: var(--radius-medium);
+      background-color: var(--background-2);
+      @media (width >= 64rem) {
+        display: none;
+      }
+      & summary {
+        padding: var(--space-4) var(--space-5);
+        cursor: pointer;
+      }
+      & nav {
+        padding: 0 var(--space-4) var(--space-4);
+      }
+    }
+  }
+</style>

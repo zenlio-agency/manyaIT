@@ -1,0 +1,337 @@
+---
+import Eyebrow from "@/components/typography/Eyebrow.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Paragraph from "@/components/typography/Paragraph.astro";
+import Button from "@/components/Button.astro";
+import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
+import Icon from "@/components/media/Icon.astro";
+import arrow from "@/assets/icons/ui-arrow.svg";
+import check from "@/assets/icons/check.svg";
+import { tbc } from "@/data/site.ts";
+import { home } from "@/sanity/content.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Pill label above the heading, as on the other sections. */
+  eyebrow?: string;
+  /** Section heading. */
+  heading?: string;
+  /** Short paragraph under the heading. */
+  lede?: string;
+  /** Buttons under the paragraph: the first solid, the rest outlined. */
+  buttons?: { label: string; href: string }[];
+  /** Figures and what each one measures, three to a row on desktop. */
+  stats?: { value: string; label: string }[];
+  /** Engineering practices shown as proof points under the figures. */
+  standards?: { title: string; items: string[] };
+}
+
+/* By default, the homepage's "Why ManyaIT" panel as edited in Sanity. */
+const { why, stats: figures, standards: practices } = await home();
+
+const {
+  render = true,
+  eyebrow = why.eyebrow,
+  heading = why.heading,
+  lede = why.statement,
+  buttons = why.buttons,
+  stats = figures,
+  standards = practices,
+} = Astro.props;
+
+/* The number is set large; any sign or unit around it ("<", "+", "%",
+   " wks") is set smaller, as in "[XX]+" or "< 5 min". */
+const split = (value: string) => {
+  const match = value.match(/^([^\d[]*)(.*[\d\]])(.*)$/);
+  return match
+    ? { before: match[1], figure: match[2], after: match[3] }
+    : { before: "", figure: value, after: "" };
+};
+
+/* Two fans of thin lines flowing across the panel. Drawn here rather than
+   as an image so they stay sharp at any size and cost no request. */
+const fan = (
+  count: number,
+  line: (t: number) => [number, number, number, number],
+) =>
+  Array.from({ length: count }, (_, index) => {
+    const t = index / (count - 1);
+    const [start, dip, rise, end] = line(t);
+    return {
+      d: `M-40 ${start}C320 ${dip} 760 ${rise} 1240 ${end}`,
+      opacity: (0.05 + 0.1 * Math.sin(Math.PI * t)).toFixed(3),
+    };
+  });
+
+const waves = [
+  ...fan(18, (t) => [
+    430 + t * 150,
+    700 - t * 60,
+    170 + t * 190,
+    250 + t * 110,
+  ]),
+  ...fan(12, (t) => [20 + t * 90, 300 + t * 120, -60 + t * 140, 90 + t * 150]),
+];
+---
+
+{
+  render && stats.length > 0 && (
+    <div class="why-metrics_panel theme-dark" data-reveal>
+      <svg
+        class="why-metrics_waves"
+        viewBox="0 0 1200 600"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+        focusable="false"
+      >
+        {waves.map((wave) => (
+          <path d={wave.d} stroke-opacity={wave.opacity} />
+        ))}
+      </svg>
+
+      <div class="why-metrics_head">
+        <Eyebrow>{eyebrow}</Eyebrow>
+        <Heading maxWidth={24} class="why-metrics_heading">
+          {heading}
+        </Heading>
+        <Paragraph variant="large" maxWidth={64} class="why-metrics_lede">
+          {lede}
+        </Paragraph>
+        {buttons.length > 0 && (
+          <ButtonWrapper marginTop="2">
+            {buttons.map((button, index) => (
+              <Button
+                element="link"
+                href={button.href}
+                emphasis={index === 0 ? "primary" : "secondary"}
+              >
+                {button.label}
+                {index === 0 && (
+                  <Icon src={arrow} variant="small" class="button_icon" />
+                )}
+              </Button>
+            ))}
+          </ButtonWrapper>
+        )}
+      </div>
+
+      <ul class="why-metrics_list">
+        {stats.map((stat, index) => {
+          const { before, figure, after } = split(stat.value);
+          return (
+            <li
+              class="why-metrics_item"
+              data-reveal
+              style={`--reveal-order: ${index % 3}`}
+            >
+              <span class="why-metrics_value">
+                {before && <span class="why-metrics_unit">{before}</span>}
+                <span set:html={tbc(figure)} />
+                {after && <span class="why-metrics_unit">{after}</span>}
+              </span>
+              <span class="why-metrics_label">{stat.label}</span>
+            </li>
+          );
+        })}
+      </ul>
+
+      {standards.items.length > 0 && (
+        <div class="why-metrics_standards" data-reveal>
+          <p class="why-metrics_standards_title">{standards.title}</p>
+          <ul class="why-metrics_standards_list">
+            {standards.items.map((item) => (
+              <li>
+                <Icon src={check} variant="small" class="why-metrics_check" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  )
+}
+
+<style is:global>
+  @layer components {
+    /* Spacing here comes from gaps, so type margins step aside. */
+    :where(.why-metrics_panel) :where(.heading, .text) {
+      margin-block: 0;
+    }
+
+    /* Black with Manya Blue light from two corners, like the figures strip
+       it replaced. Captions stay at 4.5:1 or better against every part of
+       it. */
+    .why-metrics_panel {
+      /* Body text a shade lighter than the dark theme's, so it holds 4.5:1
+         where a wave line runs beneath it. */
+      --_soft: color-mix(in srgb, var(--white) 35%, var(--slate-300));
+      position: relative;
+      isolation: isolate;
+      overflow: clip;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-7);
+      padding: var(--space-7) var(--space-4);
+      border-radius: 1.5rem;
+      text-align: center;
+      --_alignment: center;
+      background-color: var(--ink-black);
+      background-image:
+        radial-gradient(
+          ellipse 60% 80% at 100% 0%,
+          color-mix(in srgb, var(--blue-500) 45%, transparent),
+          transparent 70%
+        ),
+        radial-gradient(
+          ellipse 45% 60% at 0% 100%,
+          color-mix(in srgb, var(--blue-700) 40%, transparent),
+          transparent 70%
+        ),
+        linear-gradient(
+          120deg,
+          var(--ink-black) 35%,
+          color-mix(in srgb, var(--blue-900) 70%, var(--ink-black)) 100%
+        );
+      @media (width >= 48rem) {
+        padding: var(--space-8) var(--space-6);
+      }
+      @media (width >= 64rem) {
+        gap: var(--space-8);
+        padding: var(--space-8) var(--space-7);
+      }
+    }
+
+    .why-metrics_waves {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      width: 100%;
+      height: 100%;
+      fill: none;
+      stroke: var(--white);
+      stroke-width: 1;
+      pointer-events: none;
+      path {
+        vector-effect: non-scaling-stroke;
+      }
+    }
+
+    .why-metrics_head {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-4);
+    }
+
+    .why-metrics_heading {
+      text-wrap: balance;
+    }
+
+    .why-metrics_lede {
+      margin-inline: auto;
+      color: var(--_soft);
+    }
+
+    /* One figure per line on phones, the number beside its label; rows of
+       three from 40rem, with hairlines between the figures in a row. */
+    .why-metrics_list {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-4);
+      @media (width >= 40rem) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--space-8) 0;
+      }
+    }
+
+    .why-metrics_item {
+      display: grid;
+      grid-template-columns: 6.5rem minmax(0, 1fr);
+      align-items: center;
+      gap: var(--space-4);
+      text-align: left;
+      @media (width >= 40rem) {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+        padding-inline: var(--space-4);
+        text-align: center;
+        &:not(:nth-child(3n + 1)) {
+          border-left: 1px solid
+            color-mix(in srgb, var(--white) 14%, transparent);
+        }
+      }
+    }
+
+    /* Figures scale with the viewport up to 3.75rem (60px). */
+    .why-metrics_value {
+      font-family: var(--display-family);
+      font-size: clamp(2.25rem, 1.4rem + 2.6vw, 3.75rem);
+      font-weight: 700;
+      letter-spacing: var(--letter-spacing-tight);
+      line-height: 1;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .why-metrics_unit {
+      margin-inline: 0.08em;
+      font-size: 0.55em;
+      font-weight: 600;
+      letter-spacing: var(--letter-spacing-snug);
+    }
+
+    .why-metrics_label {
+      max-width: 24ch;
+      font-size: var(--text-small);
+      line-height: 1.45;
+      color: var(--_soft);
+      text-wrap: balance;
+    }
+
+    /* Proof points: the practices behind the figures. */
+    .why-metrics_standards {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-4);
+      padding-top: var(--space-6);
+      border-top: 1px solid color-mix(in srgb, var(--white) 14%, transparent);
+    }
+
+    .why-metrics_standards_title {
+      margin: 0;
+      font-size: var(--text-small);
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .why-metrics_standards_list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: var(--space-2) var(--space-3);
+      & li {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.95rem;
+        border: 1px solid color-mix(in srgb, var(--white) 16%, transparent);
+        border-radius: var(--radius-round);
+        background-color: color-mix(in srgb, var(--white) 6%, transparent);
+        font-size: var(--text-small);
+        color: var(--text);
+      }
+    }
+
+    .why-metrics_check {
+      color: var(--blue-300);
+    }
+  }
+</style>

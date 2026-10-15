@@ -1,0 +1,176 @@
+---
+import Button from "@/components/Button.astro";
+import Icon from "@/components/media/Icon.astro";
+import arrow from "@/assets/icons/ui-arrow.svg";
+import { tbc } from "@/data/site.ts";
+import { hubs } from "@/sanity/content.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+}
+
+const { render = true } = Astro.props;
+
+const HUBS = await hubs();
+---
+
+{
+  render && (
+    <ul class="hub-cards_wrap">
+      {HUBS.map((hub, index) => (
+        <li
+          class="hub-cards_item"
+          id={hub.id}
+          data-reveal
+          style={`--reveal-order: ${index}`}
+        >
+          <span class="hub-cards_role">{hub.role}</span>
+          <h2 class="hub-cards_city">{hub.country}</h2>
+          <p class="hub-cards_text">{hub.text}</p>
+          <dl class="hub-cards_details">
+            <div class="is-wide">
+              <dt>Company</dt>
+              <dd class="hub-cards_address">{hub.entity}</dd>
+            </div>
+            <div>
+              <dt>Phone</dt>
+              <dd set:html={tbc(hub.phone)} />
+            </div>
+            <div>
+              <dt>Email</dt>
+              <dd set:html={tbc(hub.email)} />
+            </div>
+            <div>
+              <dt>Local time</dt>
+              <dd data-hub-clock={hub.timeZone} data-locale={hub.locale}>
+                --:--
+              </dd>
+            </div>
+          </dl>
+          <Button element="link" href={hub.link.href} emphasis="secondary">
+            {hub.link.label}
+            <Icon src={arrow} variant="small" class="button_icon" />
+          </Button>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+<script>
+  /* Live local time for each hub. */
+  const clocks = [
+    ...document.querySelectorAll<HTMLElement>("[data-hub-clock]"),
+  ];
+  const tick = () => {
+    for (const clock of clocks) {
+      try {
+        clock.textContent = new Intl.DateTimeFormat(
+          clock.dataset.locale || "en-US",
+          {
+            hour: "2-digit",
+            minute: "2-digit",
+            timeZone: clock.dataset.hubClock,
+            timeZoneName: "short",
+          },
+        )
+          .format(new Date())
+          .replace(/\b(am|pm)\b/, (period) => period.toUpperCase());
+      } catch {
+        /* An unknown zone leaves the placeholder in place. */
+      }
+    }
+  };
+  if (clocks.length) {
+    tick();
+    window.setInterval(tick, 30_000);
+  }
+</script>
+
+<style is:global>
+  @layer components {
+    .hub-cards_wrap {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--site-gutter);
+      @media (width >= 48rem) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .hub-cards_item {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-6);
+      border: var(--border-width) solid var(--border);
+      border-radius: var(--radius-main);
+      background-color: var(--background-2);
+      scroll-margin-top: calc(var(--nav-height) + var(--space-5));
+      & .button_wrap {
+        margin-top: auto;
+      }
+    }
+
+    .hub-cards_role {
+      font-family: var(--heading-family);
+      font-size: 0.75rem;
+      font-weight: var(--heading-bold);
+      letter-spacing: var(--letter-spacing-wide);
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .hub-cards_city {
+      font-family: var(--display-family);
+      font-size: var(--h3);
+      font-weight: var(--heading-bold);
+      line-height: 1.15;
+      letter-spacing: var(--letter-spacing-snug);
+      color: var(--text);
+    }
+
+    .hub-cards_text {
+      max-width: 52ch;
+      color: var(--text-body);
+    }
+
+    .hub-cards_details {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-4) var(--space-5);
+      margin-block: var(--space-3);
+      padding-top: var(--space-5);
+      border-top: var(--border-width) solid var(--divider);
+      & div {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+      }
+      & .is-wide {
+        grid-column: 1 / -1;
+      }
+      & dt {
+        font-family: var(--heading-family);
+        font-size: 0.72rem;
+        font-weight: var(--heading-bold);
+        letter-spacing: var(--letter-spacing-wide);
+        text-transform: uppercase;
+        color: var(--text-2);
+      }
+      & dd {
+        margin: 0;
+        font-size: var(--text-small);
+        color: var(--text);
+      }
+    }
+
+    .hub-cards_address {
+      white-space: pre-line;
+    }
+  }
+</style>

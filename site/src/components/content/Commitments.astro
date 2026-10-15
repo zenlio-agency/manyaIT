@@ -1,0 +1,152 @@
+---
+import SectionHeader from "@/components/content/SectionHeader.astro";
+import Icon from "@/components/media/Icon.astro";
+import check from "@/assets/icons/check.svg";
+import { tbc } from "@/data/site.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Pill label above the heading. */
+  eyebrow?: string;
+  /** Section heading. */
+  heading?: string;
+  /** Paragraph beside the heading. */
+  intro?: string;
+  /** Side-by-side lists, one per audience, each with its own label. */
+  columns?: { title: string; items: { title: string; text: string }[] }[];
+}
+
+const { render = true, eyebrow, heading, intro, columns = [] } = Astro.props;
+---
+
+{
+  render && heading && columns.length > 0 && (
+    <div class="commitments_wrap">
+      <SectionHeader eyebrow={eyebrow} heading={heading} intro={intro} />
+      <div class="commitments_columns">
+        {columns.map((column, index) => (
+          <section
+            class="commitments_card"
+            aria-labelledby={`commitments-${index}`}
+            data-reveal
+            style={`--reveal-order: ${index}`}
+          >
+            <h3 class="commitments_label" id={`commitments-${index}`}>
+              {column.title}
+            </h3>
+            <ul class="commitments_list">
+              {column.items.map((item) => (
+                <li class="commitments_item">
+                  <span class="commitments_check">
+                    <Icon src={check} variant="small" />
+                  </span>
+                  <span class="commitments_copy">
+                    <strong class="commitments_title">{item.title}</strong>
+                    <span class="commitments_text" set:html={tbc(item.text)} />
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+<style is:global>
+  @layer components {
+    /* Spacing here comes from gaps, so type margins step aside. */
+    :where(.commitments_wrap) :where(.heading, .text) {
+      margin-block: 0;
+    }
+
+    .commitments_wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-7);
+    }
+
+    /* Two cards, clients then professionals, side by side from 48rem. */
+    .commitments_columns {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--site-gutter);
+      @media (width >= 48rem) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .commitments_card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-5);
+      padding: var(--space-6);
+      border: var(--border-width) solid var(--border);
+      border-radius: var(--radius-main);
+      background-color: var(--background-2);
+    }
+
+    .commitments_label {
+      align-self: flex-start;
+      padding: 0.4rem 0.9rem;
+      border-radius: var(--radius-round);
+      background-color: var(--accent-soft);
+      font-family: var(--heading-family);
+      font-size: 0.75rem;
+      font-weight: var(--heading-bold);
+      letter-spacing: var(--letter-spacing-wide);
+      line-height: 1.3;
+      text-transform: uppercase;
+      color: var(--accent-text);
+    }
+
+    .commitments_list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .commitments_item {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: var(--space-4);
+      padding-block: var(--space-4);
+      border-top: var(--border-width) solid var(--border);
+      &:last-child {
+        padding-bottom: 0;
+      }
+    }
+
+    .commitments_check {
+      display: grid;
+      place-items: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background-color: var(--accent-soft);
+      color: var(--accent-text);
+    }
+
+    .commitments_copy {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .commitments_title {
+      font-family: var(--display-family);
+      font-size: var(--text-main);
+      font-weight: var(--heading-bold);
+      line-height: 1.3;
+      color: var(--text);
+    }
+
+    .commitments_text {
+      font-size: var(--text-small);
+      line-height: 1.6;
+      color: var(--text-body);
+    }
+  }
+</style>

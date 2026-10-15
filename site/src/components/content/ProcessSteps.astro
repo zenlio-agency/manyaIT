@@ -1,0 +1,199 @@
+---
+import SectionHeader from "@/components/content/SectionHeader.astro";
+import Icon from "@/components/media/Icon.astro";
+import check from "@/assets/icons/check.svg";
+import { tbc } from "@/data/site.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Pill label above the heading. */
+  eyebrow?: string;
+  /** Section heading. */
+  heading?: string;
+  /** Paragraph beside the heading. */
+  intro?: string;
+  /** Steps in order. `note` is a short result shown under each one. */
+  steps?: { title: string; text: string; note?: string }[];
+  /** Controls that run through every step, shown as a strip under them. */
+  strip?: { title: string; items: string[] };
+}
+
+const {
+  render = true,
+  eyebrow,
+  heading,
+  intro,
+  steps = [],
+  strip,
+} = Astro.props;
+---
+
+{
+  render && heading && steps.length > 0 && (
+    <div class="process-steps_wrap">
+      <SectionHeader eyebrow={eyebrow} heading={heading} intro={intro} />
+      <ol class="process-steps_list" style={`--_count: ${steps.length}`}>
+        {steps.map((step, index) => (
+          <li
+            class="process-steps_item"
+            data-reveal
+            style={`--reveal-order: ${index}`}
+          >
+            <span class="process-steps_number">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <h3 class="process-steps_title">{step.title}</h3>
+            <p class="process-steps_text" set:html={tbc(step.text)} />
+            {step.note && (
+              <span class="process-steps_note" set:html={tbc(step.note)} />
+            )}
+          </li>
+        ))}
+      </ol>
+      {strip && strip.items.length > 0 && (
+        <div class="process-steps_strip" data-reveal>
+          <p class="process-steps_strip_title">{strip.title}</p>
+          <ul class="process-steps_strip_list">
+            {strip.items.map((item) => (
+              <li>
+                <Icon src={check} variant="small" class="process-steps_check" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  )
+}
+
+<style is:global>
+  @layer components {
+    /* Spacing here comes from gaps, so type margins step aside. */
+    :where(.process-steps_wrap) :where(.heading, .text) {
+      margin-block: 0;
+    }
+
+    .process-steps_wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-7);
+    }
+
+    /* A line runs along the top of the steps, with each number sitting
+       on it. */
+    .process-steps_list {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: calc(var(--space-6) + 1.375rem) var(--site-gutter);
+      padding-top: 1.375rem;
+      @media (width >= 48rem) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      @media (width >= 64rem) {
+        grid-template-columns: repeat(var(--_count), minmax(0, 1fr));
+      }
+    }
+
+    .process-steps_item {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding-top: var(--space-5);
+      border-top: var(--border-width) solid var(--border);
+    }
+
+    .process-steps_number {
+      display: grid;
+      place-items: center;
+      width: 2.75rem;
+      height: 2.75rem;
+      margin-top: calc(var(--space-5) * -1 - 1.375rem);
+      margin-bottom: var(--space-2);
+      border-radius: 50%;
+      background-color: var(--blue-500);
+      font-family: var(--display-family);
+      font-size: var(--text-small);
+      font-weight: 700;
+      color: var(--white);
+      box-shadow: 0 0 0 0.375rem var(--background);
+    }
+
+    .process-steps_title {
+      font-family: var(--display-family);
+      font-size: var(--h5);
+      font-weight: var(--heading-bold);
+      line-height: 1.25;
+      letter-spacing: var(--letter-spacing-snug);
+      color: var(--text);
+    }
+
+    .process-steps_text {
+      font-size: var(--text-small);
+      line-height: 1.6;
+      color: var(--text-body);
+    }
+
+    .process-steps_note {
+      margin-top: auto;
+      padding: 0.35rem 0.8rem;
+      border-radius: var(--radius-round);
+      background-color: var(--accent-soft);
+      font-family: var(--heading-family);
+      font-size: 0.78rem;
+      font-weight: var(--heading-medium);
+      color: var(--accent-text);
+    }
+
+    /* The governance strip: one line of controls under the steps. */
+    .process-steps_strip {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      padding-top: var(--space-6);
+      border-top: var(--border-width) solid var(--border);
+      @media (width >= 64rem) {
+        flex-direction: row;
+        align-items: center;
+        gap: var(--space-6);
+      }
+    }
+
+    .process-steps_strip_title {
+      flex: none;
+      margin: 0;
+      font-family: var(--heading-family);
+      font-size: 0.75rem;
+      font-weight: var(--heading-bold);
+      letter-spacing: var(--letter-spacing-wide);
+      text-transform: uppercase;
+      color: var(--text-2);
+    }
+
+    .process-steps_strip_list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2) var(--space-3);
+      & li {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.95rem;
+        border: var(--border-width) solid var(--border);
+        border-radius: var(--radius-round);
+        background-color: color-mix(in srgb, var(--text) 5%, transparent);
+        font-size: var(--text-small);
+        line-height: 1.3;
+        color: var(--text);
+      }
+    }
+
+    .process-steps_check {
+      flex: none;
+      color: var(--accent);
+    }
+  }
+</style>

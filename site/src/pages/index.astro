@@ -3,20 +3,18 @@ import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
 import HeroHome from "@/components/content/HeroHome.astro";
 import ClientLogos from "@/components/content/ClientLogos.astro";
-import WhyCards from "@/components/content/WhyCards.astro";
-import TrustStrip from "@/components/content/TrustStrip.astro";
+import WhyMetrics from "@/components/content/WhyMetrics.astro";
 import CapabilityBento from "@/components/content/CapabilityBento.astro";
 import IndustryCards from "@/components/content/IndustryCards.astro";
-import CareersHome from "@/components/content/CareersHome.astro";
 import InsightsGrid from "@/components/content/InsightsGrid.astro";
-import GlobalPresence from "@/components/content/GlobalPresence.astro";
 import EcosystemCards from "@/components/content/EcosystemCards.astro";
+import ContactConversation from "@/components/content/ContactConversation.astro";
+import { home } from "@/sanity/content.ts";
+
+const { seo } = await home();
 ---
 
-<Layout
-  title="Technology & Talent Partners"
-  description="ManyaIT is a technology and talent partner that helps global enterprises build and scale capability centers with AI-ready engineering teams."
->
+<Layout title={seo.title} description={seo.description}>
   {/* Hero */}
   <Section paddingTop="none" paddingBottom="small">
     <HeroHome />
@@ -27,39 +25,33 @@ import EcosystemCards from "@/components/content/EcosystemCards.astro";
     <ClientLogos />
   </Section>
 
-  {/* Why ManyaIT, with the at-a-glance figures */}
-  <Section theme="tint" id="why">
-    <WhyCards />
-    <TrustStrip />
-  </Section>
-
   {/* Capabilities */}
-  <Section id="capabilities">
+  <Section theme="tint" id="capabilities">
     <CapabilityBento />
   </Section>
 
   {/* Industries */}
-  <Section theme="tint" id="industries">
+  <Section id="industries">
     <IndustryCards />
   </Section>
 
-  {/* Careers */}
-  <Section id="careers">
-    <CareersHome />
+  {/* Why ManyaIT: the figures, on a dark panel, with the way to careers */}
+  <Section theme="tint" id="why">
+    <WhyMetrics />
   </Section>
 
   {/* Insights */}
-  <Section theme="tint" id="insights">
+  <Section id="insights">
     <InsightsGrid />
   </Section>
 
-  {/* Global presence */}
-  <Section id="locations">
-    <GlobalPresence />
+  {/* Other companies */}
+  <Section theme="tint" id="ecosystem" paddingTop="small" paddingBottom="small">
+    <EcosystemCards />
   </Section>
 
-  {/* Other companies, closing the page above the footer */}
-  <Section theme="tint" id="ecosystem">
-    <EcosystemCards />
+  {/* Contact form, closing the page above the footer */}
+  <Section id="contact">
+    <ContactConversation headingTag="h2" variant="home" />
   </Section>
 </Layout>

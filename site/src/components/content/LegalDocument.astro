@@ -1,0 +1,446 @@
+---
+import { render, type CollectionEntry } from "astro:content";
+import LegalHeader from "@/components/content/LegalHeader.astro";
+import LegalBody from "@/components/content/LegalBody.astro";
+import LegalToc from "@/components/content/LegalToc.astro";
+import { LEGAL, mailLink } from "@/data/legal.ts";
+import { tbc } from "@/data/site.ts";
+import { legalDate } from "@/utils/legal.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** The policy to show. */
+  entry: CollectionEntry<"legal">;
+}
+
+const { render: show = true, entry } = Astro.props;
+const { data } = entry;
+const { Content, headings } = await render(entry);
+const sections = headings.filter((heading) => heading.depth === 2);
+
+/* Line breaks render where an address is shown (white-space: pre-line). */
+const contacts = {
+  privacy: [
+    {
+      title: "Privacy team",
+      lines: [LEGAL.usEntity, LEGAL.usAddress],
+      email: LEGAL.privacyEmail,
+    },
+    {
+      title: "Grievance Officer (India)",
+      lines: [LEGAL.indiaEntity, LEGAL.indiaAddress],
+      email: LEGAL.privacyEmail,
+    },
+  ],
+  legal: [
+    {
+      title: "Questions about these terms",
+      lines: [LEGAL.usEntity, LEGAL.usAddress],
+      email: LEGAL.legalEmail,
+    },
+  ],
+  accessibility: [
+    {
+      title: "Accessibility feedback",
+      lines: [`We reply within ${LEGAL.accessibilityReply}.`],
+      email: LEGAL.accessibilityEmail,
+    },
+  ],
+  careers: [
+    {
+      title: "Check or report an offer",
+      lines: [
+        "Send us the message you received and we'll tell you if it's genuine.",
+      ],
+      email: LEGAL.careersEmail,
+    },
+  ],
+}[data.contact];
+---
+
+{
+  show && (
+    <article class="legal_wrap">
+      <LegalHeader title={data.title}>
+        <Fragment slot="meta">
+          <p class="text-style-small">
+            Effective <Fragment set:html={legalDate(data.effective)} />{" "}
+            <span aria-hidden="true">·</span> Last updated{" "}
+            <Fragment set:html={legalDate(data.updated)} />{" "}
+            <span aria-hidden="true">·</span> Version{" "}
+            <Fragment set:html={tbc(data.version)} />
+          </p>
+          <button class="legal_print" type="button" data-print hidden>
+            Print or save as PDF
+          </button>
+        </Fragment>
+      </LegalHeader>
+
+      <div class="legal_layout">
+        <aside class="legal_aside">
+          <LegalToc sections={sections} />
+        </aside>
+
+        <div class="legal_main">
+          <LegalToc sections={sections} variant="collapsible" />
+
+          {data.callout && (
+            <p class="legal_callout" set:html={tbc(data.callout)} />
+          )}
+
+          <section class="legal_glance" aria-labelledby="at-a-glance">
+            <h2 class="legal_glance_title" id="at-a-glance">
+              At a glance
+            </h2>
+            <ul>
+              {data.glance.map((point) => (
+                <li set:html={tbc(point)} />
+              ))}
+            </ul>
+            <p class="legal_glance_note">
+              This summary is here to help. The numbered sections below are the
+              full text.
+            </p>
+          </section>
+
+          <LegalBody>
+            <Content />
+          </LegalBody>
+
+          <section class="legal_contact" aria-labelledby="contact-us">
+            <h2 class="legal_section_title" id="contact-us">
+              Contact us
+            </h2>
+            <div class="legal_contact_list">
+              {contacts.map((contact) => (
+                <div class="legal_contact_item">
+                  <p class="legal_contact_title">{contact.title}</p>
+                  {contact.lines.map((line) => (
+                    <p class="legal_contact_line" set:html={tbc(line)} />
+                  ))}
+                  <p
+                    class="legal_contact_line"
+                    set:html={tbc(mailLink(contact.email))}
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {data.changes.length > 0 && (
+            <section class="legal_changes" aria-labelledby="change-log">
+              <h2 class="legal_section_title" id="change-log">
+                Change log
+              </h2>
+              <ol>
+                {data.changes.map((change) => (
+                  <li>
+                    <span class="legal_changes_version">
+                      Version <Fragment set:html={tbc(change.version)} />
+                    </span>
+                    <span
+                      class="legal_changes_date"
+                      set:html={legalDate(change.date)}
+                    />
+                    <span set:html={tbc(change.summary)} />
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
+        </div>
+      </div>
+    </article>
+  )
+}
+
+<script>
+  /* The browser's own print dialog also saves as PDF, so there is no file
+     to keep in step with the page. Without JavaScript the button stays
+     hidden. */
+  for (const button of document.querySelectorAll<HTMLButtonElement>(
+    "[data-print]",
+  )) {
+    button.hidden = false;
+    button.addEventListener("click", () => print());
+  }
+</script>
+
+<style is:global>
+  @layer components {
+    /* Legal pages hold still: no scroll reveals, so text never fades in
+       while someone is reading or searching it. */
+    .legal_wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-7);
+    }
+
+    .legal_print {
+      padding: 0.45rem 0.9rem;
+      border: var(--border-width) solid var(--border);
+      border-radius: var(--radius-small);
+      background-color: var(--background-2);
+      font-family: var(--heading-family);
+      font-size: var(--text-small);
+      font-weight: var(--heading-medium);
+      color: var(--text);
+      cursor: pointer;
+      transition: border-color var(--hover-duration) var(--hover-ease);
+      @media (hover: hover) {
+        &:hover {
+          border-color: var(--accent);
+        }
+      }
+      &[hidden] {
+        display: none;
+      }
+    }
+
+    .legal_layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-6) var(--section-space-small);
+      align-items: start;
+      @media (width >= 64rem) {
+        grid-template-columns: 16rem minmax(0, 1fr);
+      }
+    }
+
+    /* The sticky list only shows from 64rem; below that the collapsible
+       one in the main column takes over. */
+    .legal_aside {
+      display: none;
+      @media (width >= 64rem) {
+        display: block;
+        height: 100%;
+      }
+    }
+
+    .legal_main {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-7);
+      max-width: 52rem;
+      min-width: 0;
+    }
+
+    .legal_callout {
+      margin-block: 0;
+      padding: var(--space-4) var(--space-5);
+      border-left: 0.25rem solid var(--warning);
+      border-radius: var(--radius-small);
+      background-color: var(--warning-tint);
+      font-family: var(--heading-family);
+      font-weight: var(--heading-medium);
+      color: var(--text);
+    }
+
+    .legal_glance {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      padding: var(--space-5);
+      border-radius: var(--radius-main);
+      background-color: var(--section-tint);
+      @media (width >= 48rem) {
+        padding: var(--space-5) var(--space-6);
+      }
+      & ul {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        padding-left: 1.25em;
+        list-style-type: disc;
+        color: var(--text-body);
+      }
+      & li::marker {
+        color: var(--accent);
+      }
+    }
+
+    .legal_glance_title,
+    .legal_section_title {
+      margin-block: 0;
+      font-size: var(--h5);
+    }
+
+    .legal_glance_note {
+      margin-block: 0;
+      font-size: var(--text-small);
+      color: var(--text-2);
+    }
+
+    /* The document itself: a 68-character column, headings that link to
+       themselves, and tables that scroll inside their own box. */
+    .legal_body {
+      --_mw: 68ch;
+      & :is(p, ul, ol) {
+        max-width: var(--_mw);
+      }
+      & h2 {
+        position: relative;
+        font-size: var(--h4);
+        scroll-margin-top: calc(var(--nav-height) + var(--space-5));
+        &:not(:first-child) {
+          margin-top: var(--space-8);
+        }
+      }
+      & h3 {
+        font-size: var(--h6);
+        scroll-margin-top: calc(var(--nav-height) + var(--space-5));
+        &:not(:first-child) {
+          margin-top: var(--space-6);
+        }
+      }
+      & a:not(.legal_anchor) {
+        color: var(--link-text);
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+        @media (hover: hover) {
+          &:hover {
+            color: var(--link-text-hover);
+          }
+        }
+      }
+      & strong {
+        color: var(--text);
+      }
+    }
+
+    .legal_num {
+      color: var(--accent);
+    }
+
+    .legal_anchor {
+      margin-left: 0.4em;
+      color: var(--text-2);
+      text-decoration: none;
+      opacity: 0;
+      transition: opacity var(--hover-duration) var(--hover-ease);
+      h2:hover > &,
+      &:focus-visible {
+        opacity: 1;
+      }
+    }
+
+    .legal_contact {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      padding: var(--space-6);
+      border: var(--border-width) solid var(--border);
+      border-radius: var(--radius-main);
+      background-color: var(--background-2);
+    }
+
+    .legal_contact_list {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-5);
+      @media (width >= 40rem) {
+        grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+      }
+    }
+
+    .legal_contact_item {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+      & p {
+        margin-block: 0;
+      }
+      & a {
+        color: var(--link-text);
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+      }
+    }
+
+    .legal_contact_title {
+      font-family: var(--heading-family);
+      font-weight: var(--heading-bold);
+      color: var(--text);
+    }
+
+    .legal_contact_line {
+      font-size: var(--text-small);
+      color: var(--text-body);
+      white-space: pre-line;
+    }
+
+    .legal_changes {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      & ol {
+        display: flex;
+        flex-direction: column;
+        border-top: var(--border-width) solid var(--border);
+      }
+      & li {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-1) var(--space-4);
+        padding-block: var(--space-3);
+        border-bottom: var(--border-width) solid var(--border);
+        font-size: var(--text-small);
+        color: var(--text-body);
+      }
+    }
+
+    .legal_changes_version {
+      font-family: var(--heading-family);
+      font-weight: var(--heading-bold);
+      color: var(--text);
+    }
+
+    .legal_changes_date {
+      color: var(--text-2);
+    }
+
+    /* Print: the document alone, with each link's address written out. */
+    @media print {
+      .nav_wrap,
+      .footer_wrap,
+      .skip-link,
+      .legal_aside,
+      .legal-toc_wrap,
+      .legal_print,
+      .legal_anchor,
+      .legal-strip_wrap {
+        display: none !important;
+      }
+      .legal_layout {
+        display: block;
+      }
+      .legal_main {
+        max-width: none;
+      }
+      .legal_body a[href^="http"]::after,
+      .legal_body a[href^="/"]::after,
+      .legal_body a[href^="mailto:"]::after {
+        content: " (" attr(href) ")";
+        font-size: 0.85em;
+        color: var(--text-2);
+      }
+      .table-scroll {
+        overflow: visible;
+        & table {
+          min-width: 0;
+        }
+      }
+      .legal_body h2,
+      .legal_body h3 {
+        break-after: avoid;
+      }
+      .table-scroll,
+      .legal_glance,
+      .legal_contact {
+        break-inside: avoid;
+      }
+    }
+  }
+</style>

@@ -1,0 +1,138 @@
+---
+import type { CollectionEntry } from "astro:content";
+import Eyebrow from "@/components/typography/Eyebrow.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Paragraph from "@/components/typography/Paragraph.astro";
+import Icon from "@/components/media/Icon.astro";
+import arrow from "@/assets/icons/ui-arrow.svg";
+import { tbc } from "@/data/site.ts";
+import { legalDate } from "@/utils/legal.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** The policies, in the order to show them. */
+  documents?: CollectionEntry<"legal">[];
+}
+
+const { render = true, documents = [] } = Astro.props;
+---
+
+{
+  render && documents.length > 0 && (
+    <div class="legal-hub_wrap">
+      <div class="legal-hub_head">
+        <Eyebrow>Legal</Eyebrow>
+        <Heading tag="h1" variant="h2">
+          Policies and notices
+        </Heading>
+        <Paragraph variant="large" maxWidth={46}>
+          How ManyaIT handles your information, and the terms for using this
+          site. Each one is written to be read, with a short summary at the top.
+        </Paragraph>
+      </div>
+      <ul class="legal-hub_list">
+        {documents.map((doc) => (
+          <li>
+            <a class="legal-hub_card" href={`/legal/${doc.id}`}>
+              <h2 class="legal-hub_title">{doc.data.title}</h2>
+              <p class="legal-hub_summary" set:html={tbc(doc.data.summary)} />
+              <p class="legal-hub_date">
+                Updated <Fragment set:html={legalDate(doc.data.updated)} />
+              </p>
+              <span class="legal-hub_go" aria-hidden="true">
+                <Icon src={arrow} variant="small" />
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+<style is:global>
+  @layer components {
+    :where(.legal-hub_wrap) :where(.heading, .text, p) {
+      margin-block: 0;
+    }
+
+    .legal-hub_wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-7);
+    }
+
+    .legal-hub_head {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-4);
+    }
+
+    .legal-hub_list {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--site-gutter);
+      @media (width >= 40rem) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      @media (width >= 64rem) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    .legal-hub_card {
+      position: relative;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      padding: var(--space-6);
+      border: var(--border-width) solid var(--border);
+      border-radius: var(--radius-main);
+      background-color: var(--background-2);
+      color: inherit;
+      text-decoration: none;
+      transition:
+        border-color var(--hover-duration) var(--hover-ease),
+        box-shadow var(--hover-duration) var(--hover-ease);
+      @media (hover: hover) {
+        &:hover {
+          border-color: var(--accent);
+          box-shadow: var(--shadow-raised);
+          .legal-hub_go {
+            translate: 0.2rem 0;
+          }
+        }
+      }
+    }
+
+    .legal-hub_title {
+      padding-right: var(--space-6);
+      font-size: var(--h5);
+    }
+
+    .legal-hub_summary {
+      font-size: var(--text-small);
+      line-height: 1.6;
+      color: var(--text-body);
+    }
+
+    .legal-hub_date {
+      margin-top: auto;
+      padding-top: var(--space-2);
+      font-size: var(--text-small);
+      color: var(--text-2);
+    }
+
+    .legal-hub_go {
+      position: absolute;
+      top: var(--space-6);
+      right: var(--space-6);
+      color: var(--accent-text);
+      transition: translate var(--hover-duration) var(--hover-ease);
+    }
+  }
+</style>

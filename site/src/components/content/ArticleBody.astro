@@ -1,0 +1,120 @@
+---
+import RichText from "@/components/typography/RichText.astro";
+import Button from "@/components/Button.astro";
+import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
+import ArticleText from "@/components/content/ArticleText.astro";
+import { tbc } from "@/data/site.ts";
+import { settings, type Article } from "@/sanity/content.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** The article to show. */
+  article: Article;
+}
+
+const { render: show = true, article: data } = Astro.props;
+const { cta: CTA } = await settings();
+---
+
+{
+  show && (
+    <article class="article_wrap">
+      <section class="article_short" aria-labelledby="in-short">
+        <h2 class="article_short_title" id="in-short">
+          In short
+        </h2>
+        <ul>
+          {data.takeaways.map((point) => (
+            <li set:html={tbc(point)} />
+          ))}
+        </ul>
+      </section>
+
+      <ArticleText>
+        <Fragment set:html={data.html} />
+      </ArticleText>
+
+      <aside class="article_cta" aria-labelledby="article-cta">
+        <h2 class="article_cta_title" id="article-cta">
+          Planning something similar?
+        </h2>
+        <RichText>
+          <p>
+            Tell us the outcome you're targeting, and we'll map the route from
+            strategy to production.
+          </p>
+        </RichText>
+        <ButtonWrapper>
+          <Button
+            element="link"
+            href={`${CTA.primary.href}?topic=${data.topic}`}
+          >
+            Start the Conversation
+          </Button>
+          <Button element="link" href={data.related.href} emphasis="secondary">
+            Explore {data.related.label}
+          </Button>
+        </ButtonWrapper>
+      </aside>
+    </article>
+  )
+}
+
+<style is:global>
+  @layer components {
+    /* One reading column, so the eye never travels too far. */
+    .article_wrap {
+      width: 100%;
+      max-width: 44rem;
+      margin-inline: auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-7);
+    }
+
+    .article_short {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      padding: var(--space-5);
+      border-left: 0.25rem solid var(--accent);
+      border-radius: var(--radius-small);
+      background-color: var(--section-tint);
+      @media (width >= 48rem) {
+        padding: var(--space-5) var(--space-6);
+      }
+      & ul {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        padding-left: 1.25em;
+        list-style-type: disc;
+        color: var(--text-body);
+      }
+      & li::marker {
+        color: var(--accent);
+      }
+    }
+
+    .article_short_title,
+    .article_cta_title {
+      margin-block: 0;
+      font-size: var(--h5);
+    }
+
+    .article_cta {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      padding: var(--space-6);
+      border: var(--border-width) solid var(--border);
+      border-radius: var(--radius-main);
+      background-color: var(--background-2);
+      & .text {
+        margin-block: 0;
+        color: var(--text-body);
+      }
+    }
+  }
+</style>

@@ -1,0 +1,54 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import Eyebrow from "@/components/typography/Eyebrow.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Paragraph from "@/components/typography/Paragraph.astro";
+import CareersApplyForm from "@/components/content/CareersApplyForm.astro";
+---
+
+<Layout
+  title="Apply"
+  description="Apply for a role at ManyaIT, or register your interest in future roles. Share your CV and a few details, and our people team will review your application."
+>
+  {/* Header */}
+  <Section paddingTop="small" paddingBottom="none">
+    <div class="careers-apply_head">
+      <a class="careers-apply_back" href="/careers#roles">
+        <span aria-hidden="true">←</span> All openings
+      </a>
+      <Eyebrow>Apply</Eyebrow>
+      <Heading tag="h1" variant="h2">Apply to ManyaIT</Heading>
+      <Paragraph variant="large" maxWidth={44}>
+        Share your CV and a few details. It takes about five minutes, and a
+        person on our people team reads every application.
+      </Paragraph>
+    </div>
+  </Section>
+
+  {/* The form, with the role and what happens next */}
+  <Section paddingTop="small">
+    <CareersApplyForm />
+  </Section>
+</Layout>
+
+<style>
+  .careers-apply_head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+    padding-bottom: var(--space-3);
+    & :global(.heading),
+    & :global(.text) {
+      margin-block: 0;
+    }
+  }
+
+  .careers-apply_back {
+    font-size: var(--text-small);
+    color: var(--link-text);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+</style>
