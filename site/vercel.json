@@ -57,6 +57,11 @@
       "source": "/what-we-do",
       "destination": "/capabilities",
       "statusCode": 301
+    },
+    {
+      "source": "/our-clients",
+      "destination": "/",
+      "statusCode": 301
     }
   ]
 }

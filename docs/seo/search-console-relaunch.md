@@ -12,6 +12,7 @@ branch with these changes is merged and deployed.
 | `https://manyait.com/about-us/`                              | Old About page                                | **404 Not found**                              |
 | `https://manyait.com/services/`                              | Old Services page                             | **404 Not found**                              |
 | `https://manyait.com/what-we-do/`                            | Old What We Do page                           | **404 Not found**                              |
+| `https://manyait.com/our-clients/`                           | Old Our Clients page                          | **404 Not found**                              |
 | `https://manyait.com/contact/`                               | Old Contact page                              | Redirects to `/contact`, works                 |
 | `github.com/zenlio-agency/manyaIT/pull/29`, `33`, `34`, `35` | Pull requests in the public GitHub repository | Public, indexed under the brand name           |
 
@@ -25,11 +26,12 @@ title, canonical, structured data, `robots.txt` and sitemap.
    addresses, and nothing told Google where they moved, so Google kept its
    stored copy. These changes add permanent (301) redirects:
 
-   | Old address   | Now redirects to |
-   | ------------- | ---------------- |
-   | `/about-us`   | `/about`         |
-   | `/services`   | `/capabilities`  |
-   | `/what-we-do` | `/capabilities`  |
+   | Old address    | Now redirects to                            |
+   | -------------- | ------------------------------------------- |
+   | `/about-us`    | `/about`                                    |
+   | `/services`    | `/capabilities`                             |
+   | `/what-we-do`  | `/capabilities`                             |
+   | `/our-clients` | `/` (the client logos are on the home page) |
 
    With a 301, Google replaces the old result with the new page and carries
    over its history. Removing the old result does not do that.
@@ -47,19 +49,42 @@ title, canonical, structured data, `robots.txt` and sitemap.
 
 ## Which links to remove, and which to leave alone
 
-**Do not use the Removals tool on the old site's pages.** A removal only
-hides a result for about six months. It doesn't move anything to the new
-page. It also hides every version of the address (http and https, www and
-non-www). **Removing `https://manyait.com/` would hide the new home page
-`https://www.manyait.com/` for six months.** Never use "Remove all URLs with
-this prefix" on the domain.
+The Removals tool only hides a result, for about six months. It doesn't send
+anyone to the new page; the redirects do that permanently. It also hides
+every version of the address you enter (http and https, www and non-www).
+**Removing `https://manyait.com/` would hide the new home page
+`https://www.manyait.com/` for six months.** Never remove the home page, and
+never use "Remove all URLs with this prefix".
 
-| Address                                                 | Action                                                                                              |
-| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `https://manyait.com/`                                  | Leave it. Request indexing of `https://www.manyait.com/`                                            |
-| `/about-us/`, `/services/`, `/what-we-do/`, `/contact/` | Leave them. Inspect each old address and request indexing (step 4)                                  |
-| GitHub pull request pages                               | Not in Search Console. See [GitHub repository](#github-repository)                                  |
-| Any other old address that shows a 404 page             | Send it to the developer for a redirect. Remove it only if nothing on the new site matches (step 8) |
+| Address                                                            | Action                                                                                           |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| `https://manyait.com/`                                             | **Never remove.** Request indexing of `https://www.manyait.com/` and of this address             |
+| `https://manyait.com/contact/`                                     | Leave it. It already forwards to the new Contact page. Request indexing                          |
+| `/about-us/`, `/our-clients/`, `/services/`, `/what-we-do/`        | Safe to remove one by one ("Remove this URL only") to hide them now. Redirects make it permanent |
+| `/feed/`, `/comments/feed/`, `/wp-content/...`, `/wp-includes/...` | Nothing to do. They aren't indexed and never show in results                                     |
+| GitHub pull request pages                                          | Not in Search Console. See [GitHub repository](#github-repository)                               |
+| Any other old address that shows a 404 page                        | Send it to the developer for a redirect, or remove it as above                                   |
+
+### Removing the four old pages
+
+For each of these addresses, one at a time:
+
+- `https://manyait.com/about-us/`
+- `https://manyait.com/our-clients/`
+- `https://manyait.com/services/`
+- `https://manyait.com/what-we-do/`
+
+1. Search Console → **Indexing** → **Removals** → **Temporary removals** tab
+   → **New request**.
+2. Stay on **Temporarily remove URL**. Paste the address exactly as listed,
+   with `https://`, no `www`, and the slash at the end.
+3. Choose **Remove this URL only** → **Next** → **Submit request**.
+4. The request shows "Processing request", then "Temporarily removed",
+   usually within a day.
+
+The removal lasts about six months. By then Google has recrawled each
+address, found the redirect, and dropped it for good. Don't cancel the
+requests early.
 
 ## Before you start: check the deploy
 
@@ -68,6 +93,7 @@ Open these in a browser. Each should land on the page shown:
 - `https://manyait.com/about-us/` → `https://www.manyait.com/about`
 - `https://manyait.com/services/` → `https://www.manyait.com/capabilities`
 - `https://manyait.com/what-we-do/` → `https://www.manyait.com/capabilities`
+- `https://manyait.com/our-clients/` → `https://www.manyait.com/`
 - `https://www.manyait.com/sitemap.xml` → an XML list naming `sitemap-0.xml`
 - `https://www.manyait.com/sitemap-0.xml` → 31 addresses, most with a
   `lastmod` date
@@ -98,10 +124,11 @@ Open these in a browser. Each should land on the page shown:
      articles. The sitemap covers anything left over.
 
 4. **Inspect the old addresses.** URL Inspection on
-   `https://manyait.com/about-us/`, `/services/`, `/what-we-do/` and
-   `/contact/` → **Test live URL**. It should report the redirect. Then
-   **Request indexing**. Google recrawls the old address, follows the
-   redirect, and swaps the result.
+   `https://manyait.com/about-us/`, `/our-clients/`, `/services/`,
+   `/what-we-do/` and `/contact/` → **Test live URL**. Once the redirects
+   are deployed it reports the redirect instead of a 404. Then **Request
+   indexing**. Google recrawls the old address, follows the redirect, and
+   drops it.
 
 5. **Don't use Change of address.** That tool is for moving to a different
    domain. This is the same domain.
@@ -118,16 +145,29 @@ Open these in a browser. Each should land on the page shown:
      important pages.
    - **Alternate page with proper canonical tag**: fine.
 
-8. **Removals, only for dead pages.** Use this only for an old address that
-   has no match on the new site, still shows in results, and returns 404:
-   Indexing → **Removals** → **New request** → **Temporarily remove URL** →
-   paste the exact address → **Remove this URL only**. Never the home page,
-   never a prefix.
+8. **Removals.** Hide the four old pages now, as in
+   [Removing the four old pages](#removing-the-four-old-pages). Use the same
+   steps for any other old page that still shows. Never the home page, never
+   a prefix.
 
 9. **Check the structured data.** Run the
    [Rich Results Test](https://search.google.com/test/rich-results) on the
    home page, a capability page and an article. Each should be read with no
    errors.
+
+## Reading the Page indexing report (15 Oct 2026)
+
+What the `manyait.com` Domain property showed, and what to do about each
+group.
+
+| Status in Search Console                     | Addresses                                                                                | Meaning                                                                                                              | Action                                                                                 |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **Indexed** (6)                              | `manyait.com/`, `/contact/`, `/about-us/`, `/our-clients/`, `/services/`, `/what-we-do/` | All six are the old site. None of the new pages is indexed yet                                                       | Remove the four old pages (above). Request indexing of the home page and the new pages |
+| **Page with redirect**                       | `https://www.manyait.com/`, `http://manyait.com/`, `http://www.manyait.com/`             | Crawled 9 Oct, when `www` still forwarded to the bare domain. Now the bare domain forwards to `www`                  | Request indexing of `https://www.manyait.com/`. Google then makes it the home page     |
+| **Redirect error**                           | `manyait.com/capabilities/applied-ai`, `/agentic-ai-automation`                          | Crawled 13 Oct, during the switch from the bare domain to `www`. Both now forward in one step                        | Open the group → **Validate fix**                                                      |
+| **Alternate page with proper canonical tag** | `www.manyait.com/legal/privacy`, `/capabilities/sap-enterprise-data`                     | Crawled 14 Oct, before the canonical tags were fixed. Both now point to themselves                                   | URL Inspection → **Request indexing** for each                                         |
+| **Crawled – currently not indexed**          | New pages, some with a trailing slash or without `www`, plus old WordPress files         | Crawled 14 Oct, on the day the new addresses settled. The slash and non-`www` forms now forward to the right address | Request indexing of the `www` pages without a slash. Ignore the WordPress files        |
+| **Not found (404)**                          | `manyait.com/wp-content/plugins/*`                                                       | Old WordPress files                                                                                                  | Nothing to do                                                                          |
 
 ## Bing Webmaster Tools
 

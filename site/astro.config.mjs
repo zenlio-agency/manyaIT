@@ -36,6 +36,8 @@ export default defineConfig({
     "/about-us": "/about",
     "/services": "/capabilities",
     "/what-we-do": "/capabilities",
+    /* The client logos are on the home page; there is no clients page */
+    "/our-clients": "/",
   },
 
   /* Allow ngrok and Cloudflare (cloudflared) tunnels for local review */
