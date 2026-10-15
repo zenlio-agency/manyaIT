@@ -42,6 +42,21 @@
       "source": "/capabilities/workforce-solutions",
       "destination": "/capabilities/specialist-talent",
       "statusCode": 301
+    },
+    {
+      "source": "/about-us",
+      "destination": "/about",
+      "statusCode": 301
+    },
+    {
+      "source": "/services",
+      "destination": "/capabilities",
+      "statusCode": 301
+    },
+    {
+      "source": "/what-we-do",
+      "destination": "/capabilities",
+      "statusCode": 301
     }
   ]
 }

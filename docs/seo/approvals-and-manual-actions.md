@@ -22,7 +22,8 @@ Search Console, Sanity or Google Tag Manager.
 3. **Search Console:** verify the `https://www.manyait.com` property, if it
    isn't already, and submit `https://www.manyait.com/sitemap-index.xml`.
    Use URL Inspection on a few pages to confirm Google picks up the new
-   canonical URLs.
+   canonical URLs. The full relaunch steps, for Google and Bing, are in
+   `search-console-relaunch.md`.
 4. **Rich Results Test** on one page of each type (capability, industry,
    article). This confirms Google reads the JSON-LD. FAQ rich results are
    currently shown only for government and health sites, so the FAQ markup
