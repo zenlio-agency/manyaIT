@@ -1,0 +1,168 @@
+---
+/**
+ * Bento tile. Variants: surface (white with border), tint, ink, accent,
+ * photo. Spans apply inside a BentoGrid and drop away on mobile.
+ *
+ * To make the whole tile a link, put `class="tile-link"` on one link inside
+ * it (usually the title); the link then covers the tile and the tile shows
+ * the focus ring.
+ */
+interface Props {
+  variant?: "surface" | "tint" | "ink" | "accent" | "photo";
+  /** Columns to span inside a BentoGrid. */
+  span?: 1 | 2;
+  /** Rows to span inside a BentoGrid. */
+  rows?: 1 | 2;
+  /** lg 24px (bento tiles, large cards), md 20px, sm 16px. */
+  radius?: "lg" | "md" | "sm";
+  /** Remove the inner padding, e.g. for a full-bleed photo. */
+  flush?: boolean;
+  as?: "div" | "article" | "li" | "section" | "aside";
+  class?: string;
+  id?: string;
+  "aria-label"?: string;
+  "aria-labelledby"?: string;
+}
+
+const {
+  variant = "surface",
+  span = 1,
+  rows = 1,
+  radius = "lg",
+  flush = false,
+  as: Tag = "div",
+  class: className,
+  ...rest
+} = Astro.props;
+
+const dark = variant === "ink" || variant === "accent";
+---
+
+<Tag
+  class:list={[
+    "tile",
+    `tile--${variant}`,
+    `tile--r-${radius}`,
+    span === 2 && "tile--span-2",
+    rows === 2 && "tile--rows-2",
+    flush && "tile--flush",
+    dark && "on-dark",
+    className,
+  ]}
+  {...rest}
+>
+  <slot />
+</Tag>
+
+<style>
+  .tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 20px;
+    min-width: 0;
+    padding: var(--tile-pad);
+    border: 1px solid transparent;
+    overflow: hidden;
+  }
+
+  .tile--r-lg {
+    border-radius: var(--radius-lg);
+  }
+
+  .tile--r-md {
+    border-radius: var(--radius-md);
+  }
+
+  .tile--r-sm {
+    border-radius: var(--radius-sm);
+  }
+
+  .tile--flush {
+    padding: 0;
+  }
+
+  .tile--surface {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--slate);
+  }
+
+  .tile--tint {
+    background: var(--tint);
+    color: var(--slate);
+  }
+
+  .tile--ink {
+    background: var(--ink);
+    color: var(--on-dark-muted);
+  }
+
+  .tile--accent {
+    /* Muted white fails contrast on teal, so all text here is white. */
+    background: var(--accent);
+    color: var(--surface);
+  }
+
+  .tile--photo {
+    background: var(--photo);
+    color: var(--slate);
+  }
+
+  .tile--span-2 {
+    grid-column: span 2;
+  }
+
+  .tile--rows-2 {
+    grid-row: span 2;
+  }
+
+  @media (max-width: 640px) {
+    .tile--span-2,
+    .tile--rows-2 {
+      grid-column: auto;
+      grid-row: auto;
+    }
+  }
+
+  /* Whole-tile links */
+  .tile :global(.tile-link) {
+    text-decoration: none;
+  }
+
+  .tile :global(.tile-link)::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+  }
+
+  .tile :global(.tile-link:focus-visible) {
+    outline: none;
+  }
+
+  .tile:has(:global(.tile-link:focus-visible)) {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .tile:has(:global(.tile-link)) {
+    transition: border-color var(--duration) var(--ease), transform var(--duration) var(--ease);
+  }
+
+  .tile--surface:has(:global(.tile-link)):hover {
+    border-color: var(--muted-2);
+  }
+
+  .tile:has(:global(.tile-link)):hover {
+    transform: translateY(-2px);
+  }
+
+  .tile :global(.tile-link):hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+  }
+</style>

@@ -1,0 +1,65 @@
+---
+import BentoGrid from "./BentoGrid.astro";
+import Tile from "./Tile.astro";
+import Button from "./Button.astro";
+import Eyebrow from "./Eyebrow.astro";
+import { cta } from "@/content/site";
+
+/**
+ * Closing call to action: an ink tile with the consult button, and an
+ * accent tile pointing to the Data Check.
+ */
+interface Props {
+  title?: string;
+  /** Id for the heading, so the section can be labelled by it. */
+  headingId?: string;
+  class?: string;
+}
+
+const {
+  title = "What should your data do next?",
+  headingId = "cta-title",
+  class: className,
+} = Astro.props;
+---
+
+<BentoGrid rowHeight="300px" class:list={["cta-bento", className]}>
+  <Tile variant="ink" span={2} class="cta-bento__main">
+    <h2 class="h2 cta-bento__title" id={headingId}>{title}</h2>
+    <div class="cta-bento__actions">
+      <Button variant="on-dark" href={cta.consult.href} data-cta="consult">
+        {cta.consult.label}
+      </Button>
+      <p class="cta-bento__note">Reply within one business day</p>
+    </div>
+  </Tile>
+  <Tile variant="accent" class="cta-bento__check">
+    <Eyebrow>2 minutes</Eyebrow>
+    <p class="card-title">How data-ready is your business?</p>
+    <a class="arrow-link tile-link" href={cta.dataCheck.href} data-cta="data-check">
+      Take the Data Check <span aria-hidden="true">→</span>
+    </a>
+  </Tile>
+</BentoGrid>
+
+<style>
+  .cta-bento__title {
+    max-width: 14ch;
+  }
+
+  .cta-bento__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 24px;
+  }
+
+  .cta-bento__note {
+    font-size: 15px;
+  }
+
+  /* Tile roots don't carry this component's scope, hence :global */
+  :global(.cta-bento__check) .arrow-link {
+    font-size: 17px;
+  }
+</style>

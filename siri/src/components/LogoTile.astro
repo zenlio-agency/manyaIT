@@ -1,0 +1,60 @@
+---
+import { placeholders } from "@/content/placeholders";
+
+/**
+ * White rounded tile for a client logo. Shows the placeholder until an
+ * approved logo is passed in the default slot.
+ */
+interface Props {
+  label?: string;
+  as?: "div" | "li";
+  class?: string;
+}
+
+const { label = placeholders.clientLogo, as: Tag = "div", class: className } = Astro.props;
+const hasLogo = Astro.slots.has("default");
+---
+
+<Tag class:list={["logo-tile", className]}>
+  {
+    hasLogo ? (
+      <slot />
+    ) : (
+      <>
+        <span class="logo-tile__shape" aria-hidden="true" />
+        <span class="logo-tile__label">{label}</span>
+      </>
+    )
+  }
+</Tag>
+
+<style>
+  .logo-tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 88px;
+    padding: 16px 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+  }
+
+  .logo-tile__shape {
+    width: 22px;
+    height: 22px;
+    flex: none;
+    border-radius: 7px;
+    background: var(--muted-2);
+  }
+
+  .logo-tile__label {
+    color: var(--muted);
+    font-family: var(--font-brand);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: var(--tracking-brand);
+    white-space: nowrap;
+  }
+</style>

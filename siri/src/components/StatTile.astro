@@ -1,0 +1,53 @@
+---
+import Tile from "./Tile.astro";
+
+/**
+ * A labelled big number with an optional note and visual (slot). Use the
+ * `[X]` placeholder for any figure the business has not supplied.
+ */
+interface Props {
+  label: string;
+  value: string;
+  note?: string;
+  variant?: "surface" | "tint" | "ink" | "accent";
+  span?: 1 | 2;
+  rows?: 1 | 2;
+  radius?: "lg" | "md" | "sm";
+  as?: "div" | "li" | "article";
+  class?: string;
+}
+
+const { label, value, note, ...tile } = Astro.props;
+---
+
+<Tile {...tile} class:list={["stat", tile.class]}>
+  <p class="stat__label">{label}</p>
+  <div class="stat__body">
+    <p class="big-number stat__value">{value}</p>
+    {note && <p class="stat__note">{note}</p>}
+    <slot />
+  </div>
+</Tile>
+
+<style>
+  .stat__label {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  :global(.tile--surface) .stat__label,
+  :global(.tile--tint) .stat__label {
+    color: var(--muted);
+  }
+
+  .stat__body {
+    display: grid;
+    gap: 10px;
+  }
+
+  .stat__note {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+</style>

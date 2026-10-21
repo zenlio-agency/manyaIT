@@ -1,0 +1,135 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+/**
+ * Pill button. Renders an <a> when `href` is set, otherwise a <button>.
+ * Variants follow the brief: primary-ink, primary-accent, secondary,
+ * outline, on-dark.
+ */
+type Variant =
+  | "primary-ink"
+  | "primary-accent"
+  | "secondary"
+  | "outline"
+  | "on-dark";
+
+type Props = {
+  variant?: Variant;
+  href?: string;
+  type?: "button" | "submit" | "reset";
+  /** Stretch to the width of the parent. */
+  block?: boolean;
+  class?: string;
+} & Omit<HTMLAttributes<"a"> & HTMLAttributes<"button">, "type" | "class">;
+
+const {
+  variant = "primary-ink",
+  href,
+  type = "button",
+  block = false,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const classes = ["btn", `btn--${variant}`, block && "btn--block", className];
+---
+
+{
+  href ? (
+    <a href={href} class:list={classes} {...rest}>
+      <slot />
+    </a>
+  ) : (
+    <button type={type} class:list={classes} {...rest}>
+      <slot />
+    </button>
+  )
+}
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 12px 24px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      background-color var(--duration) var(--ease),
+      border-color var(--duration) var(--ease),
+      color var(--duration) var(--ease);
+  }
+
+  @media (min-width: 900px) {
+    .btn {
+      font-size: 16px;
+    }
+  }
+
+  .btn--block {
+    width: 100%;
+  }
+
+  .btn--primary-ink {
+    background: var(--ink);
+    color: var(--surface);
+  }
+
+  .btn--primary-ink:hover {
+    background: var(--ink-hover);
+  }
+
+  .btn--primary-accent {
+    background: var(--accent);
+    color: var(--surface);
+  }
+
+  .btn--primary-accent:hover {
+    background: var(--accent-hover);
+  }
+
+  .btn--secondary {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--ink);
+  }
+
+  .btn--secondary:hover {
+    background: var(--tint);
+  }
+
+  .btn--outline {
+    background: transparent;
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+
+  .btn--outline:hover {
+    background: var(--ink);
+    color: var(--surface);
+  }
+
+  .btn--on-dark {
+    background: var(--surface);
+    color: var(--ink);
+  }
+
+  .btn--on-dark:hover {
+    background: var(--tint);
+  }
+
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+</style>

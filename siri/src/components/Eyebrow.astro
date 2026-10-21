@@ -1,0 +1,31 @@
+---
+/** Uppercase label above headings and inside tiles. */
+interface Props {
+  as?: "p" | "span" | "div";
+  class?: string;
+}
+
+const { as: Tag = "p", class: className } = Astro.props;
+---
+
+<Tag class:list={["eyebrow", className]}><slot /></Tag>
+
+<style>
+  .eyebrow {
+    color: var(--eyebrow-color, var(--muted));
+    font-family: var(--font-body);
+    font-size: var(--text-eyebrow);
+    font-weight: 600;
+    letter-spacing: var(--tracking-eyebrow);
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  :global(.on-dark) .eyebrow {
+    --eyebrow-color: var(--on-dark-muted);
+  }
+
+  :global(.tile--accent) .eyebrow {
+    --eyebrow-color: var(--surface);
+  }
+</style>
