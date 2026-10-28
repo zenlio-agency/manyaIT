@@ -1,8 +1,6 @@
-/** Site name. Appended to every page title and used as `og:site_name`. */
+/** Site name. Appended to every page title and used as `og:site_name` and
+    in the structured data, as the only name, so search engines show it. */
 export const SITE_NAME = "ManyaIT";
-/** Other names people search for the company by, for search engines'
-    site name. Listed as `alternateName` in the structured data. */
-export const SITE_ALTERNATE_NAMES = ["Manya IT", "ManyaIT Inc."];
 /** Canonical origin. Resolves canonical URLs, social images, and the sitemap.
     Vercel serves the site on www and redirects the bare domain here. */
 export const SITE_URL = "https://www.manyait.com";

@@ -218,7 +218,7 @@ Already done on the site:
   footer
 - A different title and description on every page
 - `WebSite` and `Organization` structured data naming the site "ManyaIT",
-  also known as "Manya IT" and "ManyaIT Inc."
+  with no other names
 - Breadcrumbs on every inner page
 - A sitemap listing only real pages, each with the date it last changed
 
