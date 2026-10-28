@@ -1,0 +1,848 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Breadcrumbs from "@/components/Breadcrumbs.astro";
+import Eyebrow from "@/components/Eyebrow.astro";
+import Button from "@/components/Button.astro";
+import Chip from "@/components/Chip.astro";
+import BentoGrid from "@/components/BentoGrid.astro";
+import Tile from "@/components/Tile.astro";
+import StatTile from "@/components/StatTile.astro";
+import Sparkline from "@/components/Sparkline.astro";
+import MiniBars from "@/components/MiniBars.astro";
+import LogoTile from "@/components/LogoTile.astro";
+import LogoMark from "@/components/LogoMark.astro";
+import PhotoPlaceholder from "@/components/PhotoPlaceholder.astro";
+import FAQ from "@/components/FAQ.astro";
+import ComparisonTable from "@/components/ComparisonTable.astro";
+import CTABento from "@/components/CTABento.astro";
+import { colors, radii, spacing, hex } from "@/content/tokens";
+import { contrast, mix } from "@/lib/contrast";
+import { figure } from "@/content/placeholders";
+
+const accentLight = mix(hex.accent, "#FFFFFF", 0.45);
+
+const pairs = [
+  { fg: "--slate", bg: "--bg", ratio: contrast(hex.slate, hex.bg), use: "Body copy" },
+  { fg: "--muted", bg: "--bg", ratio: contrast(hex.muted, hex.bg), use: "Captions on the page" },
+  { fg: "--muted", bg: "--tint", ratio: contrast(hex.muted, hex.tint), use: "Captions on tint" },
+  { fg: "--accent", bg: "--surface", ratio: contrast(hex.accent, hex.surface), use: "Links on white" },
+  { fg: "--accent", bg: "--tint", ratio: contrast(hex.accent, hex.tint), use: "Teal on tint" },
+  { fg: "#FFFFFF", bg: "--accent", ratio: contrast("#FFFFFF", hex.accent), use: "White on teal" },
+  { fg: "--on-dark-muted", bg: "--ink", ratio: contrast(hex.onDarkMuted, hex.ink), use: "Secondary text on ink" },
+  { fg: "--accent-light", bg: "--ink", ratio: contrast(accentLight, hex.ink), use: "Accent on ink" },
+  { fg: "--danger", bg: "--danger-tint", ratio: contrast(hex.danger, hex.dangerTint), use: "“Before” tag" },
+  { fg: "--slate", bg: "--photo", ratio: contrast(hex.slate, hex.photo), use: "Text on photo placeholders" },
+  { fg: "--on-dark-muted", bg: "--accent", ratio: contrast(hex.onDarkMuted, hex.accent), use: "Avoid: use white on teal" },
+  { fg: "--muted", bg: "--photo", ratio: contrast(hex.muted, hex.photo), use: "Avoid: use slate on photo" },
+];
+
+const type = [
+  {
+    role: "Display (H1)",
+    spec: "Plus Jakarta Sans 800 · clamp(46px, 6.6vw, 96px) · −0.045em · 1.0",
+    class: "h1",
+    sample: "Your data, unified.",
+  },
+  {
+    role: "Section H2",
+    spec: "Plus Jakarta Sans 800 · clamp(36px, 4.2vw, 60px) · −0.045em · 1.02",
+    class: "h2",
+    sample: "One partner for the whole data value chain.",
+  },
+  {
+    role: "Card title",
+    spec: "Plus Jakarta Sans 700 · 22–34px · −0.03em · 1.15",
+    class: "card-title",
+    sample: "Unified Data Foundations",
+  },
+  {
+    role: "Brand wordmark, small headings",
+    spec: "Poppins 600 · 17–20px · −0.02em",
+    class: "small-heading",
+    sample: "Siri Data Analytics",
+  },
+  {
+    role: "Lead",
+    spec: "Inter 400 · 19px · 1.6",
+    class: "lead",
+    sample: "Data platforms, SAP analytics, dashboards, AI and specialist talent — from one accountable partner.",
+  },
+  {
+    role: "Body",
+    spec: "Inter 400/500 · 16px · 1.6",
+    class: "",
+    sample: "We consolidate ERP, CRM and SaaS data into a governed cloud warehouse or lakehouse — tested, monitored and ready for BI and AI.",
+  },
+  {
+    role: "Big numbers",
+    spec: "Plus Jakarta Sans 800 · 56px · −0.04em · 1 · tabular-nums",
+    class: "big-number",
+    sample: "94.2%",
+  },
+];
+
+const platforms = ["SAP S/4HANA", "BW/4HANA", "Snowflake", "Azure", "AWS", "Tableau", "Sisense"];
+
+const faq = [
+  {
+    q: "We already run a warehouse — do we start over?",
+    a: "No. We assess what you have, keep what works and modernize domain by domain.",
+  },
+  {
+    q: "Will reports go dark during migration?",
+    a: "No. Old and new run side by side and each domain is reconciled before cut-over.",
+  },
+  {
+    q: "How do you keep cloud data spend predictable?",
+    a: "Workload-level cost tracking, sizing rules and monthly cost reviews.",
+  },
+  {
+    q: "Which platforms do you work with?",
+    a: "Snowflake, Microsoft Azure, AWS and Big Data frameworks.",
+  },
+];
+
+const comparison: [string, string, string][] = [
+  ["Starting point", "The tool", "The decision and its KPI"],
+  ["Scope", "One layer of the stack", "The whole data value chain"],
+  ["Platforms", "Pushes one preferred stack", "Platform-neutral across SAP, Snowflake, Azure and AWS"],
+  ["Talent", "CVs forwarded", "Domain-screened specialists"],
+  ["Handover", "Knowledge leaves with the team", "Documented, trained and owned by you"],
+];
+
+const sections = [
+  ["colors", "Color"],
+  ["type", "Type"],
+  ["shape", "Shape and spacing"],
+  ["buttons", "Buttons"],
+  ["labels", "Eyebrows and chips"],
+  ["tiles", "Tiles"],
+  ["bento", "Bento grid"],
+  ["data", "Stats and data visuals"],
+  ["media", "Logos and photos"],
+  ["navigation", "Navigation"],
+  ["faq", "FAQ"],
+  ["table", "Comparison table"],
+  ["cta", "CTA bento"],
+];
+---
+
+<BaseLayout
+  title="Style guide | Siri Data Analytics"
+  description="Design tokens and components for the Siri Data Analytics website."
+  noindex
+>
+  <div class="container sg-hero">
+    <Breadcrumbs items={[{ label: "Style guide", href: "/styleguide" }]} />
+    <div class="stack" style="--stack-gap: 20px">
+      <Eyebrow>Direction B · Bento</Eyebrow>
+      <h1 class="h1">Style guide</h1>
+      <p class="lead sg-lead">
+        Every token and component the site is built from. This page is for the team: it is not
+        linked from the site and is kept out of search.
+      </p>
+    </div>
+    <nav class="sg-toc" aria-label="On this page">
+      <ul role="list">
+        {sections.map(([id, label]) => <li><a href={`#${id}`}>{label}</a></li>)}
+      </ul>
+    </nav>
+  </div>
+
+  <!-- Color -->
+  <section class="section sg-section" aria-labelledby="colors">
+    <div class="container">
+      <div class="sg-head">
+        <h2 class="card-title" id="colors">Color</h2>
+        <p>The brief's exact values. No other colors are used; hover states mix these tokens.</p>
+      </div>
+      <ul role="list" class="sg-swatches">
+        {
+          colors.map((c) => (
+            <li class="sg-swatch">
+              <span class="sg-swatch__chip" style={`background: var(${c.name});`} />
+              <span class="sg-swatch__name">{c.name}</span>
+              <code>{c.value}</code>
+              <span class="caption">{c.role}</span>
+            </li>
+          ))
+        }
+      </ul>
+
+      <h3 class="small-heading sg-sub">Contrast</h3>
+      <div class="sg-table-wrap" role="region" aria-label="Contrast of token pairings" tabindex="0">
+        <table class="sg-table">
+          <caption class="sr-only">Contrast of token pairings</caption>
+          <thead>
+            <tr>
+              <th scope="col">Text</th>
+              <th scope="col">Background</th>
+              <th scope="col">Ratio</th>
+              <th scope="col">AA, normal text</th>
+              <th scope="col">Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              pairs.map((p) => (
+                <tr>
+                  <td><code>{p.fg}</code></td>
+                  <td><code>{p.bg}</code></td>
+                  <td class="sg-num">{p.ratio.toFixed(2)}:1</td>
+                  <td>
+                    {p.ratio >= 4.5 ? <Chip variant="after">Pass</Chip> : <Chip variant="before">Fail</Chip>}
+                  </td>
+                  <td>{p.use}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Type -->
+  <section class="section section--band sg-section" aria-labelledby="type">
+    <div class="container">
+      <div class="sg-head">
+        <h2 class="card-title" id="type">Type</h2>
+        <p>
+          Plus Jakarta Sans 600/700/800, Poppins 500/600 and Inter 400/500/600 from Google Fonts with
+          <code>display=swap</code>. Headings use sentence case.
+        </p>
+      </div>
+      <dl class="sg-type">
+        {
+          type.map((t) => (
+            <div class="sg-type__row">
+              <dt>
+                <span class="sg-type__role">{t.role}</span>
+                <span class="caption">{t.spec}</span>
+              </dt>
+              <dd class:list={[t.class, "sg-type__sample"]}>{t.sample}</dd>
+            </div>
+          ))
+        }
+        <div class="sg-type__row">
+          <dt>
+            <span class="sg-type__role">Eyebrow / labels</span>
+            <span class="caption">Inter 600 · 13px · uppercase · 0.06em</span>
+          </dt>
+          <dd><Eyebrow as="span">Ingest · Store</Eyebrow></dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- Shape and spacing -->
+  <section class="section sg-section" aria-labelledby="shape">
+    <div class="container">
+      <div class="sg-head">
+        <h2 class="card-title" id="shape">Shape and spacing</h2>
+        <p>Only the floating nav (and its menus) casts a shadow.</p>
+      </div>
+      <ul role="list" class="sg-radii">
+        {
+          radii.map((r) => (
+            <li>
+              <span
+                class="sg-radius"
+                style={`border-radius: var(${r.name}); ${r.value === "999px" ? "width: 160px; height: 56px;" : ""}`}
+              />
+              <span class="sg-swatch__name">{r.name}</span>
+              <code>{r.value}</code>
+              <span class="caption">{r.role}</span>
+            </li>
+          ))
+        }
+        <li>
+          <span class="sg-radius sg-shadow" />
+          <span class="sg-swatch__name">--shadow-nav</span>
+          <code>0 8px 28px rgba(13,15,13,.05)</code>
+          <span class="caption">Floating nav only</span>
+        </li>
+      </ul>
+      <dl class="sg-spacing">
+        {
+          spacing.map((s) => (
+            <div>
+              <dt><code>{s.name}</code></dt>
+              <dd>
+                <strong>{s.value}</strong> <span class="caption">{s.role}</span>
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <!-- Buttons -->
+  <section class="section section--band sg-section" aria-labelledby="buttons">
+    <div class="container">
+      <div class="sg-head">
+        <h2 class="card-title" id="buttons">Buttons</h2>
+        <p>All pill-shaped, 15–16px semibold, at least 48px tall. Links render as <code>&lt;a&gt;</code>, actions as <code>&lt;button&gt;</code>.</p>
+      </div>
+      <div class="sg-row">
+        <div class="sg-demo">
+          <Button variant="primary-ink" href="/book-a-consult">Book a Data Consult</Button>
+          <code>primary-ink</code>
+        </div>
+        <div class="sg-demo">
+          <Button variant="primary-accent" href="/book-a-consult">Book a Data Consult</Button>
+          <code>primary-accent</code>
+        </div>
+        <div class="sg-demo">
+          <Button variant="secondary" href="/data-check">Take the Data Check</Button>
+          <code>secondary</code>
+        </div>
+        <div class="sg-demo">
+          <Button variant="outline" href="/solutions">All solutions</Button>
+          <code>outline</code>
+        </div>
+        <Tile variant="ink" class="sg-demo sg-demo--dark">
+          <Button variant="on-dark" href="/book-a-consult">Book a Data Consult</Button>
+          <code>on-dark</code>
+        </Tile>
+        <div class="sg-demo">
+          <Button variant="primary-ink" type="button" disabled>Disabled</Button>
+          <code>disabled</code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Eyebrows and chips -->
+  <section class="section sg-section" aria-labelledby="labels">
+    <div class="container">
+      <div class="sg-head">
+        <h2 class="card-title" id="labels">Eyebrows and chips</h2>
+        <p>Chips are 13px pills. The Before tag uses the danger colors; the After tag uses the accent.</p>
+      </div>
+      <div class="sg-row">
+        <div class="sg-demo"><Eyebrow>Ingest · Store</Eyebrow><code>Eyebrow</code></div>
+        <div class="sg-demo"><Chip>Snowflake</Chip><code>default</code></div>
+        <div class="sg-demo"><Chip variant="tint">Decision Intelligence · 6 min read</Chip><code>tint</code></div>
+        <div class="sg-demo"><Chip variant="before">Before Siri</Chip><code>before</code></div>
+        <div class="sg-demo"><Chip variant="after">After Siri</Chip><code>after</code></div>
+        <Tile variant="ink" class="sg-demo sg-demo--dark">
+          <div class="sg-chips">
+            <Chip variant="on-dark">Azure</Chip>
+            <Chip variant="on-dark">AWS</Chip>
+          </div>
+          <code>on-dark</code>
+        </Tile>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tiles -->
+  <section class="section section--band sg-section" aria-labelledby="tiles">
+    <div class="container">
+      <div class="sg-head">
+        <h2 class="card-title" id="tiles">Tiles</h2>
+        <p>Flex column, content pushed to top and bottom, 24–32px padding. The second row shows a whole-tile link and the medium and small radii.</p>
+      </div>
+      <BentoGrid rowHeight="220px">
+        <Tile variant="surface">
+          <Eyebrow>surface</Eyebrow>
+          <p class="card-title">White with a border</p>
+        </Tile>
+        <Tile variant="tint">
+          <Eyebrow>tint</Eyebrow>
+          <p class="card-title">Tinted tile</p>
+        </Tile>
+        <Tile variant="ink">
+          <Eyebrow>ink</Eyebrow>
+          <p class="card-title">Ink tile</p>
+        </Tile>
+        <Tile variant="accent">
+          <Eyebrow>accent</Eyebrow>
+          <p class="card-title">Accent tile</p>
+        </Tile>
+        <Tile variant="photo" flush>
+          <PhotoPlaceholder caption="engineers collaborating around a large screen" radius="none" />
+        </Tile>
+        <Tile variant="surface">
+          <Eyebrow>Model</Eyebrow>
+          <div class="stack" style="--stack-gap: 8px">
+            <h3 class="card-title"><a class="tile-link" href="/solutions/sap-insight-engine">SAP Insight Engine</a></h3>
+            <p>S/4HANA and BW/4HANA analytics without compromising a clean core.</p>
+          </div>
+        </Tile>
+        <Tile variant="tint" radius="md">
+          <Eyebrow>radius md · 20px</Eyebrow>
+          <p class="card-title">Medium card</p>
+        </Tile>
+        <Tile variant="surface" radius="sm">
+          <Eyebrow>radius sm · 16px</Eyebrow>
+          <p class="card-title">Small tile</p>
+        </Tile>
+      </BentoGrid>
+    </div>
+  </section>
+
+  <!-- Bento grid -->
+  <section class="section sg-section" aria-labelledby="bento">
+    <div class="container">
+      <div class="sg-head">
+        <h2 class="card-title" id="bento">Bento grid</h2>
+        <p>
+          <code>repeat(auto-fit, minmax(280px, 1fr))</code>, a row height per instance (210px here, the
+          home hero) and 14px gaps. Tiles span two columns or rows; under 640px the grid is one column
+          and spans are removed.
+        </p>
+      </div>
+      <BentoGrid rowHeight="210px">
+        <Tile variant="photo" span={2} rows={2} flush>
+          <PhotoPlaceholder caption="engineers collaborating around a large screen" radius="none" />
+        </Tile>
+        <StatTile label="Forecast accuracy" value="94.2%">
+          <Sparkline />
+        </StatTile>
+        <StatTile variant="accent" label="Report refresh" value="15 min" note="Down from 24 hours" />
+        <Tile variant="ink">
+          <p class="sg-tile-label">Platforms we run on</p>
+          <ul role="list" class="sg-chips">
+            {platforms.map((p) => <Chip as="li" variant="on-dark">{p}</Chip>)}
+          </ul>
+        </Tile>
+        <Tile variant="tint">
+          <p class="sg-tile-label">Sources unified</p>
+          <div class="stack" style="--stack-gap: 12px">
+            <MiniBars />
+            <p>38 systems, one model</p>
+          </div>
+        </Tile>
+      </BentoGrid>
+      <p class="caption sg-illustrative">Illustrative figures</p>
+    </div>
+  </section>
+
+  <!-- Stats and data visuals -->
+  <section class="section section--band sg-section" aria-labelledby="data">
+    <div class="container">
+      <div class="sg-head">
+        <h2 class="card-title" id="data">Stats and data visuals</h2>
+        <p>
+          Stat tiles take any variant. Figures the business has not supplied stay as
+          <code>{figure}</code>. Sparkline and MiniBars are decorative and always sit beside a number or label.
+        </p>
+      </div>
+      <BentoGrid rowHeight="200px">
+        <StatTile label="Data sources unified" value={figure} />
+        <StatTile variant="tint" label="Report refresh time" value={figure} />
+        <StatTile variant="ink" label="Platform cost per query" value={figure} />
+        <Tile variant="surface">
+          <p class="sg-tile-label">Sparkline</p>
+          <Sparkline />
+        </Tile>
+        <Tile variant="ink">
+          <p class="sg-tile-label">Sparkline on ink</p>
+          <Sparkline points={[30, 34, 31, 40, 44, 41, 49, 55]} />
+        </Tile>
+        <Tile variant="surface">
+          <p class="sg-tile-label">MiniBars</p>
+          <MiniBars />
+        </Tile>
+      </BentoGrid>
+    </div>
+  </section>
+
+  <!-- Logos and photos -->
+  <section class="section sg-section" aria-labelledby="media">
+    <div class="container">
+      <div class="sg-head">
+        <h2 class="card-title" id="media">Logos and photos</h2>
+        <p>
+          Only approved client logos go live. Photos are labelled grey placeholders until real ones
+          are supplied: never stock lifestyle photos or images from other companies' sites.
+        </p>
+      </div>
+      <ul role="list" class="sg-logos">
+        {Array.from({ length: 6 }, () => <LogoTile as="li" />)}
+      </ul>
+      <div class="sg-photos">
+        <PhotoPlaceholder caption="Risk team at work" height="200px" />
+        <PhotoPlaceholder caption="Claims analysts" height="200px" captionPosition="center" />
+        <div class="sg-mark">
+          <LogoMark />
+          <LogoMark size={64} />
+          <span class="caption">Logo mark, 34px and 64px</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Navigation -->
+  <section class="section section--band sg-section" aria-labelledby="navigation">
+    <div class="container">
+      <div class="sg-head">
+        <h2 class="card-title" id="navigation">Navigation</h2>
+        <p>
+          The floating nav and footer are live on this page. Solutions and Industries open mega-menus
+          (Enter or Space opens, Escape closes and returns focus). Under 900px the nav becomes a menu
+          button that opens a full-screen sheet.
+        </p>
+      </div>
+      <div class="stack" style="--stack-gap: 24px">
+        <Breadcrumbs
+          label="Breadcrumb example"
+          items={[
+            { label: "Solutions", href: "/solutions" },
+            { label: "Unified Data Foundations", href: "/solutions/unified-data-foundations" },
+          ]}
+        />
+        <code class="caption">Breadcrumbs</code>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section sg-section" aria-labelledby="faq">
+    <div class="container sg-narrow">
+      <div class="sg-head">
+        <h2 class="card-title" id="faq">Questions, decoded</h2>
+        <p>Searchable accordion. Try “cloud”, or a word that matches nothing to see the empty state.</p>
+      </div>
+      <FAQ items={faq} id="sg-faq" />
+    </div>
+  </section>
+
+  <!-- Comparison table -->
+  <section class="section section--band sg-section" aria-labelledby="table">
+    <div class="container">
+      <div class="sg-head">
+        <h2 class="card-title" id="table">Comparison table</h2>
+        <p>Scrolls inside its own box on small screens. The Siri column is highlighted.</p>
+      </div>
+      <ComparisonTable
+        caption="Typical IT vendor vs Siri"
+        columns={["", "Typical IT vendor", "Siri"]}
+        rows={comparison}
+      />
+    </div>
+  </section>
+
+  <!-- CTA bento -->
+  <section class="section sg-section" aria-labelledby="cta">
+    <div class="container">
+      <div class="sg-head">
+        <h2 class="card-title" id="cta">CTA bento</h2>
+        <p>Closes every page. Solution pages pass the title “Make your data count.”</p>
+      </div>
+      <CTABento headingId="sg-cta-title" />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .sg-hero {
+    display: grid;
+    gap: 40px;
+    padding-top: 72px;
+    padding-bottom: 24px;
+  }
+
+  .sg-lead {
+    max-width: 720px;
+  }
+
+  .sg-toc ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .sg-toc a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    color: var(--slate);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .sg-toc a:hover {
+    background: var(--tint);
+    color: var(--ink);
+  }
+
+  .sg-section {
+    padding-block: 96px;
+  }
+
+  @media (max-width: 899px) {
+    .sg-section {
+      padding-block: 64px;
+    }
+  }
+
+  .sg-head {
+    display: grid;
+    gap: 8px;
+    max-width: 760px;
+    margin-bottom: 32px;
+  }
+
+  .sg-sub {
+    margin: 48px 0 16px;
+    color: var(--ink);
+  }
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px;
+    color: var(--slate);
+  }
+
+  .sg-swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+    gap: var(--tile-gap);
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .sg-swatch {
+    display: grid;
+    gap: 4px;
+    padding: 12px 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+  }
+
+  .sg-swatch__chip {
+    height: 72px;
+    margin-bottom: 8px;
+    border: 1px solid var(--divider);
+    border-radius: 10px;
+  }
+
+  .sg-swatch__name {
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .sg-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+  }
+
+  .sg-table {
+    width: 100%;
+    min-width: 680px;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .sg-table th,
+  .sg-table td {
+    padding: 12px 20px;
+    text-align: left;
+  }
+
+  .sg-table thead th {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+  }
+
+  .sg-table tbody tr {
+    border-top: 1px solid var(--divider);
+  }
+
+  .sg-num {
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+
+  .sg-type {
+    display: grid;
+  }
+
+  .sg-type__row {
+    display: grid;
+    grid-template-columns: minmax(200px, 280px) 1fr;
+    gap: 16px 40px;
+    align-items: baseline;
+    padding-block: 28px;
+    border-top: 1px solid var(--divider);
+  }
+
+  .sg-type__row dt {
+    display: grid;
+    gap: 4px;
+  }
+
+  .sg-type__role {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .sg-type__row dd {
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .sg-type__sample.h1,
+  .sg-type__sample.h2 {
+    color: var(--ink);
+  }
+
+  @media (max-width: 760px) {
+    .sg-type__row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .sg-radii {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+    gap: 24px var(--tile-gap);
+    padding: 0;
+    margin: 0 0 40px;
+    list-style: none;
+  }
+
+  .sg-radii li {
+    display: grid;
+    gap: 4px;
+    align-content: start;
+  }
+
+  .sg-radius {
+    display: block;
+    width: 120px;
+    height: 88px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    background: var(--tint);
+  }
+
+  .sg-shadow {
+    border-radius: var(--radius-pill);
+    width: 160px;
+    height: 56px;
+    background: var(--surface);
+    box-shadow: var(--shadow-nav);
+  }
+
+  .sg-spacing {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+    gap: var(--tile-gap);
+  }
+
+  .sg-spacing > div {
+    display: grid;
+    gap: 4px;
+    padding: 16px 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+  }
+
+  .sg-spacing dd {
+    margin: 0;
+    color: var(--ink);
+  }
+
+  .sg-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 24px var(--tile-gap);
+  }
+
+  .sg-demo {
+    display: grid;
+    align-content: start;
+    justify-items: start;
+    gap: 10px;
+  }
+
+  .sg-row > .sg-demo:not(.sg-demo--dark) {
+    padding: 4px 4px 4px 0;
+  }
+
+  :global(.sg-demo--dark) {
+    padding: 20px;
+  }
+
+  :global(.sg-demo--dark) code {
+    color: var(--on-dark-muted);
+  }
+
+  .sg-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .sg-tile-label {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  :global(.tile--surface) .sg-tile-label,
+  :global(.tile--tint) .sg-tile-label {
+    color: var(--muted);
+  }
+
+  .sg-illustrative {
+    margin-top: 12px;
+    text-align: right;
+  }
+
+  .sg-logos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+    gap: var(--tile-gap);
+    padding: 0;
+    margin: 0 0 var(--tile-gap);
+    list-style: none;
+  }
+
+  .sg-photos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    gap: var(--tile-gap);
+  }
+
+  .sg-mark {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+  }
+
+  .sg-narrow {
+    max-width: calc(880px + var(--gutter) * 2);
+  }
+</style>

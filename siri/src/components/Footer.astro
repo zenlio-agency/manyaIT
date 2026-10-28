@@ -1,0 +1,201 @@
+---
+import Logo from "./Logo.astro";
+import { site, companyLinks, legalLinks } from "@/content/site";
+import { solutions, solutionHref } from "@/content/solutions";
+import { industries, industryHref } from "@/content/industries";
+import { isPlaceholder } from "@/content/placeholders";
+
+const linkedinIsUrl = !isPlaceholder(site.linkedinUrl);
+const { street, locality, region, postalCode } = site.address;
+---
+
+<footer class="footer on-dark">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <Logo tone="light" />
+        <p class="footer__tagline">{site.tagline}</p>
+      </div>
+
+      <nav class="footer__col" aria-labelledby="footer-solutions">
+        <h2 class="footer__heading" id="footer-solutions">Solutions</h2>
+        <ul role="list">
+          {solutions.map((s) => <li><a href={solutionHref(s.slug)}>{s.name}</a></li>)}
+        </ul>
+      </nav>
+
+      <nav class="footer__col" aria-labelledby="footer-industries">
+        <h2 class="footer__heading" id="footer-industries">Industries</h2>
+        <ul role="list">
+          {industries.map((i) => <li><a href={industryHref(i.slug)}>{i.name}</a></li>)}
+        </ul>
+      </nav>
+
+      <nav class="footer__col" aria-labelledby="footer-company">
+        <h2 class="footer__heading" id="footer-company">Company</h2>
+        <ul role="list">
+          {companyLinks.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+        </ul>
+      </nav>
+
+      <div class="footer__col footer__contact">
+        <h2 class="footer__heading">{locality}, {site.address.regionName}</h2>
+        <address>
+          <p>
+            {street}<br />
+            {locality}, {region} {postalCode}
+          </p>
+          <p><a href={site.phone.href}>{site.phone.display}</a></p>
+          <p><a href={site.email.href}>{site.email.display}</a></p>
+        </address>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <p class="footer__copy">
+        © {site.copyrightYear} {site.name} {site.legalEntity}. All rights reserved.
+      </p>
+      <ul role="list" class="footer__legal">
+        {legalLinks.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+        <li>
+          {
+            linkedinIsUrl ? (
+              <a href={site.linkedinUrl} rel="me noopener">LinkedIn</a>
+            ) : (
+              <span class="footer__pending">LinkedIn {site.linkedinUrl}</span>
+            )
+          }
+        </li>
+        <li>
+          <a class="footer__network" href={site.network.href} rel="noopener">
+            Part of the {site.network.name} network <span aria-hidden="true">↗</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding-block: 88px 40px;
+    background: var(--ink);
+    color: var(--on-dark-muted);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .footer a {
+    color: var(--on-dark-muted);
+    text-decoration: none;
+    border-radius: 4px;
+  }
+
+  .footer a:hover {
+    color: var(--surface);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .footer__grid {
+    display: grid;
+    grid-template-columns: 1.4fr repeat(3, 1fr) 1.3fr;
+    gap: 48px 32px;
+  }
+
+  .footer__brand {
+    display: grid;
+    align-content: start;
+    gap: 16px;
+  }
+
+  .footer__tagline {
+    font-family: var(--font-brand);
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: var(--tracking-brand);
+    color: var(--surface);
+  }
+
+  .footer__heading {
+    margin-bottom: 16px;
+    color: var(--surface);
+    font-family: var(--font-brand);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: var(--tracking-brand);
+  }
+
+  .footer__col ul {
+    display: grid;
+    gap: 10px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .footer address {
+    display: grid;
+    gap: 10px;
+    font-style: normal;
+  }
+
+  .footer__contact a {
+    color: var(--surface);
+  }
+
+  .footer__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px 32px;
+    margin-top: 72px;
+    padding-top: 28px;
+    border-top: 1px solid var(--on-dark-chip);
+    font-size: 14px;
+  }
+
+  .footer__legal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .footer__network {
+    white-space: nowrap;
+  }
+
+  @media (max-width: 1099px) {
+    .footer__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .footer__brand {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 699px) {
+    .footer {
+      padding-top: 64px;
+    }
+
+    .footer__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .footer__contact {
+      grid-column: 1 / -1;
+    }
+
+    .footer__bottom {
+      margin-top: 56px;
+      flex-direction: column;
+      align-items: start;
+    }
+  }
+</style>

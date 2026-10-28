@@ -1,0 +1,88 @@
+/* Siri Data Analytics design tokens (Direction B, "Bento").
+   Colors are the brief's exact values. Do not add colors here or anywhere
+   else: derive any state color from these with color-mix(). */
+
+:root {
+  /* Color */
+  --bg: #FAFAFA;          /* page background, off-white */
+  --surface: #FFFFFF;     /* cards, nav pill */
+  --tint: #EEF0F8;        /* tinted tiles/sections */
+  --photo: #E3E6EE;       /* photo placeholders */
+  --border: #DDE0E8;
+  --divider: #EBEDF2;
+  --muted-2: #B4B7C2;     /* chart bars, logo placeholders */
+  --muted: #686B76;       /* captions, labels */
+  --slate: #3A3D45;       /* body copy */
+  --ink: #0D0F0D;         /* headings, ink tiles, primary dark buttons */
+  --accent: #0F766E;      /* Siri teal — single brand accent */
+  --accent-light: color-mix(in srgb, var(--accent) 45%, #fff); /* accent on ink */
+  --danger: #B42318;  --danger-tint: #FCEBEC;  /* "Before" states only */
+  --on-dark-muted: rgba(255,255,255,.72);
+  --on-dark-chip: rgba(255,255,255,.12);
+
+  /* Hover states, derived from the palette above */
+  --ink-hover: var(--slate);
+  --accent-hover: color-mix(in srgb, var(--accent) 86%, var(--ink));
+
+  /* Focus ring. Light surfaces use the accent; ink and accent surfaces
+     switch it to white (see .on-dark in global.css). */
+  --focus-ring: var(--accent);
+
+  /* Type families */
+  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-brand: "Poppins", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+
+  /* Type scale */
+  --text-display: clamp(46px, 6.6vw, 96px);
+  --text-h2: clamp(36px, 4.2vw, 60px);
+  --text-card-title: clamp(22px, 1.4rem + 0.8vw, 34px);
+  --text-card-title-sm: 22px;
+  --text-brand: clamp(17px, 0.95rem + 0.25vw, 20px);
+  --text-body: 16px;
+  --text-lead: 19px;
+  --text-eyebrow: 13px;
+  --text-number: 56px;
+  --text-chip: 13px;
+
+  --tracking-display: -0.045em;
+  --tracking-title: -0.03em;
+  --tracking-brand: -0.02em;
+  --tracking-number: -0.04em;
+  --tracking-eyebrow: 0.06em;
+
+  /* Shape */
+  --radius-lg: 24px;   /* bento tiles and large cards */
+  --radius-md: 20px;   /* medium cards */
+  --radius-sm: 16px;   /* small tiles */
+  --radius-pill: 999px; /* buttons, chips, nav bar */
+
+  /* Layout and spacing */
+  --content-max: 1320px;
+  --gutter: 32px;
+  --section-y: 128px;
+  --tile-gap: 14px;
+  --tile-pad: clamp(24px, 2vw + 8px, 32px);
+  --nav-inset: 20px;
+  --nav-height: 68px;
+
+  /* Elevation: only the floating nav casts a shadow */
+  --shadow-nav: 0 8px 28px rgba(13,15,13,.05);
+
+  /* Motion */
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --duration: 180ms;
+}
+
+@media (max-width: 899px) {
+  :root {
+    --section-y: 72px;
+    --nav-height: 60px;
+  }
+}
+
+@media (max-width: 599px) {
+  :root {
+    --gutter: 16px;
+  }
+}

@@ -1,0 +1,50 @@
+---
+/** Eight rounded bars, the last one in the accent color. Decorative. */
+interface Props {
+  /** Eight relative heights (0–100). Illustrative unless real data is supplied. */
+  values?: number[];
+  height?: string;
+  class?: string;
+}
+
+const {
+  values = [34, 48, 41, 58, 52, 66, 72, 92],
+  height = "64px",
+  class: className,
+} = Astro.props;
+
+const bars = values.slice(0, 8);
+---
+
+<div class:list={["minibars", className]} style={`--minibars-h: ${height};`} aria-hidden="true">
+  {bars.map((value) => <span style={`--h: ${Math.max(6, Math.min(100, value))}%;`} />)}
+</div>
+
+<style>
+  .minibars {
+    display: flex;
+    align-items: end;
+    gap: 6px;
+    height: var(--minibars-h);
+  }
+
+  .minibars span {
+    flex: 1;
+    height: var(--h);
+    min-width: 8px;
+    border-radius: 6px;
+    background: var(--muted-2);
+  }
+
+  .minibars span:last-child {
+    background: var(--accent);
+  }
+
+  :global(.on-dark) .minibars span {
+    background: var(--on-dark-chip);
+  }
+
+  :global(.on-dark) .minibars span:last-child {
+    background: var(--accent-light);
+  }
+</style>

@@ -1,0 +1,119 @@
+---
+/**
+ * Labelled grey box standing in for a photo that has not been supplied.
+ * Never swap in stock or third-party images; replace with an approved photo
+ * and use the caption as its alt text.
+ */
+interface Props {
+  /** What the photo will show, without the "Photo:" prefix. */
+  caption: string;
+  /** Fixed height, e.g. "200px". Fills the parent when omitted. */
+  height?: string;
+  /** Aspect ratio when no height is given, e.g. "16 / 9". */
+  ratio?: string;
+  /** Where the caption pill sits. */
+  captionPosition?: "bottom-left" | "center";
+  radius?: "lg" | "md" | "sm" | "none";
+  class?: string;
+}
+
+const {
+  caption,
+  height,
+  ratio,
+  captionPosition = "bottom-left",
+  radius = "lg",
+  class: className,
+} = Astro.props;
+
+const style = [
+  height && `height: ${height};`,
+  !height && ratio && `aspect-ratio: ${ratio};`,
+]
+  .filter(Boolean)
+  .join(" ");
+---
+
+<div
+  class:list={[
+    "photo",
+    `photo--${captionPosition}`,
+    radius !== "none" && `photo--r-${radius}`,
+    !height && !ratio && "photo--fill",
+    className,
+  ]}
+  style={style || undefined}
+  data-placeholder="photo"
+>
+  <svg class="photo__icon" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+    <rect x="5" y="9" width="38" height="30" rx="6"></rect>
+    <circle cx="17" cy="20" r="4"></circle>
+    <path d="m9 35 10-10 7 7 5-5 8 8"></path>
+  </svg>
+  <p class="photo__caption">Photo: {caption}</p>
+</div>
+
+<style>
+  .photo {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-height: 120px;
+    background: var(--photo);
+    overflow: hidden;
+  }
+
+  .photo--fill {
+    flex: 1;
+    height: 100%;
+  }
+
+  .photo--r-lg {
+    border-radius: var(--radius-lg);
+  }
+
+  .photo--r-md {
+    border-radius: var(--radius-md);
+  }
+
+  .photo--r-sm {
+    border-radius: var(--radius-sm);
+  }
+
+  .photo__icon {
+    width: 48px;
+    height: 48px;
+    fill: none;
+    stroke: var(--muted-2);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .photo__caption {
+    max-width: calc(100% - 32px);
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    color: var(--slate);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .photo--bottom-left .photo__caption {
+    position: absolute;
+    left: 16px;
+    bottom: 16px;
+  }
+
+  .photo--center {
+    align-content: center;
+    gap: 12px;
+  }
+
+  .photo--center .photo__caption {
+    text-align: center;
+  }
+</style>

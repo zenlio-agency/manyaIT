@@ -1,0 +1,238 @@
+---
+/**
+ * Searchable FAQ accordion ("Questions, decoded"). The search box filters
+ * questions and answers as you type; each question is a button with
+ * aria-expanded that shows or hides its answer.
+ */
+export interface FaqItem {
+  q: string;
+  a: string;
+}
+
+interface Props {
+  items: FaqItem[];
+  /** Unique per page; prefixes the element ids. */
+  id?: string;
+  /** Heading level for each question, to fit the page outline. */
+  headingLevel?: 3 | 4;
+  emptyHref?: string;
+  class?: string;
+}
+
+const {
+  items,
+  id = "faq",
+  headingLevel = 3,
+  emptyHref = "/book-a-consult",
+  class: className,
+} = Astro.props;
+const Heading = `h${headingLevel}` as "h3" | "h4";
+---
+
+<div class:list={["faq", className]} data-faq>
+  <div class="faq__search" data-faq-search hidden>
+    <label for={`${id}-search`} class="faq__label">Search questions</label>
+    <div class="faq__field">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <circle cx="11" cy="11" r="7"></circle>
+        <path d="m20 20-3.5-3.5"></path>
+      </svg>
+      <input
+        id={`${id}-search`}
+        type="search"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="Type a word, e.g. migration"
+        data-faq-input
+      />
+    </div>
+  </div>
+  <p class="sr-only" aria-live="polite" data-faq-status></p>
+
+  <ul role="list" class="faq__list">
+    {
+      items.map((item, i) => (
+        <li class="faq__item" data-faq-item>
+          <Heading class="faq__q">
+            <button
+              type="button"
+              id={`${id}-q-${i}`}
+              aria-expanded="false"
+              aria-controls={`${id}-a-${i}`}
+              data-faq-toggle
+            >
+              <span>{item.q}</span>
+              <svg class="faq__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5 12h14" />
+                <path class="faq__icon-v" d="M12 5v14" />
+              </svg>
+            </button>
+          </Heading>
+          <div
+            class="faq__a"
+            id={`${id}-a-${i}`}
+            role="region"
+            aria-labelledby={`${id}-q-${i}`}
+            hidden
+          >
+            <p>{item.a}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+
+  <p class="faq__empty" data-faq-empty hidden>
+    No questions match — <a class="text-link" href={emptyHref}>Ask a data architect →</a>
+  </p>
+
+  <noscript>
+    <style is:inline>
+      .faq__a[hidden] {
+        display: block;
+      }
+    </style>
+  </noscript>
+</div>
+
+<script>
+  import { initFaqs } from "@/scripts/faq";
+  initFaqs();
+</script>
+
+<style>
+  .faq {
+    display: grid;
+    gap: 20px;
+  }
+
+  .faq__search {
+    display: grid;
+    gap: 8px;
+    max-width: 520px;
+  }
+
+  .faq__search[hidden] {
+    display: none;
+  }
+
+  .faq__label {
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .faq__field {
+    position: relative;
+  }
+
+  .faq__field svg {
+    position: absolute;
+    top: 50%;
+    left: 18px;
+    width: 18px;
+    height: 18px;
+    transform: translateY(-50%);
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  .faq__field input {
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 20px 10px 46px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    color: var(--ink);
+  }
+
+  .faq__field input::placeholder {
+    color: var(--muted);
+  }
+
+  .faq__field input:focus-visible {
+    border-color: var(--accent);
+    outline-offset: 2px;
+  }
+
+  .faq__list {
+    display: grid;
+    gap: 10px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .faq__item {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+  }
+
+  .faq__item[hidden] {
+    display: none;
+  }
+
+  .faq__q {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.35;
+  }
+
+  .faq__q button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    width: 100%;
+    min-height: 64px;
+    padding: 18px 22px;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    letter-spacing: inherit;
+    text-align: left;
+  }
+
+  .faq__icon {
+    width: 22px;
+    height: 22px;
+    flex: none;
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  .faq__icon-v {
+    transform-origin: center;
+    transition: transform var(--duration) var(--ease);
+  }
+
+  [aria-expanded="true"] .faq__icon-v {
+    transform: scaleY(0);
+  }
+
+  .faq__a {
+    padding: 0 22px 22px;
+    max-width: 72ch;
+  }
+
+  .faq__empty {
+    padding: 20px 22px;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+  }
+
+  .faq__empty[hidden] {
+    display: none;
+  }
+</style>

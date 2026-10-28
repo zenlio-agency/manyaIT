@@ -5,6 +5,7 @@ ManyaIT website redesign.
 | Folder       | What it is                                                                      |
 | ------------ | ------------------------------------------------------------------------------- |
 | `site/`      | The website, built with Astro and Lumos. See `site/README.md`.                  |
+| `siri/`      | The Siri Data Analytics website (part of the ManyaIT network). See `siri/README.md`. |
 | `studio/`    | Sanity Studio, where HR and marketing edit content. See `studio/README.md`.     |
 | `content/`   | Homepage copy (`homepage-copy.md`) and the legal pack design (`legal-pack.md`). |
 | `wireframe/` | Black-and-white homepage wireframe.                                             |

@@ -1,0 +1,50 @@
+---
+import LogoMark from "./LogoMark.astro";
+import { site } from "@/content/site";
+
+/** Logo mark and wordmark, linking home. */
+interface Props {
+  /** Wordmark color: ink on light surfaces, white on the footer. */
+  tone?: "ink" | "light";
+  class?: string;
+}
+
+const { tone = "ink", class: className } = Astro.props;
+const isHome = Astro.url.pathname === "/";
+---
+
+<a
+  href="/"
+  class:list={["logo", `logo--${tone}`, className]}
+  aria-current={isHome ? "page" : undefined}
+>
+  <LogoMark />
+  <span class="logo__word">{site.name}</span>
+</a>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 12px;
+    text-decoration: none;
+  }
+
+  .logo__word {
+    font-family: var(--font-brand);
+    font-size: var(--text-brand);
+    font-weight: 600;
+    letter-spacing: var(--tracking-brand);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .logo--ink {
+    color: var(--ink);
+  }
+
+  .logo--light {
+    color: var(--surface);
+  }
+</style>

@@ -1,0 +1,69 @@
+---
+/**
+ * Wraps a wide table so it scrolls inside its own rounded box on small
+ * screens instead of scrolling the page. Focusable so keyboard users can
+ * scroll it.
+ */
+interface Props {
+  /** Accessible name for the scroll region; usually the table caption. */
+  label: string;
+  class?: string;
+}
+
+const { label, class: className } = Astro.props;
+---
+
+<div class:list={["table-scroll", className]} role="region" aria-label={label} tabindex="0">
+  <slot />
+</div>
+
+<style>
+  .table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    overscroll-behavior-x: contain;
+  }
+
+  .table-scroll :global(table) {
+    width: 100%;
+    min-width: 640px;
+    border-collapse: collapse;
+    font-size: 15px;
+    line-height: 1.5;
+    text-align: left;
+  }
+
+  .table-scroll :global(caption) {
+    padding: 20px 24px 0;
+    color: var(--muted);
+    font-size: 14px;
+    text-align: left;
+  }
+
+  .table-scroll :global(th),
+  .table-scroll :global(td) {
+    padding: 18px 24px;
+    vertical-align: top;
+  }
+
+  .table-scroll :global(thead th) {
+    color: var(--muted);
+    font-size: var(--text-eyebrow);
+    font-weight: 600;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .table-scroll :global(tbody tr) {
+    border-top: 1px solid var(--divider);
+  }
+
+  .table-scroll :global(tbody th) {
+    color: var(--ink);
+    font-weight: 600;
+  }
+</style>

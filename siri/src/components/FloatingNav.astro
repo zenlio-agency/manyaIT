@@ -1,0 +1,673 @@
+---
+import Logo from "./Logo.astro";
+import Button from "./Button.astro";
+import Eyebrow from "./Eyebrow.astro";
+import Sparkline from "./Sparkline.astro";
+import { primaryNav, cta, site } from "@/content/site";
+import { solutions, solutionHref } from "@/content/solutions";
+import { industries, industryHref } from "@/content/industries";
+
+/**
+ * Floating pill nav. Solutions and Industries open mega-menus; under 900px
+ * everything moves into a full-screen sheet behind a menu button.
+ */
+
+const path = Astro.url.pathname.replace(/\/$/, "") || "/";
+const inSection = (href: string) => path === href || path.startsWith(`${href}/`);
+const current = (href: string) => (path === href ? "page" : inSection(href) ? "true" : undefined);
+---
+
+<header class="site-header" data-nav>
+  <div class="container">
+    <nav class="nav-pill" aria-label="Main">
+      <Logo class="nav-logo" />
+
+      <ul role="list" class="nav-menu">
+        <li class="nav-item" data-mega-item>
+          <button
+            type="button"
+            class:list={["nav-link", "nav-trigger", inSection(primaryNav.solutions.href) && "is-current"]}
+            aria-expanded="false"
+            aria-controls="mega-solutions"
+            data-mega-trigger
+          >
+            {primaryNav.solutions.label}
+            <svg class="nav-chevron" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path d="m4 6 4 4 4-4"></path>
+            </svg>
+          </button>
+
+          <div class="mega mega--solutions" id="mega-solutions" data-mega hidden>
+            <div class="mega__outcomes">
+              <Eyebrow>What do you need?</Eyebrow>
+              <ul role="list">
+                {
+                  solutions.map((s, i) => (
+                    <li>
+                      <a
+                        href={solutionHref(s.slug)}
+                        class:list={["mega__outcome", i === 0 && "is-active"]}
+                        data-preview={s.slug}
+                        aria-current={current(solutionHref(s.slug))}
+                      >
+                        <span>{s.outcome}</span>
+                        <span class="sr-only">: {s.name}</span>
+                        <span class="mega__arrow" aria-hidden="true">→</span>
+                      </a>
+                    </li>
+                  ))
+                }
+              </ul>
+              <a class="arrow-link mega__all" href={primaryNav.solutions.href}>
+                All solutions <span aria-hidden="true">→</span>
+              </a>
+            </div>
+
+            <div class="mega__previews" aria-hidden="true">
+              {
+                solutions.map((s, i) => (
+                  <div class="mega__preview" data-preview-pane={s.slug} hidden={i !== 0}>
+                    <div class="mega__preview-text">
+                      <Eyebrow>{s.stage}</Eyebrow>
+                      <p class="card-title card-title--sm">{s.name}</p>
+                      <p>{s.line}</p>
+                    </div>
+                    <div class="mega__kpi">
+                      <div class="mega__kpi-text">
+                        <Eyebrow>KPI we move</Eyebrow>
+                        <p class="small-heading">{s.metrics[0]}</p>
+                      </div>
+                      <Sparkline />
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </li>
+
+        <li class="nav-item" data-mega-item>
+          <button
+            type="button"
+            class:list={["nav-link", "nav-trigger", inSection(primaryNav.industries.href) && "is-current"]}
+            aria-expanded="false"
+            aria-controls="mega-industries"
+            data-mega-trigger
+          >
+            {primaryNav.industries.label}
+            <svg class="nav-chevron" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path d="m4 6 4 4 4-4"></path>
+            </svg>
+          </button>
+
+          <div class="mega mega--industries" id="mega-industries" data-mega hidden>
+            <ul role="list" class="mega__industries">
+              {
+                industries.map((ind) => (
+                  <li class="mega__industry">
+                    <a href={industryHref(ind.slug)} aria-current={current(industryHref(ind.slug))}>
+                      <span class="small-heading">{ind.name}</span>
+                      <span class="mega__industry-kpi">
+                        <span class="sr-only">KPI we move: </span>
+                        {ind.cardKpis[0]}
+                      </span>
+                      <span class="mega__arrow" aria-hidden="true">→</span>
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+            <a class="arrow-link mega__all" href={primaryNav.industries.href}>
+              All industries <span aria-hidden="true">→</span>
+            </a>
+          </div>
+        </li>
+
+        {
+          primaryNav.links.map((link) => (
+            <li class="nav-item">
+              <a
+                href={link.href}
+                class:list={["nav-link", inSection(link.href) && "is-current"]}
+                aria-current={current(link.href)}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <Button variant="primary-accent" href={cta.consult.href} class="nav-cta" data-cta="consult">
+        {cta.consult.label}
+      </Button>
+
+      <button
+        type="button"
+        class="nav-menu-btn"
+        aria-haspopup="dialog"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        data-sheet-open
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M4 7h16M4 12h16M4 17h16"></path>
+        </svg>
+        Menu
+      </button>
+    </nav>
+  </div>
+
+  <dialog class="sheet" id="mobile-menu" aria-label="Menu" data-sheet>
+    <div class="sheet__inner">
+      <div class="sheet__bar">
+        <Logo />
+        <button type="button" class="nav-menu-btn sheet__close" data-sheet-close>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M6 6l12 12M18 6 6 18"></path>
+          </svg>
+          Close
+        </button>
+      </div>
+
+      <nav class="sheet__nav" aria-label="Main">
+        <section class="sheet__group" aria-labelledby="sheet-solutions">
+          <h2 class="sheet__heading" id="sheet-solutions">
+            <a href={primaryNav.solutions.href}>{primaryNav.solutions.label}</a>
+          </h2>
+          <ul role="list">
+            {
+              solutions.map((s) => (
+                <li>
+                  <a href={solutionHref(s.slug)} aria-current={current(solutionHref(s.slug))}>
+                    {s.name}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+
+        <section class="sheet__group" aria-labelledby="sheet-industries">
+          <h2 class="sheet__heading" id="sheet-industries">
+            <a href={primaryNav.industries.href}>{primaryNav.industries.label}</a>
+          </h2>
+          <ul role="list">
+            {
+              industries.map((ind) => (
+                <li>
+                  <a href={industryHref(ind.slug)} aria-current={current(industryHref(ind.slug))}>
+                    {ind.name}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+
+        <ul role="list" class="sheet__links">
+          {
+            primaryNav.links.map((link) => (
+              <li>
+                <a href={link.href} aria-current={current(link.href)}>
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="sheet__actions">
+        <Button variant="primary-accent" href={cta.consult.href} block data-cta="consult">
+          {cta.consult.label}
+        </Button>
+        <Button variant="secondary" href={cta.dataCheck.href} block data-cta="data-check">
+          {cta.dataCheck.label}
+        </Button>
+        <p class="sheet__contact">
+          <a href={site.phone.href}>{site.phone.display}</a>
+          <a href={site.email.href}>{site.email.display}</a>
+        </p>
+      </div>
+    </div>
+  </dialog>
+</header>
+
+<script>
+  import { initNav } from "@/scripts/nav";
+  initNav();
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: var(--nav-inset);
+    z-index: 50;
+    margin-top: var(--nav-inset);
+  }
+
+  .nav-pill {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: var(--nav-height);
+    padding: 10px 10px 10px 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    box-shadow: var(--shadow-nav);
+  }
+
+  .nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 10px 14px;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: none;
+    color: var(--slate);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      background-color var(--duration) var(--ease),
+      color var(--duration) var(--ease);
+  }
+
+  .nav-link:hover,
+  .nav-trigger[aria-expanded="true"] {
+    background: var(--tint);
+    color: var(--ink);
+  }
+
+  .nav-link.is-current {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .nav-chevron {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform var(--duration) var(--ease);
+  }
+
+  .nav-trigger[aria-expanded="true"] .nav-chevron {
+    transform: rotate(180deg);
+  }
+
+  .nav-cta {
+    flex: none;
+  }
+
+  .nav-menu-btn {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    margin-left: auto;
+    padding: 10px 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .nav-menu-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  /* Mega-menus */
+  .mega {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    right: 0;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-nav);
+  }
+
+  .mega[hidden] {
+    display: none;
+  }
+
+  .mega--solutions:not([hidden]) {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.9fr) 1.6fr;
+    gap: 14px;
+  }
+
+  .mega__outcomes {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: 18px 10px 10px;
+  }
+
+  .mega__outcomes > :global(.eyebrow) {
+    padding-inline: 12px;
+  }
+
+  .mega__outcomes ul {
+    display: grid;
+    gap: 2px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .mega__outcome {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 48px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: var(--tracking-title);
+    text-decoration: none;
+  }
+
+  .mega__outcome.is-active {
+    background: var(--tint);
+  }
+
+  .mega__arrow {
+    color: var(--accent);
+    font-family: var(--font-body);
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity var(--duration) var(--ease);
+  }
+
+  .mega__outcome.is-active .mega__arrow,
+  .mega__industry a:hover .mega__arrow,
+  .mega__industry a:focus-visible .mega__arrow {
+    opacity: 1;
+  }
+
+  .mega__all {
+    justify-self: start;
+    margin: 8px 14px 4px;
+    color: var(--accent);
+    font-size: 15px;
+  }
+
+  .mega__previews {
+    display: grid;
+  }
+
+  .mega__preview {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 14px;
+  }
+
+  .mega__preview[hidden] {
+    display: none;
+  }
+
+  .mega__preview-text {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+    padding: 28px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+  }
+
+  .mega__kpi {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 28px;
+    border-radius: var(--radius-md);
+    background: var(--tint);
+  }
+
+  .mega__kpi-text {
+    display: grid;
+    gap: 8px;
+  }
+
+  .mega--industries:not([hidden]) {
+    display: grid;
+    gap: 6px;
+  }
+
+  .mega__industries {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .mega__industry a {
+    position: relative;
+    display: grid;
+    align-content: space-between;
+    gap: 28px;
+    height: 100%;
+    min-height: 160px;
+    padding: 24px;
+    border-radius: var(--radius-sm);
+    background: var(--tint);
+    color: var(--ink);
+    text-decoration: none;
+    transition: background-color var(--duration) var(--ease);
+  }
+
+  .mega__industry a:hover {
+    background: var(--photo);
+  }
+
+  .mega__industry-kpi {
+    color: var(--slate);
+    font-size: 15px;
+  }
+
+  .mega__industry .mega__arrow {
+    position: absolute;
+    top: 22px;
+    right: 22px;
+  }
+
+  @media (max-width: 1199px) {
+    .mega__preview {
+      grid-template-columns: 1fr;
+    }
+
+    .mega__industries {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 1079px) {
+    .nav-link {
+      padding-inline: 8px;
+      font-size: 14px;
+    }
+
+    .nav-pill {
+      gap: 6px;
+      padding-left: 14px;
+    }
+
+    .nav-pill :global(.nav-cta) {
+      padding-inline: 18px;
+      font-size: 15px;
+    }
+  }
+
+  /* Under 900px the menu and CTA move into the sheet */
+  @media (max-width: 899px) {
+    .nav-menu,
+    .nav-cta {
+      display: none;
+    }
+
+    .nav-menu-btn {
+      display: inline-flex;
+    }
+
+    .nav-pill {
+      padding: 8px 8px 8px 14px;
+    }
+  }
+
+  /* Full-screen sheet */
+  .sheet {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--bg);
+    color: var(--slate);
+  }
+
+  .sheet::backdrop {
+    background: var(--bg);
+  }
+
+  .sheet__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    min-height: 100%;
+    padding: var(--nav-inset) var(--gutter) 32px;
+  }
+
+  .sheet__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--nav-height);
+    padding: 8px 8px 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+  }
+
+  .sheet__close {
+    display: inline-flex;
+  }
+
+  .sheet__nav {
+    display: grid;
+    gap: 28px;
+  }
+
+  .sheet__heading {
+    margin-bottom: 8px;
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: var(--tracking-title);
+  }
+
+  .sheet__heading a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .sheet__group ul,
+  .sheet__links {
+    display: grid;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .sheet__group li a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--slate);
+    font-size: 17px;
+    text-decoration: none;
+    border-bottom: 1px solid var(--divider);
+  }
+
+  .sheet__links {
+    gap: 4px;
+  }
+
+  .sheet__links a {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: var(--tracking-title);
+    text-decoration: none;
+  }
+
+  .sheet a[aria-current="page"] {
+    color: var(--accent);
+  }
+
+  .sheet__actions {
+    display: grid;
+    gap: 10px;
+    margin-top: auto;
+  }
+
+  .sheet__contact {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px 20px;
+    margin-top: 8px;
+    font-size: 15px;
+  }
+
+  .sheet__contact a {
+    color: var(--slate);
+  }
+
+  :global(html:has(.sheet[open])) {
+    overflow: hidden;
+  }
+</style>
