@@ -3,7 +3,7 @@
  * already shows; nothing here adds a claim the page doesn't make.
  * Rendered by `components/utility/JsonLd.astro`.
  */
-import { SITE_ALTERNATE_NAMES, SITE_NAME, SITE_URL } from "../consts.ts";
+import { SITE_NAME, SITE_URL } from "../consts.ts";
 import { canonicalPath } from "./seo.ts";
 
 type Node = Record<string, unknown>;
@@ -35,7 +35,6 @@ export function siteGraph(
       "@type": "Organization",
       "@id": ORGANIZATION_ID,
       name: SITE_NAME,
-      alternateName: SITE_ALTERNATE_NAMES,
       url: absolute("/"),
       logo: {
         "@type": "ImageObject",
@@ -59,7 +58,6 @@ export function siteGraph(
       "@type": "WebSite",
       "@id": WEBSITE_ID,
       name: SITE_NAME,
-      alternateName: SITE_ALTERNATE_NAMES,
       url: absolute("/"),
       inLanguage: "en-US",
       ...(description && { description }),
